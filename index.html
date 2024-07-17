@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<title data-l10n-id="title">ATBシ</title>
+<meta charset="utf-8">
+<meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=0, width=device-width">
+<script src="https://cdn.rawgit.com/inexorabletash/polyfill/v0.1.29/polyfill.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.61.1/codemirror.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.61.1/addon/runmode/runmode.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.61.1/addon/edit/closebrackets.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.61.1/addon/edit/matchbrackets.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.61.1/addon/display/placeholder.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.61.1/codemirror.css">
+<script src="cm/logo.js"></script>
+
+<link rel="stylesheet" href="cm/logo.css">
+<link rel="stylesheet" href="index.css">
+
+<body class="single">
+
+<div id="topbar" class="panel">
+  <h1 data-l10n-id="tl-title">Aaryav's LOGO</h1>
+
+
+<div id="display-panel" class="panel">
+  <div id="display">
+    <div class="inner">
+      <canvas id="sandbox" width="450" height="250">
+        <span data-l10n-id="no-canvas">Your browser does not support the canvas element - sorry!</span>
+      </canvas>
+      <canvas id="turtle" width="450" height="250"></canvas>
+      <div id="overlay"></div>
+      <div id="error"></div>
+    </div>
+  </div>
+</div>
+
+<div id="input-panel" class="panel">
+
+  <div id="run"><div data-l10n-id="ip-button-run" class="label">Run</div></div>
+  <div id="stop"><div data-l10n-id="ip-button-stop" class="label">Stop</div></div>
+  <div id="clear"><div data-l10n-id="ip-button-clear" class="label">Clear</div></div>
+  <div id="input">
+    <div class="inner">
+      <div id="toggle">
+        <span id="expand-label">&#x2197;</span>
+        <span id="collapse-label">&#x2199;</span>
+      </div>
+      <textarea rows="1" cols="80" placeholder="Type your code here..." data-l10n-id="logo-ta-single-line" id="logo-ta-single-line"></textarea>
+      <textarea rows="20" cols="80" placeholder="Type your code here..." data-l10n-id="logo-ta-multi-line" id="logo-ta-multi-line"></textarea>
+    </div>
+  </div>
+</div>
+
+<div id="sidebar-header" class="panel">
+  <ul>
+  </ul>
+</div>
+
+<div id="sidebar" class="panel examples">
+  <iframe frameBorder="0" allowtransparency="true" src="language.html" class="choice" id="reference" loading=lazy></iframe>
+  <div class="choice snippets" id="examples"></div>
+  <div class="choice" id="history">
+    <div style="text-align: center; padding: 5px">
+    </div>
+    <div class="snippets"></div>
+    <div class="placeholder" data-l10n-id="history-placeholder"y>
+      Commands you enter will appear here so you can find, modify, and re-run them.
+    </div>
+  </div>
+  <div class="choice" id="library">
+    <div style="text-align: center; padding: 5px">
+    </div>
+    <div class="snippets"></div>
+  </div>
+  <div class="choice" id="links" dir="ltr">
+
+    <ul>
+      </ul>
+      <p style="margin-top: 2em;">
+        By <a href="mailto:behlaaryav@gmail.com">Aaryav Behl</a>
+      </p>
+      <p style="margin-top: 2em;">
+        ATECシ
+      </p>
+  </div>
+  <div class="choice" id="extras">
+    <ul>
+    </ul>
+  </div>
+</div>
+
+<script src="floodfill.js"></script>
+<script src="logo.js"></script>
+<script src="turtle.js"></script>
+<script src="dialog.js"></script>
+<script src="index.js"></script>
+<script src="https://togetherjs.com/togetherjs-min.js"></script>
+
+</body>
