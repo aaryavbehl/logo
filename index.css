@@ -190,3 +190,162 @@ body {
     white-space: pre-wrap;
     font-family: Helvetica;
   }
+  
+#input {
+    position: absolute;
+    overflow: hidden;
+    top: 5px; bottom: 10px;
+    border: 2px solid black;
+    border-radius: 5px;
+    color: black;
+    background-color: white;
+    left: 10px; right: 85px;
+  }
+  [dir=rtl] #input {
+    right: 10px; left: 85px;
+  }
+  
+  #logo-cm-multi-line,
+  #logo-cm-single-line,
+  #logo-ta-single-line,
+  #logo-ta-multi-line {
+    position: absolute;
+    overflow: hidden;
+    left: 0; top: 0; right: 0; bottom: 0;
+    font-family: Helvetica;
+    display: none;
+  }
+  
+  .single #logo-cm-single-line,
+  .single #logo-ta-single-line,
+  .multi #logo-cm-multi-line,
+  .multi #logo-ta-multi-line {
+    display: block;
+  }
+  
+  .CodeMirror .CodeMirror-placeholder { color: gray; font-style: italic; }
+  
+  #logo-cm-single-line .CodeMirror-hscrollbar,
+  #logo-cm-single-line .CodeMirror-vscrollbar { visibility: hidden; }
+  
+  #logo-cm-single-line.CodeMirror {
+    position: absolute;
+    top: 0; bottom: 0; left: 0; right: 0;
+    margin: auto;
+  }
+  
+  .single #logo-cm-single-line,
+  .single #logo-ta-single-line {
+    font-size: 12pt;
+    display: block;
+  }
+  
+  #input #toggle {
+    cursor: pointer;
+  
+    position: absolute;
+    overflow: hidden;
+    z-index: 1000;
+    top: 1px;
+    width: 20px; height: 20px;
+    text-shadow: 0 0 1px black;
+    left: auto; right: 1px;
+  }
+  [dir=rtl] #input #toggle {
+    right: auto; left: 1px;
+  }
+  .single #toggle #collapse-label { display: none; }
+  .multi  #toggle #expand-label { display: none; }
+  
+  #run, #stop, #clear {
+    cursor: pointer;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+  
+    position: absolute;
+    border: 2px solid black;
+    border-radius: 5px;
+    background-color: white;
+  }
+  
+  #run, #stop {
+    top: 5px; bottom: 35px; width: 70px;
+  }
+  
+  #run, #stop {
+    top: 5px; bottom: 35px; width: 70px;
+  }
+  
+  #run { display: block; }
+  #stop { display: none; }
+  .running #run { display: none; }
+  .running #stop { display: block; }
+  
+  #clear {
+    height: 19px; bottom: 10px; width: 70px;
+  }
+  
+  #run, #stop, #clear {
+    right: 5px; left: auto;
+  }
+  [dir=rtl] #run, [dir=rtl] #clear, [dir=rtl] #stop {
+    left: 5px; right: auto;
+  }
+  
+  #run:hover, #clear:hover, #stop:hover {
+    background-color: #eeeeee;
+  }
+  
+  #run .label, #clear .label, #stop .label {
+    position: absolute;
+    top: 0; bottom: 0; left: 0; right: 0;
+    margin: auto;
+    height: 20px;
+    text-align: center;
+    display: block;
+  }
+  
+  #history .placeholder {
+    text-align: center;
+    font-style: italic;
+    padding: 50px;
+  }
+  #history .snippets:not(:empty) + .placeholder {
+    display: none;
+  }
+  
+  @media only screen and (max-width: 1000px) {
+    #topbar-links { display: none; }
+  }
+  @media only screen and (max-width: 800px) {
+    #topbar, #display-panel, #input-panel {
+      left: 0; right: 200px;
+    }
+    [dir=rtl] #topbar, [dir=rtl] #display-panel, [dir=rtl] #input-panel {
+      right: 0; left: 200px;
+    }
+    #sidebar-header, #sidebar { width: 200px;; }
+    .linkdesc { display: none; }
+  }
+  
+  @media only screen and (max-width: 600px) {
+    #topbar, #display-panel, #input-panel {
+      left: 0; right: 0;
+    }
+    [dir=rtl] #topbar, [dir=rtl] #display-panel, [dir=rtl] #input-panel {
+      right: 0; left: 0;
+    }
+    #sidebar-header, #sidebar { display: none; }
+    #topbar-altlinks { display: inline-block; }
+  
+    #topbar h1 { font-size: 14pt; }
+    #topbar { height: 28px; }
+    #display-panel { top: 28px; }
+  }
+  
+  @media only screen and (max-width: 420px) {
+    #run, #stop { height: auto; bottom: 10px; }
+    #clear { display: none; }
+  }  
