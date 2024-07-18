@@ -458,3 +458,157 @@
           scrunch: this.scrunch
         };
       }},
+
+    setstate: {value: function(state) {
+        if ((! state) || ! state.isturtlestate) {
+          throw new Error("Tried to restore a state that is not a turtle state");
+        }
+        this.turtlemode = state.turtlemode;
+        this.color = state.color;
+        this.bgcolor = state.bgcolor;
+        this.penwidth = state.penwidth;
+        this.fontsize = state.fontsize;
+        this.fontname = state.fontname;
+        this.position = state.position;
+        this.heading = state.heading;
+        this.penmode = state.penmode;
+        this.scrunch = state.scrunch;
+        this.visible = state.visible;
+        this.pendown = state.pendown;
+      }},
+  
+      copy: {value: function(w, h) {
+        var x = this.width / 2 + this.x * this.sx;
+        var y = this.height / 2 - this.y * this.sy;
+        w *= this.sx;
+        h *= this.sy;
+        this._clipboard = this.canvas_ctx.getImageData(x, y, w, h);
+      }},
+  
+      paste: {value: function() {
+        if (!this._clipboard)
+          return;
+  
+        var x = this.width / 2 + this.x * this.sx;
+        var y = this.height / 2 - this.y * this.sy;
+        this.canvas_ctx.putImageData(this._clipboard, x, y);
+      }},
+  
+      pendown: {
+        set: function(down) { this._down = down; },
+        get: function() { return this._down; }
+      },
+  
+      penmode: {
+        get: function() { return this._penmode; },
+        set: function(penmode) {
+          this._penmode = penmode;
+          this.canvas_ctx.globalCompositeOperation =
+            (this.penmode === 'erase') ? 'destination-out' :
+            (this.penmode === 'reverse') ? 'difference' : 'source-over';
+          if (penmode === 'paint')
+            this.canvas_ctx.strokeStyle = this.canvas_ctx.fillStyle = this.color;
+          else
+            this.canvas_ctx.strokeStyle = this.canvas_ctx.fillStyle = '#ffffff';
+        }
+      },
+  
+      turtlemode: {
+        set: function(turtlemode) { this._turtlemode = turtlemode; },
+        get: function() { return this._turtlemode; }
+      },
+  
+      color: {
+        get: function() { return this._color; },
+        set: function(color) {
+          this._color = color;
+          this.canvas_ctx.strokeStyle = this._color;
+          this.canvas_ctx.fillStyle = this._color;
+        }
+      },
+  
+      bgcolor: {
+        get: function() { return this._bgcolor; },
+        set: function(color) {
+          this._bgcolor = color;
+          this.clear();
+        }
+      },
+  
+      penwidth: {
+        set: function(width) {
+          this._penwidth = width;
+          this.canvas_ctx.lineWidth = this._penwidth;
+        },
+        get: function() { return this._penwidth; }
+      },
+  
+  
+      fontsize: {
+        set: function(size) {
+          this._fontsize = size;
+          this.canvas_ctx.font = font(this.fontsize, this.fontname);
+        },
+        get: function() { return this._fontsize; }
+      },
+  
+      fontname: {
+        set: function(name) {
+          this._fontname = name;
+          this.canvas_ctx.font = font(this.fontsize, this.fontname);
+        },
+        get: function() { return this._fontname; }
+      },
+  
+      position: {
+        set: function(coords) {
+          var x = coords[0], y = coords[1];
+          x = (x === undefined) ? this.x : x;
+          y = (y === undefined) ? this.y : y;
+          this._moveto(x, y, /*setpos*/true);
+        },
+        get: function() {
+          return [this.x, this.y];
+        }
+      },
+  
+      heading: {
+        get: function() {
+          return 90 - rad2deg(this.r);
+        },
+        set: function(angle) {
+          this.r = deg2rad(90 - angle);
+        }
+      },
+  
+      visible: {
+        set: function(visible) { this._visible = visible; },
+        get: function() { return this._visible; }
+      },
+  
+      scrunch: {
+        set: function(sc) {
+          var sx = sc[0], sy = sc[1];
+          this.x = this.px = this.x / sx * this.sx;
+          this.y = this.py = this.y / sy * this.sy;
+  
+          for (var i = 0; i < this._turtles.length; ++i) {
+            if (this._turtles[i] === undefined || i == this.currentturtle) {
+              continue;
+            }
+            var t = this._turtles[i];
+            t.x = t.x / sx * this.sx;
+            t.y = t.y / sy * this.sy;
+          }
+  
+          this.sx = sx;
+          this.sy = sy;
+  
+          [this.turtle_ctx, this.canvas_ctx].forEach(function(ctx) {
+            ctx.setTransform(this.sx, 0, 0, -this.sy, this.width / 2, this.height / 2);
+          }.bind(this));
+        },
+        get: function() {
+          return [this.sx, this.sy];
+        }
+      },
