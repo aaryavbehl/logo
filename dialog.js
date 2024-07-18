@@ -13,7 +13,7 @@ var Dialog = {
       Object.assign(fg.style, {
         backgroundColor: 'white',
         color: 'black',
-        fontFamily: 'sans-serif',
+        fontFamily: 'Helvetica',
         fontSize: '16px',
         position: 'absolute',
         width: '280px',
@@ -36,7 +36,7 @@ var Dialog = {
       input.value = (def !== undefined) ? def : '';
       Object.assign(input.style, {
         width: '100%',
-        fontFamily: 'sans-serif',
+        fontFamily: 'Helvetica',
         fontSize: '16px',
         border: '1px solid gray',
         padding: '4px',
@@ -66,7 +66,7 @@ var Dialog = {
       });
   
       [ok, cancel].forEach(b => Object.assign(b.style, {
-        fontFamily: 'sans-serif',
+        fontFamily: 'Helvetica',
         fontSize: '16px',
         width: '100px',
         textAlign: 'center',
@@ -112,7 +112,7 @@ var Dialog = {
       Object.assign(fg.style, {
         backgroundColor: 'white',
         color: 'black',
-        fontFamily: 'sans-serif',
+        fontFamily: 'Helvetica',
         fontSize: '16px',
         position: 'absolute',
         width: '280px',
@@ -142,7 +142,7 @@ var Dialog = {
       Object.assign(ok.style, {
         fontWeight: 'bold',
         border: '1px solid black',
-        fontFamily: 'sans-serif',
+        fontFamily: 'Helvetica',
         fontSize: '16px',
         width: '100px',
         textAlign: 'center',
