@@ -156,3 +156,152 @@
           ctx.restore();
         }
       }
+      
+      _draw(this.turtle_ctx, this);
+
+      for (var i = 0; i < this._turtles.length; ++i) {
+        if (this._turtles[i] === undefined || i == this.currentturtle) {
+          continue;
+        }
+        _draw(this.turtle_ctx, this._turtles[i]);
+      }
+    }},
+
+    _moveto: {value: function(x, y, setpos) {
+
+      var _go = function(x1, y1, x2, y2) {
+        if (this.pendown) {
+          if (this.filling) {
+            this.canvas_ctx.lineTo(x1, y1);
+            this.canvas_ctx.lineTo(x2, y2);
+          } else {
+            this.canvas_ctx.beginPath();
+            this.canvas_ctx.moveTo(x1, y1);
+            this.canvas_ctx.lineTo(x2, y2);
+            this.canvas_ctx.stroke();
+          }
+        }
+      }.bind(this);
+
+      var w = this.width / this.sx, h = this.height / this.sy;
+
+      var left = -w / 2, right = w / 2,
+          bottom = -h / 2, top = h / 2;
+
+      var ix, iy, wx, wy, fx, fy, less;
+
+      if (setpos && this.turtlemode === 'wrap') {
+        var oob = (x < left || x >= right || y < bottom || y >= top);
+        var px = x, py = y;
+        if (this.was_oob) {
+          var dx = mod(x + w / 2, w) - (x + w / 2);
+          var dy = mod(y + h / 2, h) - (y + h / 2);
+          x += dx;
+          y += dy;
+          this.x = this.px + dx;
+          this.y = this.py + dy;
+        }
+        this.was_oob = oob;
+        this.px = px;
+        this.py = py;
+      } else {
+        this.was_oob = false;
+      }
+
+      while (true) {
+
+        switch (this.turtlemode) {
+        case 'window':
+          _go(this.x, this.y, x, y);
+          this.x = this.px = x;
+          this.y = this.py = y;
+          return;
+
+        default:
+        case 'wrap':
+        case 'fence':
+
+          fx = 1;
+          fy = 1;
+
+          if (x < left) {
+            fx = (this.x - left) / (this.x - x);
+          } else if (x > right) {
+            fx = (this.x - right) / (this.x - x);
+          }
+
+          if (y < bottom) {
+            fy = (this.y - bottom) / (this.y - y);
+          } else if (y > top) {
+            fy = (this.y - top) / (this.y - y);
+          }
+
+          if (!isFinite(fx) || !isFinite(fy)) {
+            console.log('x', x, 'left', left, 'right', right);
+            console.log('y', y, 'bottom', bottom, 'top', top);
+            console.log('fx', fx, 'fy', fy);
+            throw new Error("Wrapping error: non-finite fraction");
+          }
+
+          ix = x;
+          iy = y;
+
+          wx = x;
+          wy = y;
+
+          if (fx < 1 && fx <= fy) {
+            less = (x < left);
+            ix = less ? left : right;
+            iy = this.y - fx * (this.y - y);
+            x += less ? w : -w;
+            wx = less ? right : left;
+            wy = iy;
+          } else if (fy < 1 && fy <= fx) {
+            less = (y < bottom);
+            ix = this.x - fy * (this.x - x);
+            iy = less ? bottom : top;
+            y += less ? h : -h;
+            wx = ix;
+            wy = less ? top : bottom;
+          }
+
+          _go(this.x, this.y, ix, iy);
+
+          if (this.turtlemode === 'fence') {
+
+            this.x = this.px = ix;
+            this.y = this.py = iy;
+            return;
+          } else {
+
+            this.x = wx;
+            this.y = wy;
+            if (fx >= 1 && fy >= 1)
+              return;
+          }
+
+          break;
+        }
+      }
+    }},
+
+    _mousemove: {value: function(x, y, b) {
+      this._mousex = (x - this.width / 2) / this.sx;
+      this._mousey = (y - this.height / 2) / -this.sy;
+      this._buttons = b;
+    }},
+
+    _mouseclick: {value: function(x, y, b) {
+      this._clickx = (x - this.width / 2) / this.sx;
+      this._clicky = (y - this.height / 2) / -this.sy;
+      this._buttons = b;
+    }},
+
+    _touch: {value: function(touches) {
+      this._touches = touches.map(function(touch) {
+        return [
+          (touch.x - this.width / 2) / this.sx,
+          (touch.y - this.height / 2) / -this.sy
+        ];
+      }.bind(this));
+    }},
