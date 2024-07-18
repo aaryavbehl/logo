@@ -612,3 +612,67 @@
           return [this.sx, this.sy];
         }
       },
+      
+    bounds: {
+        get: function() {
+
+          return [
+            -this.width/2/this.sx, this.width/2/this.sx,
+            -this.height/2/this.sy, this.height/2/this.sy
+          ];
+        }
+      },
+  
+      mousepos: {
+        get: function() { return [this._mousex, this._mousey]; }
+      },
+  
+      clickpos: {
+        get: function() { return [this._clickx, this._clicky]; }
+      },
+  
+      button: {
+        get: function() { return this._buttons; }
+      },
+  
+      touches: {
+        get: function() { return this._touches; }
+      },
+  
+      currentturtle: {
+        get: function() { return this._currentturtle; },
+        set: function(newturtle) {
+          if (newturtle === this._currentturtle) return;
+          this._turtles[this._currentturtle] = {
+            x: this.x,
+            y: this.y,
+            r: this.r,
+            pendown: this.pendown,
+            visible: this.visible,
+          };
+          this._currentturtle = newturtle;
+          if (this._turtles[this._currentturtle] !== undefined) {
+            this.x = this._turtles[this._currentturtle].x;
+            this.y = this._turtles[this._currentturtle].y;
+            this.r = this._turtles[this._currentturtle].r;
+            this.pendown = this._turtles[this._currentturtle].pendown;
+            this.visible = this._turtles[this._currentturtle].visible;
+          } else {
+            this.x = 0;
+            this.y = 0;
+            this.r = Math.PI / 2;
+            this.pendown = true;
+            this.visible = true;
+          }
+          this._turtles[this._currentturtle] = {};
+        }
+      },
+  
+      turtles: {
+        get: function() { return this._turtles.length; }
+      }
+  
+    });
+  
+    global.CanvasTurtle = CanvasTurtle;
+  }(self));
