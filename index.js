@@ -696,3 +696,70 @@ window.addEventListener('DOMContentLoaded', function() {
     document.location = url + '?lang=' + select.value;
   });
 });
+
+
+localizationComplete.then(initInput);
+
+localizationComplete.then(function() {
+fetch(examples)
+  .then(function(response) {
+    if (!response.ok) throw Error(response.statusText);
+    return response.text();
+  })
+  .then(function(text) {
+    var parent = $('#examples');
+    text.split(/\n\n/g).forEach(function(line) {
+      insertSnippet(line, parent, undefined, {
+        noScroll: true
+      });
+    });
+  });
+});  
+ 
+  function demo(param) {
+    param = String(param);
+    if (param.length > 0) {
+      param = decodeURIComponent(param.substring(1).replace(/_/g, ' '));
+      input.setValue(param);
+      logo.run(param).catch(function (e) {
+        Dialog.alert("Error: " + e.message);
+      });
+    }
+  }
+
+  var param = queryRest || document.location.hash;
+  demo(param);
+  window.addEventListener('hashchange', function() { demo(document.location.hash); } );
+
+});
+
+window.TogetherJSConfig ={
+
+  hub_on: {
+    "togetherjs.hello": function () {
+      var visible = turtle.isturtlevisible();
+      TogetherJS.send({
+        type: "init",
+        image: $("#sandbox").toDataURL("image/png"),
+        turtle: turtle.getstate()
+      });
+    },
+
+    "init": function (msg) {
+      var context = $("#sandbox").getContext("2d");
+      var image = document.createElement('image');
+      image.src = msg.image;
+      context.drawImage(image, 0, 0);
+      turtle.setstate(msg.turtle);
+    },
+
+    run: function (msg) {
+      input.run(true);
+    },
+
+    clear: function (msg) {
+      input.clear(true);
+    }
+  }
+
+};
