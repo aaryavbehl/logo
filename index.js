@@ -412,4 +412,156 @@ function initInput() {
             parent.removeChild(parent.firstChild);
         });
       }());
+
+var snippets = new Map();
+function insertSnippet(text, parent, key, options) {
+  options = options || {};
+
+  var snippet;
+  if (key && snippets.has(key)) {
+    snippet = snippets.get(key);
+    snippet.innerHTML = '';
+  } else {
+    snippet = document.createElement('div');
+    snippet.className = 'snippet';
+    snippet.title = "Click to edit";
+    snippet.addEventListener('click', function() {
+      input.setMulti();
+      input.setValue(text);
+    });
+    if (key) {
+      snippets.set(key, snippet);
+    }
+  }
+
+  var container = document.createElement('pre');
+  snippet.appendChild(container);
+  if (typeof CodeMirror !== 'undefined') {
+    CodeMirror.runMode(text, 'logo', container);
+  } else {
+    container.appendChild(document.createTextNode(text));
+  }
+
+  if (!options.noScroll) {
+    if (parent.scrollTimeoutId)
+      clearTimeout(parent.scrollTimeoutId);
+    parent.scrollTimeoutId = setTimeout(function() {
+      parent.scrollTimeoutId = null;
+      parent.scrollTop = snippet.offsetTop;
+    }, 100);
+  }
+
+  if (snippet.parentElement !== parent)
+    parent.appendChild(snippet);
+}
+function removeSnippet(parent, key) {
+  var snippet;
+  if (!key || !snippets.has(key))
+    return;
+  snippet = snippets.get(key);
+  parent.removeChild(snippet);
+  snippets.delete(key);
+}
+
+window.addEventListener('DOMContentLoaded', function() {
+
+  var queryParams = {}, queryRest;
+  (function() {
+    if (document.location.search) {
+      document.location.search.substring(1).split('&').forEach(function(entry) {
+        var match = /^(\w+)=(.*)$/.exec(entry);
+        if (match)
+          queryParams[decodeURIComponent(match[1])] = decodeURIComponent(match[2]);
+        else
+          queryRest = '?' + entry;
+      });
+    }
+  }());
+
+
+  $('#overlay').style.fontSize = '13px';
+  $('#overlay').style.fontFamily = 'monospace';
+  $('#overlay').style.color = 'black';
+
+  function asyncResult(value) {
+    return new Promise(function(resolve) {
+      setTimeout(function() { resolve(value); }, 0);
+    });
+  }
+
+  var stream = {
+    read: function(s) {
+      return Dialog.prompt(s ? s : "");
+    },
+    write: function() {
+      var div = $('#overlay');
+      for (var i = 0; i < arguments.length; i += 1) {
+        div.innerHTML += escapeHTML(arguments[i]);
+      }
+      div.scrollTop = div.scrollHeight;
+      return asyncResult();
+    },
+    clear: function() {
+      var div = $('#overlay');
+      div.innerHTML = "";
+      return asyncResult();
+    },
+    readback: function() {
+      var div = $('#overlay');
+      return asyncResult(div.innerHTML);
+    },
+    get textsize() {
+      return parseFloat($('#overlay').style.fontSize.replace('px', ''));
+    },
+    set textsize(height) {
+      $('#overlay').style.fontSize = Math.max(height, 1) + 'px';
+    },
+    get font() {
+      return $('#overlay').style.fontFamily;
+    },
+    set font(name) {
+      if (['serif', 'sans-serif', 'cursive', 'fantasy', 'monospace'].indexOf(name) === -1)
+        name = JSON.stringify(name);
+      $('#overlay').style.fontFamily = name;
+    },
+    get color() {
+      return $('#overlay').style.color;
+    },
+    set color(color) {
+      $('#overlay').style.color = color;
+    }
+  };
+
+  var canvas_element = $("#sandbox"), canvas_ctx = canvas_element.getContext('2d'),
+      turtle_element = $("#turtle"), turtle_ctx = turtle_element.getContext('2d');
+  turtle = new CanvasTurtle(
+    canvas_ctx,
+    turtle_ctx,
+    canvas_element.width, canvas_element.height, $('#overlay'));
+
+  logo = new LogoInterpreter(
+    turtle, stream,
+    function (name, def) {
+      if (savehook) {
+        savehook(name, def);
+      }
+    });
+  logo.run('cs');
+  initStorage(function (def) {
+    logo.run(def);
+  });
+
+  function saveDataAs(dataURL, filename) {
+    if (!('download' in document.createElement('a')))
+      return false;
+    var anchor = document.createElement('a');
+    anchor.href = dataURL;
+    anchor.download = filename;
+    var event = document.createEvent('MouseEvents');
+    event.initMouseEvent('click', true, true, window, null,
+                         0, 0, 0, 0, false, false, false, false, 0, null);
+    anchor.dispatchEvent(event);
+    return true;
+  }
+
       
