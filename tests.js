@@ -95,3 +95,117 @@ QUnit.module("Logo Unit Tests", {
           message: expression});
       }).then(done);
     };
+
+    this.assert_stream = function(expression, expected) {
+        this.stream.clear();
+        var result = this.interpreter.run(expression, {returnResult: true});
+        result = Promise.resolve(result);
+        var done = t.async();
+        result.then((function () {
+          var actual = this.stream.outputbuffer;
+          this.stream.clear();
+          t.equal(actual, expected, expression);
+        }).bind(this), (function (err) {
+          var actual = this.stream.outputbuffer + "\nError: " + err;
+          this.stream.clear();
+          t.equal(actual, expected, expression);
+        }).bind(this)).then(done);
+      };
+  
+      this.assert_prompt = function(expression, expected) {
+        this.stream.clear();
+        var result = this.interpreter.run(expression, {returnResult: true});
+        var done = t.async();
+        result.then((function () {
+          var actual = this.stream.last_prompt;
+          this.stream.clear();
+          t.equal(actual, expected, expression);
+        }).bind(this), (function (err) {
+          t.equal("(no error)", err, expression);
+          this.stream.clear();
+        }).bind(this)).then(done);
+      };
+  
+      this.assert_predicate = function(expression, predicate) {
+        var result = this.interpreter.run(expression, {returnResult: true});
+        var done = t.async();
+        result.then(function (value) {
+          t.ok(predicate(value), expression);
+        }, function (err) {
+          t.equal("(no error)", err, expression);
+        }).then(done);
+      };
+  
+      this.assert_error = function(expression, expected, code) {
+        var done = t.async();
+        try {
+          var result = this.interpreter.run(expression);
+          result.then(function (result) {
+            t.pushResult({
+              result:false,
+              actual: '(no error)',
+              expected: expected,
+              message:'Expected to error but did not: ' + expression});
+            done();
+          }, function (ex) {
+            t.pushResult({
+              result: ex.message === expected,
+              actual: ex.message,
+              expected: expected,
+              message: 'Expected error from: ' + expression});
+            if (code !== undefined) {
+              t.pushResult({
+                result: ex.code === code,
+                actual: ex.code,
+                expected: code,
+                message: 'Expected error from: ' + expression});
+            }
+            done();
+          });
+        } catch (ex) {
+          t.push({
+            result: ex.message === expected,
+            actual: ex.message,
+            expected: expected,
+            message: 'Expected error from: ' + expression});
+          done();
+        }
+      };
+  
+      this.queue = function(task) {
+        this.interpreter.queueTask(task.bind(this));
+      };
+  
+      this.run = function(code) {
+        this.interpreter.run(code).catch(function(error) {
+          console.warn(error.message);
+          t.pushResult({
+            result: false,
+            actual: 'Failed: ' + error.message,
+            expected: '(no error)',
+            message: code
+          });
+        });
+      };
+    }
+  });
+  
+  QUnit.test("Parser", function(t) {
+  
+    this.assert_equals('"abc;comment', 'abc');
+    this.assert_equals('"abc;comment\n', 'abc');
+    this.assert_equals('"abc ; comment', 'abc');
+    this.assert_equals('"abc ; comment\n', 'abc');
+  
+    this.assert_equals('"abc\\;comment', 'abc;comment');
+    this.assert_equals('"abc\\;comment\n', 'abc;comment');
+
+    this.assert_equals('"abc~', 'abc~');
+    this.assert_equals('"abc\n"def', 'def');
+    this.assert_equals('"abc~\n', 'abc');
+    this.assert_equals('"abc~\ndef', 'abcdef');
+    this.assert_equals('"abc~\n~\ndef', 'abcdef');
+    this.assert_equals('"abc~\nd~\nef', 'abcdef');
+    this.assert_equals('"abc\\~\n', 'abc~');
+    this.assert_equals('"abc\\~\n"def', 'def');
+  
