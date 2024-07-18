@@ -564,4 +564,135 @@ window.addEventListener('DOMContentLoaded', function() {
     return true;
   }
 
-      
+  $('#savelibrary').addEventListener('click', function() {
+    var library = logo.procdefs().replace('\n', '\r\n');
+    var url = 'data:text/plain,' + encodeURIComponent(library);
+    if (!saveDataAs(url, 'logo_library.txt'))
+      Dialog.alert("Sorry, not supported by your browser");
+  });
+  $('#screenshot').addEventListener('click', function() {
+    var canvas = document.querySelector('#sandbox');
+    var url = canvas.toDataURL('image/png');
+    if (!saveDataAs(url, 'logo_drawing.png'))
+      Dialog.alert("Sorry, not supported by your browser");
+  });
+  $('#clearhistory').addEventListener('click', function() {
+    if (!confirm(__('Clear history: Are you sure?'))) return;
+    clearhistoryhook();
+  });
+  $('#clearlibrary').addEventListener('click', function() {
+    if (!confirm(__('Clear library: Are you sure?'))) return;
+    logo.run('erall');
+  });
+
+  var __ = function(s) { return s; };
+
+  var localizationComplete = (function() {
+    function localize(data) {
+      if ('page' in data) {
+        if ('dir' in data.page)
+          document.body.dir = data.page.dir;
+        if ('examples' in data.page)
+          examples = data.page.examples;
+
+        if ('translations' in data.page) {
+          (function(translation) {
+            var ids = new Set();
+            Object.keys(translation).forEach(function(key) {
+              var parts = key.split('.'), id = parts[0], attr = parts[1], s = translation[key];
+              ids.add(id);
+              var elem = document.querySelector('[data-l10n-id="'+id+'"]');
+              if (!elem)
+                console.warn('Unused translation: ' + id);
+              else if (attr)
+                elem.setAttribute(attr, s);
+              else
+                elem.textContent = s;
+            });
+            Array.from(document.querySelectorAll('[data-l10n-id]'))
+              .map(function(element) { return element.getAttribute('data-l10n-id'); })
+              .filter(function(id) { return !ids.has(id); })
+              .forEach(function(id) { console.warn('Missing translation: ' + id); });
+          }(data.page.translations));
+        }
+        if ('messages' in data.page) {
+
+          __ = function(s) { return data.page.messages[s] || s; };
+        }
+      }
+
+      if ('interpreter' in data) {
+        if ('messages' in data.interpreter) {
+          logo.localize = function(s) {
+            return data.interpreter.messages[s];
+          };
+        }
+
+        if ('keywords' in data.interpreter) {
+          logo.keywordAlias = function(s) {
+            return data.interpreter.keywords[s];
+          };
+        }
+
+        if ('procedures' in data.interpreter) {
+          (function(aliases) {
+            Object.keys(aliases).forEach(function(alias) {
+              logo.copydef(alias, aliases[alias]);
+            });
+          }(data.interpreter.procedures));
+        }
+      }
+
+      if ('graphics' in data) {
+        if ('colors' in data.graphics) {
+          turtle.colorAlias = function(s) {
+            return data.graphics.colors[s];
+          };
+        }
+      }
+    }
+
+    var lang = queryParams.lang || navigator.language || navigator.userLanguage;
+    if (!lang) return Promise.resolve();
+
+    lang = lang.split('-')[0];
+    document.body.lang = lang;
+
+    if (lang === 'en') return Promise.resolve();
+    return fetch('l10n/lang-' + lang + '.json')
+      .then(function(response) {
+        if (!response.ok) throw Error(response.statusText);
+        return response.text();
+      })
+      .then(function(text) {
+        window.json = text;
+        localize(JSON.parse(text));
+      })
+      .catch(function(reason) {
+        console.warn('Error loading localization file for "' +
+                     lang + '": ' + reason.message);
+        document.body.lang = 'en';
+      });
+  }());
+  fetch('l10n/languages.txt')
+.then(function(response) {
+  if (!response.ok) throw Error(response.statusText);
+  return response.text();
+})
+.then(function(text) {
+  var select = $('#select-lang');
+  text.split(/\r?\n/g).forEach(function(entry) {
+    var match = /^(\w+)\s+(.*)$/.exec(entry);
+    if (!match) return;
+    var opt = document.createElement('option');
+    opt.value = match[1];
+    opt.textContent = match[2];
+    select.appendChild(opt);
+  });
+  select.value = document.body.lang;
+  select.addEventListener('change', function() {
+    var url = String(document.location);
+    url = url.replace(/[?#].*/, '');
+    document.location = url + '?lang=' + select.value;
+  });
+});
