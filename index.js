@@ -277,3 +277,139 @@ function initInput() {
         run();
       }
     });
+
+    input.getValue = function() {
+        return (isMulti() ? cm2 : cm).getValue();
+      };
+      input.setValue = function(v) {
+        (isMulti() ? cm2 : cm).setValue(v);
+      };
+      input.setFocus = function() {
+        (isMulti() ? cm2 : cm).focus();
+      };
+      
+      } else {
+      
+      $('#logo-ta-single-line').addEventListener('keydown', function(e) {
+      
+       var elem = $('#logo-ta-single-line');
+      
+        var keyMap = {
+          'Enter': function(elem) {
+            run();
+          },
+          'ArrowUp': function(elem) {
+            var v = commandHistory.prev();
+            if (v !== undefined) {
+              elem.value = v;
+            }
+          },
+          'ArrowDown': function(elem) {
+            var v = commandHistory.next();
+            if (v !== undefined) {
+              elem.value = v;
+            }
+          }
+        };
+      
+        var keyName = keyNameForEvent(e);
+        if (keyName in keyMap && typeof keyMap[keyName] === 'function') {
+          keyMap[keyName](elem);
+          e.stopPropagation();
+          e.preventDefault();
+        }
+      });
+      
+          input.getValue = function() {
+            return $(isMulti() ? '#logo-ta-multi-line' : '#logo-ta-single-line').value;
+          };
+          input.setValue = function(v) {
+            $(isMulti() ? '#logo-ta-multi-line' : '#logo-ta-single-line').value = v;
+          };
+          input.setFocus = function() {
+            $(isMulti() ? '#logo-ta-multi-line' : '#logo-ta-single-line').focus();
+          };
+        }
+      
+        input.setFocus();
+        $('#input').addEventListener('click', function() {
+          input.setFocus();
+        });
+      
+        $('#toggle').addEventListener('click', function() {
+          var v = input.getValue();
+          document.body.classList.toggle('single');
+          document.body.classList.toggle('multi');
+          if (!isMulti()) {
+            v = v.replace(/\n/g, '  ');
+          } else {
+            v = v.replace(/\s\s(\s*)/g, '\n$1');
+          }
+          input.setValue(v);
+          input.setFocus();
+        });
+      
+        $('#run').addEventListener('click', run);
+        $('#stop').addEventListener('click', stop);
+        $('#clear').addEventListener('click', clear);
+      
+        window.addEventListener('message', function(e) {
+          if ('example' in e.data) {
+            var text = e.data.example;
+            input.setSingle();
+            input.setValue(text);
+            input.setFocus();
+          }
+        });
+      }
+      
+      (function() {
+        window.addEventListener('resize', resize);
+        window.addEventListener('DOMContentLoaded', resize);
+        function resize() {
+          var box = $('#display-panel .inner'), rect = box.getBoundingClientRect(),
+              w = rect.width, h = rect.height;
+          $('#sandbox').width = w; $('#sandbox').height = h;
+          $('#turtle').width = w; $('#turtle').height = h;
+          $('#overlay').width = w; $('#overlay').height = h;
+      
+          if (logo && turtle) {
+            turtle.resize(w, h);
+            logo.run('cs');
+          }
+        }
+      }());
+
+      (function() {
+        var sidebars = Array.from($$('#sidebar .choice')).map(
+          function(elem) { return elem.id; });
+        sidebars.forEach(function(k) {
+          $('#sb-link-' + k).addEventListener('click', function() {
+            var cl = $('#sidebar').classList;
+            sidebars.forEach(function(sb) { cl.remove(sb); });
+            cl.add(k);
+          });
+        });
+      }());
+
+      (function() {
+        savehook = hook(savehook, function(name, def) {
+          var parent = $('#library .snippets');
+          if (def)
+            insertSnippet(def, parent, name);
+          else
+            removeSnippet(parent, name);
+        });
+      
+        historyhook = hook(historyhook, function(entry) {
+          var parent = $('#history .snippets');
+          insertSnippet(entry, parent);
+        });
+      
+        clearhistoryhook = hook(clearhistoryhook, function() {
+          var parent = $('#history .snippets');
+          while (parent.firstChild)
+            parent.removeChild(parent.firstChild);
+        });
+      }());
+      
