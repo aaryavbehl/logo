@@ -1517,7 +1517,7 @@ QUnit.test("Control Structures", function(t) {
 
   this.assert_equals('make "x 0  for [ r 10 0 -2 ] [ make "x :x + :r ]  :x', 30);
   this.assert_equals('make "x 0  for [ r 10 0 -2-2 ] [ make "x :x + :r ]  :x', 18);
-  
+
   this.assert_equals('make "x 0  for [ r 10 10 ] [ make "x :x + :r ]  :x', 10);
 this.assert_equals('make "x 0  for [ r 10 10 1 ] [ make "x :x + :r ]  :x', 10);
 this.assert_equals('make "x 0  for [ r 10 10 -1 ] [ make "x :x + :r ]  :x', 10);
@@ -1686,3 +1686,135 @@ QUnit.test("Error Messages", function(t) {
   this.assert_error('setitem 3 { 1 2 } 0', 'SETITEM: Index out of bounds', 4);
 
 });
+
+QUnit.test("Regression Tests", function(t) {
+  this.assert_error('ern "i  make "x :i + 1', "Don't know about variable I");
+  this.assert_equals('make "x 0  repeat 3 [ for [ i 1 4 ] [ make "x :x + 1 ] ]  :x', 12);
+  this.assert_error('ern "i  for [i 0 100 :i+1] []', "Don't know about variable I");
+  this.assert_error('ern "i  for [i 0 100 :i + 1] []', "Don't know about variable I");
+  this.assert_equals('make "i 5  make "x 0  for [ i 0 100 :i ] [ make "x :x + :i ]  :x', 1050);
+  this.assert_error("fd 100 50 rt 90", "Don't know what to do with 50");
+  this.assert_equals("to foo output 123 end  make \"v foo", undefined);
+  this.assert_equals("to foo end", undefined);
+  this.assert_equals("setpos [ -1 0 ]  123", 123);
+  this.assert_equals("to foo output 234 end foo", 234);
+  this.assert_equals("to foo output 234 END foo", 234);
+  this.assert_error("to whatever fd 100", "TO: Expected END");
+  this.assert_equals('"abc;def', "abc");
+  this.assert_equals('"abc\\;def', "abc;def");
+  this.assert_equals('"abc\\\\def', "abc\\def");
+  this.assert_equals('"a\\ b', 'a b');
+  this.assert_equals('repeat 1 [ make "v "abc\\;def ]  :v', "abc\\;def");
+  this.assert_error('repeat 1 [ make "v "abc;def ]  :v', "Expected ']'");
+  this.assert_equals('make "a [ a b c ]  make "b :a  pop "a  :b', ["a", "b", "c"]);
+  this.assert_equals('to foo :BAR output :BAR end  foo 1', 1);
+  this.assert_equals('(word "a (char 10) "b)', 'a\nb');
+
+  this.assert_equals('equalp "1 1', 1);
+  this.assert_equals('equalp 1 "1', 1);
+  this.assert_equals('equalp "1.0 1', 1);
+  this.assert_equals('equalp 1.0 "1', 1);
+  this.assert_equals('equalp "1 1.0', 1);
+  this.assert_equals('equalp 1 "1.0', 1);
+  this.assert_equals('equalp "1 "1.0', 0);
+
+  this.assert_equals('make "a { 1 }  make "b :a  setitem 1 :a 2  item 1 :b', 2);
+  this.assert_equals('show "b\n1', 1);
+
+  this.assert_equals('to f output 1 end (f + 1)', 2);
+  this.assert_equals('setpos [150 150]  setheading 0  fd 10  pos ', [150, -140]);
+
+  this.assert_equals(
+    'make "a 0  do.while [ make "a :a + 1 ] notequalp :a 5  :a', 5);
+
+  this.run('foreach [ 1 2 3 4 5 ] ".verify_bound_ignore');
+  this.assert_equals('map ".verify_bound_identity [ 1 2 ]', ['1', '2']);
+  this.assert_equals('filter ".verify_bound_identity [ 1 2 ]', ['1', '2']);
+  this.assert_equals('find ".verify_bound_identity [ 1 ]', '1');
+  this.run('reduce ".verify_bound_ignore [ 1 2 ]');
+  this.run('ignore crossmap ".verify_bound_ignore [[ 1 2 ] [ 3 4 ]]');
+
+  this.assert_equals('forever [ bye ] 123', undefined);
+  this.assert_equals('for [ i 1 2 ] [ bye ] 123', undefined);
+  this.assert_equals('dotimes [ i 1 ] [ bye ] 123', undefined);
+  this.assert_equals('do.while [ bye ] [ 1 = 1 ] 123', undefined);
+  this.assert_equals('while [ 1 = 1 ] [ bye ] 123', undefined);
+  this.assert_equals('do.until [ bye ] [ 1 = 0 ] 123', undefined);
+  this.assert_equals('until [ 1 = 0 ] [ bye ] 123', undefined);
+});
+
+QUnit.test("API Tests", function(t) {
+
+  this.assert_error('yup', "Don't know how to YUP");
+  this.assert_error('nope', "Don't know how to NOPE");
+
+  this.queue(function() {
+    this.interpreter.copydef('yup', 'true');
+    this.interpreter.copydef('nope', 'false');
+  });
+  this.assert_equals('yup', 1);
+  this.assert_equals('nope', 0);
+
+  this.assert_error("1 / 0", "Division by zero");
+  this.assert_error("item 5 [ 1 2 ]", "ITEM: Index out of bounds");
+  this.queue(function() {
+    this.interpreter.localize = function(s) {
+      return {
+        'Division by zero': 'Divido per nulo',
+        '{_PROC_}: Index out of bounds': '{_PROC_}: Indekso ekster limojn'
+      }[s];
+    };
+  });
+  this.assert_error("1 / 0", "Divido per nulo");
+  this.assert_error("item 5 [ 1 2 ]", "ITEM: Indekso ekster limojn");
+
+  this.assert_error('to foo output 2 fino  foo', "TO: Expected END");
+  this.assert_equals('case 2 [[[1] "a"] [alie "b]]', undefined);
+  this.queue(function() {
+    this.interpreter.keywordAlias = function(s) {
+      return {
+        'FINO': 'END',
+        'ALIE': 'ELSE'
+      }[s];
+    };
+  });
+  this.assert_equals('case 2 [[[1] "a"] [alie "b]]', 'b');
+  this.assert_equals('to foo output 2 fino  foo', 2);
+
+  var done = t.async();
+  var hookCalled = false;
+  this.queue(function() {
+    this.interpreter.colorAlias = function(s) {
+      hookCalled = hookCalled || (s === 'internationalorange');
+    };
+  });
+  this.run('setpencolor "internationalorange');
+  this.queue(function() {
+    t.ok(hookCalled);
+    done();
+  });
+});
+
+QUnit.test("Arity of Primitives", function(t) {
+  var arities = [
+
+    ['.maybeoutput', [1, 1, 1]],
+    ['.setbf', [2, 2, 2]],
+    ['.setfirst', [2, 2, 2]],
+    ['.setitem', [3, 3, 3]],
+    ['and', [0, 2, -1]],
+    ['apply', [2, 2, 2]],
+    ['arc', [2, 2, 2]],
+    ['arctan', [1, 1, 2]],
+    ['arity', [1, 1, 1]],
+    ['array', [1, 1, 2]],
+    ['array?', [1, 1, 1]],
+    ['arrayp', [1, 1, 1]],
+    ['arraytolist', [1, 1, 1]],
+    ['ascii', [1, 1, 1]],
+    ['ashift', [2, 2, 2]],
+    ['ask', [2, 2, 2]],
+    ['back', [1, 1, 1]],
+    ['background', [0, 0, 0]],
+    ['before?', [2, 2, 2]],
+    ['beforep', [2, 2, 2]],
