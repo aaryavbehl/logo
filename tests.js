@@ -670,3 +670,142 @@ QUnit.module("Logo Unit Tests", {
     this.assert_prompt('readword', undefined);
     this.assert_prompt('(readword "query)', 'query');
     this.assert_prompt('(readword [a b c])', 'a b c');
+    
+  this.assert_stream('print "a cleartext', '');
+  this.assert_stream('print "a ct', '');
+
+  this.assert_equals('settextcolor "red  textcolor', 'red');
+  this.assert_equals('settextcolor "#123456  textcolor', '#123456');
+  this.assert_equals('settextcolor [ 0 100 0 ]  textcolor', '#00ff00');
+
+  this.assert_equals('setfont "serif  font', 'serif');
+  this.assert_equals('settextsize 66  textsize', 66);
+  this.assert_equals('settextsize 100  increasefont  textsize', 125);
+  this.assert_equals('settextsize 100  decreasefont  textsize', 80);
+
+  this.stream.clear();
+});
+
+QUnit.test("Arithmetic", function(t) {
+  t.expect(147);
+
+  this.assert_equals('sum 1 2', 3);
+  this.assert_equals('(sum 1 2 3 4)', 10);
+  this.assert_equals('1 + 2', 3);
+
+  this.assert_equals('"3 + "2', 5);
+
+  this.assert_equals('difference 3 1', 2);
+  this.assert_equals('3 - 1', 2);
+  this.assert_equals('minus 3 + 4', -(3 + 4));
+  this.assert_equals('- 3 + 4', (-3) + 4);
+  this.assert_equals('minus 3', -3);
+  this.assert_equals('- 3', -3);
+  this.assert_equals('product 2 3', 6);
+  this.assert_equals('(product 2 3 4)', 24);
+  this.assert_equals('2 * 3', 6);
+  this.assert_equals('quotient 6 2', 3);
+  this.assert_equals('(quotient 2)', 1 / 2);
+  this.assert_equals('6 / 2', 3);
+
+  this.assert_equals('remainder 7 4', 3);
+  this.assert_equals('remainder 7 -4', 3);
+  this.assert_equals('remainder -7 4', -3);
+  this.assert_equals('remainder -7 -4', -3);
+  this.assert_equals('7 % 4', 3);
+  this.assert_equals('7 % -4', 3);
+  this.assert_equals('-7 % 4', -3);
+  this.assert_equals('-7 % -4', -3);
+
+  this.assert_equals('modulo 7 4', 3);
+  this.assert_equals('modulo 7 -4', -3);
+  this.assert_equals('modulo -7 4', 3);
+  this.assert_equals('modulo -7 -4', -3);
+
+  this.assert_equals('abs -1', 1);
+  this.assert_equals('abs 0', 0);
+  this.assert_equals('abs 1', 1);
+
+  this.assert_equals('int 3.5', 3);
+  this.assert_equals('int -3.5', -3);
+  this.assert_equals('round 2.4', 2);
+  this.assert_equals('round 2.5', 3);
+  this.assert_equals('round 2.6', 3);
+  this.assert_equals('round -2.4', -2);
+  this.assert_equals('round -2.5', -2);
+  this.assert_equals('round -2.6', -3);
+
+  this.assert_equals('sqrt 9', 3);
+  this.assert_equals('power 3 2', 9);
+  this.assert_equals('3 ^ 2', 9);
+
+  this.assert_equals('exp 2', 7.38905609893065);
+  this.assert_equals('log10 100', 2);
+  this.assert_equals('ln 9', 2.1972245773362196);
+
+  this.assert_equals('arctan 1', 45);
+  this.assert_equals('2*(arctan 0 1)', 180);
+  this.assert_equals('sin 30', 0.5);
+  this.assert_equals('cos 60', 0.5);
+  this.assert_equals('tan 45', 1);
+
+  this.assert_equals('radarctan 1', Math.PI / 4);
+  this.assert_equals('2*(radarctan 0 1)', Math.PI);
+  this.assert_equals('radsin 0.5235987755982988', 0.5);
+  this.assert_equals('radcos 1.0471975511965976', 0.5);
+  this.assert_equals('radtan 0.7853981633974483', 1);
+
+  this.assert_equals('iseq 1 4', [1, 2, 3, 4]);
+  this.assert_equals('iseq 3 7', [3, 4, 5, 6, 7]);
+  this.assert_equals('iseq 7 3', [7, 6, 5, 4, 3]);
+
+  this.assert_equals('rseq 3 5 9', [3, 3.25, 3.5, 3.75, 4, 4.25, 4.5, 4.75, 5]);
+  this.assert_equals('rseq 3 5 5', [3, 3.5, 4, 4.5, 5]);
+
+  this.assert_equals('greaterp 3 4', 0);
+  this.assert_equals('greaterp 3 3', 0);
+  this.assert_equals('greaterp 3 2', 1);
+  this.assert_equals('greater? 3 4', 0);
+  this.assert_equals('greater? 3 3', 0);
+  this.assert_equals('greater? 3 2', 1);
+  this.assert_equals('3 > 4', 0);
+  this.assert_equals('3 > 3', 0);
+  this.assert_equals('3 > 2', 1);
+  this.assert_equals('greaterequalp 3 4', 0);
+  this.assert_equals('greaterequalp 3 3', 1);
+  this.assert_equals('greaterequalp 3 2', 1);
+  this.assert_equals('greaterequal? 3 4', 0);
+  this.assert_equals('greaterequal? 3 3', 1);
+  this.assert_equals('greaterequal? 3 2', 1);
+  this.assert_equals('3 >= 4', 0);
+  this.assert_equals('3 >= 3', 1);
+  this.assert_equals('3 >= 2', 1);
+  this.assert_equals('lessp 3 4', 1);
+  this.assert_equals('lessp 3 3', 0);
+  this.assert_equals('lessp 3 2', 0);
+  this.assert_equals('less? 3 4', 1);
+  this.assert_equals('less? 3 3', 0);
+  this.assert_equals('less? 3 2', 0);
+  this.assert_equals('3 < 4', 1);
+  this.assert_equals('3 < 3', 0);
+  this.assert_equals('3 < 2', 0);
+  this.assert_equals('lessequalp 3 4', 1);
+  this.assert_equals('lessequalp 3 3', 1);
+  this.assert_equals('lessequalp 3 2', 0);
+  this.assert_equals('lessequal? 3 4', 1);
+  this.assert_equals('lessequal? 3 3', 1);
+  this.assert_equals('lessequal? 3 2', 0);
+  this.assert_equals('3 <= 4', 1);
+  this.assert_equals('3 <= 3', 1);
+  this.assert_equals('3 <= 2', 0);
+
+  this.assert_equals('"3 < "22', 1);
+
+  for (var i = 0; i < 10; i += 1) {
+    this.assert_predicate('random 10', function(x) { return 0 <= x && x < 10; });
+  }
+  for (i = 0; i < 10; i += 1) {
+    this.assert_predicate('(random 1 6)', function(x) { return 1 <= x && x <= 6; });
+  }
+  this.assert_equals('rerandom  make "x random 100  rerandom  make "y random 100  :x - :y', 0);
+  this.assert_equals('(rerandom 123) make "x random 100  (rerandom 123)  make "y random 100  :x - :y', 0);
