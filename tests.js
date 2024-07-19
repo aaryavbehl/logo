@@ -508,3 +508,165 @@ QUnit.module("Logo Unit Tests", {
   this.assert_equals('list? [ 1 ]', 1);
   this.assert_equals('list? { 1 }', 0);
 
+  this.assert_equals('arrayp "a', 0);
+  this.assert_equals('arrayp 1', 0);
+  this.assert_equals('arrayp [ 1 ]', 0);
+  this.assert_equals('arrayp { 1 }', 1);
+  this.assert_equals('array? "a', 0);
+  this.assert_equals('array? 1', 0);
+  this.assert_equals('array? [ 1 ]', 0);
+  this.assert_equals('array? { 1 }', 1);
+  
+    this.assert_equals('equalp 3 4', 0);
+    this.assert_equals('equalp 3 3', 1);
+    this.assert_equals('equalp 3 2', 0);
+    this.assert_equals('equal? 3 4', 0);
+    this.assert_equals('equal? 3 3', 1);
+    this.assert_equals('equal? 3 2', 0);
+    this.assert_equals('3 = 4', 0);
+    this.assert_equals('3 = 3', 1);
+    this.assert_equals('3 = 2', 0);
+    this.assert_equals('notequalp 3 4', 1);
+    this.assert_equals('notequalp 3 3', 0);
+    this.assert_equals('notequalp 3 2', 1);
+    this.assert_equals('notequal? 3 4', 1);
+    this.assert_equals('notequal? 3 3', 0);
+    this.assert_equals('notequal? 3 2', 1);
+    this.assert_equals('3 <> 4', 1);
+    this.assert_equals('3 <> 3', 0);
+    this.assert_equals('3 <> 2', 1);
+    this.assert_equals('[] = []', 1);
+    this.assert_equals('[] <> [ 1 ]', 1);
+  
+    this.assert_equals('equalp "a "a', 1);
+    this.assert_equals('equalp "a "b', 0);
+    this.assert_equals('"a = "a', 1);
+    this.assert_equals('"a = "b', 0);
+    this.assert_equals('equalp [1 2] [1 2]', 1);
+    this.assert_equals('equalp [1 2] [1 3]', 0);
+    this.assert_equals('[ 1 2 ] = [ 1 2 ]', 1);
+    this.assert_equals('[ 1 2 ] = [ 1 3 ]', 0);
+  
+    this.assert_equals('equalp {1} {1}', 0);
+    this.assert_equals('make "a {1}  equalp :a :a', 1);
+    this.assert_equals('{1} = {1}', 0);
+    this.assert_equals('make "a {1}  :a = :a', 1);
+  
+    this.assert_equals('equalp "a 1', 0);
+    this.assert_equals('equalp "a [ 1 ]', 0);
+    this.assert_equals('equalp 1 [ 1 ]', 0);
+  
+  
+    this.assert_equals('numberp "a', 0);
+    this.assert_equals('numberp 1', 1);
+    this.assert_equals('numberp [ 1 ]', 0);
+    this.assert_equals('numberp { 1 }', 0);
+    this.assert_equals('number? "a', 0);
+    this.assert_equals('number? 1', 1);
+    this.assert_equals('number? [ 1 ]', 0);
+    this.assert_equals('number? { 1 }', 0);
+  
+    this.assert_equals('emptyp []', 1);
+    this.assert_equals('empty? []', 1);
+    this.assert_equals('emptyp [ 1 ]', 0);
+    this.assert_equals('empty? [ 1 ]', 0);
+    this.assert_equals('emptyp "', 1);
+    this.assert_equals('empty? "', 1);
+    this.assert_equals('emptyp "a', 0);
+    this.assert_equals('empty? "a', 0);
+  
+    this.assert_equals('emptyp {}', 0);
+  
+    this.assert_equals('beforep "a "b', 1);
+    this.assert_equals('beforep "b "b', 0);
+    this.assert_equals('beforep "c "b', 0);
+    this.assert_equals('before? "a "b', 1);
+    this.assert_equals('before? "b "b', 0);
+    this.assert_equals('before? "c "b', 0);
+  
+    this.assert_equals('.eq 1 1', false);
+    this.assert_equals('.eq 1 "1', false);
+    this.assert_equals('.eq [] []', false);
+    this.assert_equals('.eq {} {}', false);
+    this.assert_equals('make "a 1  .eq :a :a', false);
+    this.assert_equals('make "a []  .eq :a :a', true);
+    this.assert_equals('make "a {}  .eq :a :a', true);
+  
+    this.assert_equals('memberp "b [ a b c ]', 1);
+    this.assert_equals('memberp "e [ a b c ]', 0);
+    this.assert_equals('memberp [ "b ] [ [ "a ] [ "b ] [ "c ] ]', 1);
+    this.assert_equals('member? "b [ a b c ]', 1);
+    this.assert_equals('member? "e [ a b c ]', 0);
+    this.assert_equals('member? [ "b ] [ [ "a ] [ "b ] [ "c ] ]', 1);
+  
+    this.assert_equals('substringp "a "abc', 1);
+    this.assert_equals('substringp "z "abc', 0);
+    this.assert_equals('substring? "a "abc', 1);
+    this.assert_equals('substring? "z "abc', 0);
+  
+    this.assert_equals('count [ ]', 0);
+    this.assert_equals('count [ 1 ]', 1);
+    this.assert_equals('count [ 1 2 ]', 2);
+    this.assert_equals('count { 1 2 }@0', 2);
+    this.assert_equals('count "', 0);
+    this.assert_equals('count "a', 1);
+    this.assert_equals('count "ab', 2);
+  
+    this.assert_equals('ascii "A', 65);
+    this.assert_equals('char 65', 'A');
+  
+    this.assert_equals('member "a "banana', 'anana');
+    this.assert_equals('member "z "banana', '');
+    this.assert_equals('member 1 [1 2 3 1 2 3]', ['1', '2', '3', '1', '2', '3']);
+    this.assert_equals('member 2 [1 2 3 1 2 3]', ['2', '3', '1', '2', '3']);
+    this.assert_equals('member 3 [1 2 3 1 2 3]', ['3', '1', '2', '3']);
+    this.assert_equals('member 4 [1 2 3 1 2 3]', []);
+  
+    this.assert_equals('lowercase "ABcd', 'abcd');
+    this.assert_equals('uppercase "ABcd', 'ABCD');
+  
+    this.assert_equals('standout "whatever', '\uD835\uDC30\uD835\uDC21\uD835\uDC1A\uD835\uDC2D\uD835\uDC1E\uD835\uDC2F\uD835\uDC1E\uD835\uDC2B');
+    this.assert_equals('standout "ABCabc123', '\uD835\uDC00\uD835\uDC01\uD835\uDC02\uD835\uDC1A\uD835\uDC1B\uD835\uDC1C\uD835\uDFCF\uD835\uDFD0\uD835\uDFD1');
+    this.assert_equals('standout "!@#$_,.?', '!@#$_,.?');
+  
+    this.assert_equals('parse "1+\\(2\\ *\\ 3\\)', ['1+(2', '*', '3)']);
+    this.assert_equals('runparse "1+\\(2\\ *\\ 3\\)', ['1', '+', '(', '2', '*', '3', ')']);
+  
+  });
+  
+  QUnit.test("Communication", function(t) {
+    t.expect(33);
+
+    this.assert_stream('print "a', 'a\n');
+    this.assert_stream('print 1', '1\n');
+    this.assert_stream('print [ 1 ]', '1\n');
+    this.assert_stream('print [ 1 [ 2 ] ]', '1 [2]\n');
+    this.assert_stream('(print "a 1 [ 2 [ 3 ] ])', 'a 1 2 [3]\n');
+  
+    this.assert_stream('type "a', 'a');
+    this.assert_stream('(type "a 1 [ 2 [ 3 ] ])', 'a12 [3]');
+  
+    this.assert_stream('(print "hello "world)', "hello world\n");
+    this.assert_stream('(type "hello "world)', "helloworld");
+  
+    this.assert_stream('show "a', 'a\n');
+    this.assert_stream('show 1', '1\n');
+    this.assert_stream('show [ 1 ]', '[1]\n');
+    this.assert_stream('show [ 1 [ 2 ] ]', '[1 [2]]\n');
+    this.assert_stream('(show "a 1 [ 2 [ 3 ] ])', 'a 1 [2 [3]]\n');
+
+    this.queue(function() { this.stream.inputbuffer = "1+2"; });
+    this.assert_equals('readlist', ['1+2']);
+    this.queue(function() { this.stream.inputbuffer = "1 + 2"; });
+    this.assert_equals('readlist', ['1', '+', '2']);
+    this.assert_prompt('readlist', undefined);
+    this.assert_prompt('(readlist "query)', 'query');
+    this.assert_prompt('(readlist [a b c])', 'a b c');
+  
+    this.queue(function() { this.stream.inputbuffer = "test"; });
+    this.assert_equals('readword', 'test');
+    this.queue(function() { this.stream.inputbuffer = "a b c 1 2 3"; });
+    this.assert_equals('readword', 'a b c 1 2 3');
+    this.assert_prompt('readword', undefined);
+    this.assert_prompt('(readword "query)', 'query');
+    this.assert_prompt('(readword [a b c])', 'a b c');
