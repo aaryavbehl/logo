@@ -157,3 +157,161 @@ of comparison.</p>
   <dd class=example>show first "abc</dd>
   <dd class=example>show last [ 1 2 3 ]</dd>
   <dd class=example>show last "abc</dd>
+  
+  <dt><code>firsts <var>listoflists</var></code>
+    <dd>Outputs a list of the first item (or character) of each sublist (or word)
+    <dd class=example>show firsts [ [1 2 3] [a b c] ]</dd>
+    <dd class=example>show firsts [ abc def ]</dd>
+  
+    <dt><code>butfirst <var>list</var></code>
+    <dt><code>bf <var>list</var></code>
+    <dt><code>butlast <var>list</var></code>
+    <dt><code>bl <var>list</var></code>
+    <dd>Outputs the list (or word), except for the first/last item (or character)
+    <dd class=example>show butfirst [ 1 2 3 ]</dd>
+    <dd class=example>show butfirst "abc</dd>
+    <dd class=example>show butlast [ 1 2 3 ]</dd>
+    <dd class=example>show butlast "abc</dd>
+  
+    <dt><code>butfirsts <var>listoflists</var></code>
+    <dt><code>bfs <var>listoflists</var></code>
+    <dd>Outputs a list of sublists (or words) without the first item (or characters)
+    <dd class=example>show butfirsts [ [ 1 2 3 ] [ a b c ] ]</dd>
+    <dd class=example>show butfirsts [ abc def ]</dd>
+  
+    <dt><code>item <var>index</var> <var>thing</var></code>
+    <dd>Outputs the indexth item of the list or array or word
+    <dd class=example>show item 2 [ 1 2 3 ]</dd>
+    <dd class=example>show item 2 "abc</dd>
+  
+    <dt><code>mditem [<var>index</var> ...] <var>thing</var></code>
+    <dd>Outputs an item from a multi-dimensional array
+    <dd class=example>show mditem [2 1] {{a b} {c d}}</dd>
+  
+    <dt><code>pick <var>list</var></code>
+    <dd>Outputs one item from a list (or word), at random
+    <dd class=example>show pick [ 1 2 3 ]</dd>
+    <dd class=example>show pick "abc</dd>
+  
+    <dt><code>remove <var>thing</var> <var>list</var></code>
+    <dd>Outputs the list (or word) with any occurences of thing removed
+    <dd class=example>show remove "b [ a b c ]</dd>
+    <dd class=example>show remove "a "banana</dd>
+  
+    <dt><code>remdup <var>list</var></code>
+    <dd>Outputs the list (or word) with duplicates removed
+    <dd class=example>show remdup [ 1 2 3 2 3 4 3 4 5 ]</dd>
+    <dd class=example>show remdup "banana</dd>
+  
+    <dt><code>quoted <var>thing</var></code>
+    <dd>Outputs thing with " prepended if a word, or just thing otherwise.
+    <dd class=example>show quoted "abc</dd>
+  
+    <dt><code>split <var>thing</var> <var>list</var></code>
+    <dd>Outputs the list split into a list of lists (or list of words) wherever thing appears.
+    <dd class=example>show split "a "banana</dd>
+    <dd class=example>show split 3 [1 2 3 4 1 2 3 4]</dd>
+  
+  </dl>
+  
+  <h4>2.3 Data Mutators</h4>
+  <dl>
+    <dt><code>setitem <var>index</var> <var>array</var> <var>value</var></code>
+    <dd>Sets the indexth item of the array to value (circular arrays prevented)
+    <dd class=example>make "a { 1 2 3 }  setitem 2 :a "x  show :a</dd>
+  
+    <dt><code>mdsetitem [<var>index</var>...] <var>array</var> <var>value</var></code>
+    <dd>Sets an item in a multi-dimensional array to value (circular arrays prevented)
+    <dd class=example>make "a {{1 2} {3 4}}  mdsetitem [2 1] :a "x  show :a</dd>
+  
+    <dt><code>.setfirst <var>list</var> <var>value</var></code>
+    <dd>Sets the first item of the list to value
+    <dd class=example>make "a [ 1 2 3 ]  .setfirst :a "7  show :a</dd>
+  
+    <dt><code>.setbf <var>list</var> <var>value</var></code>
+    <dd>Sets the 'butfirst' of the list to the items in value (a list)
+    <dd class=example>make "a [ 1 2 3 ]  .setbf :a [ 4 9 ]  show :a</dd>
+  
+    <dt><code>.setitem <var>index</var> <var>array</var> <var>value</var></code>
+    <dd>Sets the indexth item of the array to value (circular arrays allowed)
+    <dd class=example>make "a { 1 2 3 }  setitem 2 :a "x  show :a</dd>
+  
+    <dt><code>push <var>stackname</var> <var>thing</var></code>
+    <dt><code>pop <var>stackname</var></code>
+    <dd>Push to/pop from a stack i.e. list variable. Stacks grow from the front. Works on words.
+    <dd class=example>make "s [ 2 1 ]  push "s 3  show :s  show pop "s</dd>
+    <dd class=example>make "s "ba  push "s "c  show :s  show pop "s</dd>
+  
+    <dt><code>queue <var>stackname</var> <var>thing</var></code>
+    <dt><code>dequeue <var>stackname</var></code>
+    <dd>Add/remove from a queue i.e. list variable, Queues grow from the end. Works on words.
+    <dd class=example>make "q [ 1 2 ]  queue "q 3  show :q  show dequeue "q</dd>
+    <dd class=example>make "q "ab  queue "q "c  show :q  show dequeue "q</dd>
+  
+  </dl>
+  
+  <h4>2.4 Predicates</h4>
+  <p>Predicates return 1 (true) or 0 (false) </p>
+  <dl>
+    <dt><code>wordp <var>thing</var></code>
+    <dt><code>word? <var>thing</var></code>
+    <dt><code>listp <var>thing</var></code>
+    <dt><code>list? <var>thing</var></code>
+    <dt><code>arrayp <var>thing</var></code>
+    <dt><code>array? <var>thing</var></code>
+    <dt><code>numberp <var>thing</var></code>
+    <dt><code>number? <var>thing</var></code>
+    <dd>Test if thing is a word, list, array, or number respectively.
+  
+    <dt><code>emptyp <var>expr</var></code>
+    <dt><code>empty? <var>expr</var></code>
+    <dd>Test if thing is an empty list or empty string.
+  
+    <dt><code>equalp <var>expr</var> <var>expr</var></code>
+    <dt><code>equal? <var>expr</var> <var>expr</var></code>
+    <dt><code><var>expr</var> = <var>expr</var></code>
+    <dt><code>notequalp <var>expr</var> <var>expr</var></code>
+    <dt><code>notequal? <var>expr</var> <var>expr</var></code>
+    <dt><code><var>expr</var> &lt;&gt; <var>expr</var></code>
+    <dd>Equality/inequality tests. Compares strings, numbers, or lists (equal if length and all members are equal).
+  
+    <dt><code>beforep <var>thing1</var> <var>thing2</var></code>
+    <dt><code>before? <var>thing1</var> <var>thing2</var></code>
+    <dd>Test string collation order.
+  
+    <dt><code>.eq <var>thing1</var> <var>thing2</var></code>
+    <dd>Test if things have the same identity.
+  
+    <dt><code>memberp <var>thing</var> <var>list</var></code>
+    <dt><code>member? <var>thing</var> <var>list</var></code>
+    <dd>Test if thing is equal to any member of list.
+  
+    <dt><code>substringp <var>thing1</var> <var>thing2</var></code>
+    <dt><code>substring? <var>thing1</var> <var>thing2</var></code>
+    <dd>Test if thing1 is a substring of thing2.
+  </dl>
+  
+  <h4>2.5 Queries</h4>
+  <dl>
+    <dt><code>count <var>thing</var></code>
+    <dd>Outputs length of a list or number of characters in a string
+    <dd class=example>show count [ 1 2 3 ]</dd>
+    <dd class=example>show count "hello</dd>
+  
+    <dt><code>ascii <var>expr</var></code>
+    <dd>Outputs ASCII (actually, Unicode) code point for first character of string
+    <dd class=example>show ascii "abc</dd>
+  
+    <dt><code>char <var>expr</var></code>
+    <dd>Outputs Unicode character at specified code point
+    <dd class=example>show char 97</dd>
+  
+    <dt><code>member <var>thing</var> <var>list</var></code>
+    <dd>Outputs the list (or word) from the first occurence of thing to the end, or empty list (or word)
+    <dd class=example>show member "a "banana</dd>
+    <dd class=example>show member 2 [1 2 3 4]</dd>
+  
+    <dt><code>uppercase <var>expr</var></code>
+    <dt><code>lowercase <var>expr</var></code>
+    <dd>Outputs string converted to upper/lowercase
+    <dd class=example>show uppercase "abc</dd>
