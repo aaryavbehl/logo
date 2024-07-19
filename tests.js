@@ -1517,3 +1517,172 @@ QUnit.test("Control Structures", function(t) {
 
   this.assert_equals('make "x 0  for [ r 10 0 -2 ] [ make "x :x + :r ]  :x', 30);
   this.assert_equals('make "x 0  for [ r 10 0 -2-2 ] [ make "x :x + :r ]  :x', 18);
+  
+  this.assert_equals('make "x 0  for [ r 10 10 ] [ make "x :x + :r ]  :x', 10);
+this.assert_equals('make "x 0  for [ r 10 10 1 ] [ make "x :x + :r ]  :x', 10);
+this.assert_equals('make "x 0  for [ r 10 10 -1 ] [ make "x :x + :r ]  :x', 10);
+
+this.assert_equals('make "x 0  for [ r 10 20 -1 ] [ make "x :x + :r ]  :x', 0);
+this.assert_equals('make "x 0  for [ r 20 10 1 ] [ make "x :x + :r ]  :x', 0);
+
+this.assert_equals('make "x 0  dotimes [ i 5 ] [ make "x :x + :i ]  :x', 15);
+this.assert_equals('make "x 0  dotimes [ i 0 ] [ make "x :x + :i ]  :x', 0);
+
+this.assert_equals('make "x 0  do.while [ make "x :x + 1 ] :x < 10  :x', 10);
+this.assert_equals('make "x 0  do.while [ make "x :x + 1 ] [:x < 10]  :x', 10);
+this.assert_equals('make "x 0  do.while [ make "x :x+1 ] :x < 10  :x', 10);
+this.assert_equals('make "x 0  do.while [ make "x :x + 1 ] [:x<10]  :x', 10);
+this.assert_equals('make "x 0  while :x < 10 [ make "x :x + 1 ]     :x', 10);
+this.assert_equals('make "x 0  while [:x < 10] [ make "x :x + 1 ]     :x', 10);
+this.assert_equals('make "x 0  while :x < 10 [ make "x :x+1 ]     :x', 10);
+this.assert_equals('make "x 0  while [:x<10] [ make "x :x + 1 ]     :x', 10);
+
+this.assert_equals('make "x 0  do.until [ make "x :x + 1 ] :x > 10  :x', 11);
+this.assert_equals('make "x 0  do.until [ make "x :x + 1 ] [:x > 10]  :x', 11);
+this.assert_equals('make "x 0  do.until [ make "x :x+1 ] :x > 10  :x', 11);
+this.assert_equals('make "x 0  do.until [ make "x :x + 1 ] [:x>10]  :x', 11);
+this.assert_equals('make "x 0  until :x > 10 [ make "x :x + 1 ]     :x', 11);
+this.assert_equals('make "x 0  until [:x > 10] [ make "x :x + 1 ]     :x', 11);
+this.assert_equals('make "x 0  until :x > 10 [ make "x :x+1 ]     :x', 11);
+this.assert_equals('make "x 0  until [:x>10] [ make "x :x + 1 ]     :x', 11);
+
+this.assert_equals('to vowelp :letter ' +
+                   '  output case :letter [ [[a e i o u] "true] [else "false] ] ' +
+                   'end ' +
+                   '(list vowelp "a vowelp "b', ['true', 'false']);
+
+this.assert_equals('to evenp :n ' +
+                   '  output not bitand :n 1 ' +
+                   'end ' +
+                   'to evens :numbers ' +
+                   '  op cond [ [ [emptyp :numbers]      [] ] ' +
+                   '            [ [evenp first :numbers] ' +
+                   '              fput first :numbers evens butfirst :numbers] '+
+                   '            [ else evens butfirst :numbers] '+
+                   ' ] ' +
+                   'end ' +
+                   'evens [ 1 2 3 4 5 6 ]', ['2', '4', '6']);
+
+  this.assert_equals('cond [ [ [2<3] "yep ] [ else "nope ]]', 'yep');
+  this.assert_equals('cond [ [ [2>3] "yep ] [ else "nope ]]', 'nope');
+
+  this.run("to add_async :a :b output .promise :a + :b end");
+  this.run("to numberp_async :a output .promise numberp :a end");
+
+  this.assert_equals('apply "word ["a "b "c]', '"a"b"c');
+  this.assert_equals('apply "add_async [1 2]', 3);
+
+  this.assert_equals('invoke "word "a', 'a');
+  this.assert_equals('(invoke "word "a "b "c)', 'abc');
+  this.assert_equals('(invoke "word)', '');
+  this.assert_equals('(invoke "add_async 1 2)', 3);
+
+  this.assert_equals('make "x 0  to addx :a make "x :x+:a end  foreach [ 1 2 3 4 5 ] "addx  :x', 15);
+  this.assert_equals('make "x 0  to addx :a make "x .promise :x+:a end  foreach [ 1 2 3 4 5 ] "addx  :x', 15);
+
+  this.assert_equals('to double :x output :x * 2 end  map "double [ 1 2 3 ]', [2, 4, 6]);
+  this.assert_equals('to double :x output .promise :x * 2 end  map "double [ 1 2 3 ]', [2, 4, 6]);
+
+  this.assert_equals('(map "sum [1 2 3] [40 50 60] [700 800 900])', [741, 852, 963]);
+  this.assert_equals('(map "item [2 1 2 3] [john paul george ringo])', ['o', 'p', 'e', 'n']);
+
+  this.assert_equals('to odd :x output :x % 2 end  filter "odd [ 1 2 3 ]', ["1", "3"]);
+  this.assert_equals('to odd :x output .promise :x % 2 end  filter "odd [ 1 2 3 ]', ["1", "3"]);
+  this.assert_equals('filter "numberp [ 1 "a 2 "b ]', ["1", "2"]);
+
+  this.assert_equals('find "numberp (list "a "b "c 4 "e "f )', 4);
+  this.assert_equals('find "numberp (list "a "b "c "d "e "f )', []);
+  this.assert_equals('find "numberp_async (list "a "b "c 4 "e "f )', 4);
+  this.assert_equals('find "numberp_async (list "a "b "c "d "e "f )', []);
+
+  this.assert_equals('reduce "sum [ 1 2 3 4 ]', 10);
+  this.assert_equals('(reduce "sum [ 1 2 3 4 ] 10)', 20);
+  this.assert_equals('reduce "add_async [ 1 2 3 4 ]', 10);
+  this.assert_equals('(reduce "add_async [ 1 2 3 4 ] 10)', 20);
+
+  this.assert_equals('(crossmap "word [a b c] [1 2 3 4])',
+                     ['a1', 'a2', 'a3', 'a4', 'b1', 'b2', 'b3', 'b4', 'c1', 'c2', 'c3', 'c4']);
+  this.assert_equals('(crossmap "word [a b] [1 2])', ['a1', 'a2', 'b1', 'b2']);
+  this.assert_equals('crossmap "word [[a b] [1 2]]', ['a1', 'a2', 'b1', 'b2']);
+});
+
+QUnit.test("Error Messages", function(t) {
+  this.assert_error("to foo end show foo", "No output from procedure", 5);
+  this.assert_error("[ 1 2", "Expected ']'", 26);
+  this.assert_error("{ 1 2", "Expected '}'", 27);
+  this.assert_error("[ 1 2 }", "Unexpected '}'", 27);
+  this.assert_error("{ 1 2 ]", "Unexpected ']'", 26);
+  this.assert_error('make "a { 1 2 3 }@1.5', "Don't know what to do with 0.5", 9);
+
+  this.assert_error("show :nosuchvar", "Don't know about variable NOSUCHVAR", 11);
+  this.assert_error("1 / 0", "Division by zero", 4);
+  this.assert_error("1 % 0", "Division by zero", 4);
+  this.assert_error("1 + -", "Unexpected end of instructions");
+  this.assert_error("( 1 + 2", "Expected ')'", 10);
+  this.assert_error("( 1 + 2 3", "Expected ')', saw 3", 10);
+  this.assert_error("nosuchproc", "Don't know how to NOSUCHPROC", 24);
+  this.assert_error("1 + \"1+2", "Expected number", 4);
+  this.assert_error("1 + []", "Expected number", 4);
+  this.assert_error("1 + ignore 1", "Expected number", 4);
+  this.assert_error("(minus [])", "Expected number", 4);
+  this.assert_error("make [] 123", "Expected string", 4);
+  this.assert_error("(def [])", "Expected string", 4);
+  this.assert_error("erase ignore 1", "ERASE: Expected list", 4);
+
+  this.assert_error('fd50', "Need a space between FD and 50", 39);
+
+  this.assert_error("(erase {})", "ERASE: Expected list", 4);
+  this.assert_error("(map \"show {})", "MAP: Expected list", 4);
+  this.assert_error("(map \"sum [1 2] [1])", "MAP: Expected lists of equal length", 4);
+  this.assert_error("to 123", "TO: Expected identifier");
+  this.assert_error("to +", "TO: Expected identifier");
+  this.assert_error("to fd :x bk :x end", "TO: Can't redefine primitive FD", 22);
+  this.assert_error("define \"fd [[x] [bk :x]]", "DEFINE: Can't redefine primitive FD", 22);
+  this.assert_error("define \"fd [[x]]", "DEFINE: Expected list of length 2", 4);
+  this.assert_error("def \"nosuchproc", "DEF: Don't know how to NOSUCHPROC", 24);
+  this.assert_error("def \"def", "DEF: Can't show definition of primitive DEF", 22);
+  this.assert_error("text \"nosuchproc", "TEXT: Don't know how to NOSUCHPROC", 24);
+  this.assert_error("text \"text", "TEXT: Can't show definition of primitive TEXT", 22);
+  this.assert_error("text \"nosuchproc", "TEXT: Don't know how to NOSUCHPROC", 24);
+  this.assert_error("text \"def", "TEXT: Can't show definition of primitive DEF", 22);
+  this.assert_error("item 5 [ 1 2 ]", "ITEM: Index out of bounds", 4);
+  this.assert_error("copydef \"newname \"nosuchproc", "COPYDEF: Don't know how to NOSUCHPROC", 24);
+  this.assert_error("to foo end  copydef \"to \"foo", "COPYDEF: Can't overwrite special TO", 4);
+  this.assert_error("to foo end  copydef \"show \"foo", "COPYDEF: Can't overwrite primitives unless REDEFP is TRUE", 4);
+  this.assert_error("erase [ [ TO ] [ ] ]", "Can't ERASE special TO", 4);
+  this.assert_error("erase [ [ SHOW ] [ ] ]", "Can't ERASE primitives unless REDEFP is TRUE", 4);
+  this.assert_error("do.while 1 2", "DO.WHILE: Expected block", 4);
+  this.assert_error("while 1 2", "WHILE: Expected block", 4);
+  this.assert_error("do.until 1 2", "DO.UNTIL: Expected block", 4);
+  this.assert_error("until 1 2", "UNTIL: Expected block", 4);
+  this.assert_error("apply \"nosuch [ 1 2 ]", "APPLY: Don't know how to NOSUCH", 24);
+  this.assert_error("apply \"to [ 1 2 ]", "Can't apply APPLY to special TO", 4);
+  this.assert_error("apply \"while [ 1 2 ]", "Can't apply APPLY to special WHILE", 4);
+  this.assert_error("foreach [ 1 2 ] \"nosuch", "FOREACH: Don't know how to NOSUCH", 24);
+  this.assert_error("foreach [ 1 2 ] \"to", "Can't apply FOREACH to special TO", 4);
+  this.assert_error("foreach [ 1 2 ] \"while", "Can't apply FOREACH to special WHILE", 4);
+  this.assert_error("invoke \"nosuch [ 1 2 ]", "INVOKE: Don't know how to NOSUCH", 24);
+  this.assert_error("invoke \"to [ 1 2 ]", "Can't apply INVOKE to special TO", 4);
+  this.assert_error("invoke \"while [ 1 2 ]", "Can't apply INVOKE to special WHILE", 4);
+  this.assert_error("map \"nosuch [ 1 2 ]", "MAP: Don't know how to NOSUCH", 24);
+  this.assert_error("map \"to [ 1 2 ]", "Can't apply MAP to special TO", 4);
+  this.assert_error("map \"while [ 1 2 ]", "Can't apply MAP to special WHILE", 4);
+  this.assert_error("filter \"nosuch [ 1 2 ]", "FILTER: Don't know how to NOSUCH", 24);
+  this.assert_error("filter \"to [ 1 2 ]", "Can't apply FILTER to special TO", 4);
+  this.assert_error("filter \"while [ 1 2 ]", "Can't apply FILTER to special WHILE", 4);
+  this.assert_error("find \"nosuch [ 1 2 ]", "FIND: Don't know how to NOSUCH", 24);
+  this.assert_error("find \"to [ 1 2 ]", "Can't apply FIND to special TO", 4);
+  this.assert_error("find \"while [ 1 2 ]", "Can't apply FIND to special WHILE", 4);
+  this.assert_error("reduce \"nosuch [ 1 2 ]", "REDUCE: Don't know how to NOSUCH", 24);
+  this.assert_error("reduce \"to [ 1 2 ]", "Can't apply REDUCE to special TO", 4);
+  this.assert_error("reduce \"while [ 1 2 ]", "Can't apply REDUCE to special WHILE", 4);
+  this.assert_error("0", "Don't know what to do with 0", 9);
+  this.assert_error("1 + 2", "Don't know what to do with 3", 9);
+  this.assert_error("to foo output 123 end  foo", "Don't know what to do with 123", 9);
+  this.assert_error('setpos []', 'SETPOS: Expected list of length 2', 4);
+  this.assert_error('setpos [1 2 3]', 'SETPOS: Expected list of length 2', 4);
+  this.assert_error('towards []', 'TOWARDS: Expected list of length 2', 4);
+  this.assert_error('item 3 { 1 2 }', 'ITEM: Index out of bounds', 4);
+  this.assert_error('setitem 3 { 1 2 } 0', 'SETITEM: Index out of bounds', 4);
+
+});
