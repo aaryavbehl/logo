@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<title>Logo Language Guide</title>
+<meta charset="utf-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<script src="https://cdn.rawgit.com/inexorabletash/polyfill/v0.1.29/polyfill.min.js"></script>
+
+<style>
+h1, h2, h3, h4, p { margin-bottom: 6pt; margin-top: 6pt; }
+body, p, h1, h2, h3 { font-family: sans-serif; }
+dl { margin-top: 6pt; }
+p, dt, dd, ol, li { font-size: 10pt; }
+code { font-family: monospace; font-weight: bold; }
+body
+{
+  color: black;
+  background-color: transparent;
+}
+dd.example:before {
+  content: 'Example:';
+  margin-right: 0.5em;
+  font-family: sans-serif;
+  font-style: italic;
+  color: gray;
+}
+dd.example {
+  font-family: monospace;
+  white-space: pre-wrap;
+  margin-top: 2px;
+  margin-bottom: 2px;
+  color: gray;
+  cursor: pointer;
+}
+</style>
+
+<div>
+
+<p>The section numbers are per the <a target="_blank" href="https://www.cs.berkeley.edu/~bh/v2ch14/manual.html">Berkeley Logo Reference Manual</a> in Brian Harvey's <cite>Computer Science Logo Style volume 2: Advanced Techniques</cite> for ease
+of comparison.</p>
+
+<ol>
+  <li><a href="#types">Data Types and Syntax</a>
+  <li><a href="#sec2">Data Structure Primitives</a>
+  <li><a href="#sec3">Communication</a>
+  <li><a href="#sec4">Arithmetic</a>
+  <li><a href="#sec5">Logical Operations</a>
+  <li><a href="#sec6">Graphics</a>
+  <li><a href="#sec7">Workspace Management</a>
+  <li><a href="#sec8">Control Structures</a>
+</ol>
+
+
+<h3 id="types">Data Types and Syntax</h3>
+<dl>
+  <dt><code>"<var>word</var></code>
+  <dt><code>'<var>word</var></code>
+  <dt><code><var>number</var></code>
+  <dd>Word. (Quoted words are terminated by [](){} or whitespace, \ to escape.)
+  <dd class=example>show "hello</dd>
+  <dd class=example>show "hello\ logo</dd>
+  <dd class=example>show 12.34</dd>
+
+  <dt><code>:<var>variable</var></code>
+  <dd>Input definition/variable reference
+  <dd class=example>show :name</dd>
+
+  <dt><code>[ <var>word ...</var> ]</code>
+  <dd>List of words or lists, whitespace separated
+  <dd class=example>show [1 2 3]</dd>
+
+  <dt><code>{ <var>word ...</var> }</code>
+  <dt><code>{ <var>word ...</var> }@<var>origin</var></code>
+  <dd>Array of words, whitespace separated
+  <dd class=example>show {1 2 3}</dd>
+
+  <dt><code> ( <var>expression</var> )</code>
+  <dd>Parenthesis can be used to group expressions
+  <dd class=example>show ( 1 + 2 ) * 3</dd>
+
+  <dt><code><var>procedure</var> <var>input</var> ...</code>
+  <dd>Call procedure with default number of inputs
+  <dd class=example>show "hello</dd>
+
+  <dt><code> ( <var>procedure</var> <var>input</var> ... )</code>
+  <dd>Call procedure with an arbitrary number of inputs
+  <dd class=example>(show "hello :name)</dd>
+</dl>
+
+<h3 id="sec2">2. Data Structure Primitives</h3>
+<h4>2.1 Constructors</h4>
+
+<dl>
+  <dt><code>word <var>expr</var> <var>expr</var></code>
+  <dt><code>(word <var>expr</var> <var>...</var>)</code>
+  <dd>Concatenate two (or more) words into one word
+  <dd class=example>show (word "a "b "c)</dd>
+
+  <dt><code>list <var>thing1</var> <var>thing2</var></code>
+  <dt><code>(list <var>thing1</var> <var>thing2</var> ...)</code>
+  <dd>Create a new list from the inputs
+  <dd class=example>show (list 1+2 2+3 3+4)</dd>
+
+  <dt><code>sentence thing1 thing2</code>
+  <dt><code>(sentence thing1 thing2 ...)</code>
+  <dt><code>se thing1 thing2</code>
+  <dt><code>(se thing1 thing2 ...)</code>
+  <dd>Create a new list from the inputs (if non-lists) or members of the inputs (if lists)
+  <dd class=example>show sentence [1 2 3] [and so on]</dd>
+
+  <dt><code>fput <var>thing</var> <var>list</var></code>
+  <dt><code>lput <var>thing</var> <var>list</var></code>
+  <dd>Outputs list, but with thing added as a new first/last item; if list is a word, concatenates
+  <dd class=example>show fput 0 [ 1 2 3 ]</dd>
+  <dd class=example>show fput "a "bcd</dd>
+  <dd class=example>show lput 4 [ 1 2 3 ]</dd>
+  <dd class=example>show lput "e "bcd</dd>
+
+  <dt><code>array <var>size</var></code>
+  <dt><code>(array <var>size</var> <var>origin</var>)</code>
+  <dd>Create a new array. The default origin is 1.
+  <dd class=example>show array 10</dd>
+
+  <dt><code>mdarray [<var>dimensions</var> ...]</code>
+  <dt><code>(mdarray [<var>dimensions</var> ...] <var>origin</var>)</code>
+  <dd>Create a new multi-dimensional array. The default origin is 1.
+  <dd class=example>show mdarray [2 2]</dd>
+
+  <dt><code>listtoarray <var>list</var></code>
+  <dt><code>(listtoarray <var>list</var> <var>origin</var>)</code>
+  <dd>Create a new array populated by members of a list
+  <dd class=example>show listtoarray [ 1 3 5 7 ]</dd>
+
+  <dt><code>arraytolist <var>array</var></code>
+  <dd>Create a new list populated by members of a array
+  <dd class=example>show arraytolist { 2 4 6 8 }</dd>
+
+  <dt><code>combine thing1 thing2</code>
+  <dd>If thing2 is a word, like <code>word</code>; otherwise, like <code>fput</code>
+  <dd class=example>show combine "a [b c]</dd>
+
+  <dt><code>reverse <var>list</var></code>
+  <dd>Outputs a list with the items in reverse order; if input is a word, reverses characters
+  <dd class=example>show reverse [ 1 2 3 ]</dd>
+  <dd class=example>show reverse "abc</dd>
+
+  <dt><code>gensym</code>
+  <dd>Outputs a unique string, e.g. <samp>G1</samp>, <samp>G2</samp>, etc.
+  <dd class=example>show gensym</dd>
+</dl>
+
+<h4>2.2 Data Selectors</h4>
+<dl>
+  <dt><code>first <var>list</var></code>
+  <dt><code>last <var>list</var></code>
+  <dd>Outputs the first or last item (or character) from the list (or word), respectively
+  <dd class=example>show first [ 1 2 3 ]</dd>
+  <dd class=example>show first "abc</dd>
+  <dd class=example>show last [ 1 2 3 ]</dd>
+  <dd class=example>show last "abc</dd>
