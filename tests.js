@@ -1246,3 +1246,145 @@ QUnit.test("Workspace Management", function(t) {
                 'end ' +
                 'make "foo 123 ' +
                 'dofoo + :foo', 456 + 456);
+                
+
+  this.assert_equals('to dofoo2 :foo ' +
+    '  make "foo 456 ' +
+    '  output :foo + :foo ' +
+    'end ' +
+    'make "foo 123 ' +
+    '(dofoo2 111) + :foo', 123 + 456 + 456);
+
+this.assert_equals('name 5 "foo :foo', 5);
+this.assert_equals('name "a "foo :foo', 'a');
+this.assert_equals('name [a b] "foo :foo', ["a", "b"]);
+this.assert_equals('name "gamma "m  name "delta :m :gamma', 'delta');
+
+this.assert_equals('to dofoo ' +
+    '  local "foo ' +
+    '  make "foo 456' +
+    '  output :foo ' +
+    'end ' +
+    'make "foo 123 ' +
+    'dofoo + :foo', 456 + 123);
+
+this.assert_equals('to dofoo ' +
+    '  localmake "foo 456' +
+    '  output :foo ' +
+    'end ' +
+    'make "foo 123 ' +
+    'dofoo + :foo', 456 + 123);
+
+this.assert_equals('make "baz 321 thing "baz', 321);
+this.assert_equals('make "baz "a thing "baz', 'a');
+this.assert_equals('make "baz [a b c] thing "baz', ["a", "b", "c"]);
+
+this.assert_equals('global "foo 1', 1); 
+this.assert_equals('(global "foo "bar) 1', 1); 
+
+this.assert_equals('procedurep "notdefined', 0);
+this.assert_equals('to foo end  procedurep "foo', 1);
+this.assert_equals('procedure? "notdefined', 0);
+this.assert_equals('to foo end  procedure? "foo', 1);
+
+this.assert_equals('primitivep "notdefined', 0);
+this.assert_equals('to foo end  primitivep "foo', 0);
+this.assert_equals('primitivep "sentence', 1);
+this.assert_equals('primitive? "notdefined', 0);
+this.assert_equals('to foo end  primitive? "foo', 0);
+this.assert_equals('primitive? "sentence', 1);
+
+this.assert_equals('definedp "notdefined', 0);
+this.assert_equals('to foo end  definedp "foo', 1);
+this.assert_equals('definedp "sentence', 0);
+this.assert_equals('defined? "notdefined', 0);
+this.assert_equals('to foo end  defined? "foo', 1);
+this.assert_equals('defined? "sentence', 0);
+
+this.assert_equals('namep "notdefined', 0);
+this.assert_equals('make "foo 5 namep "foo', 1);
+
+this.assert_equals('plistp "lname', 0);
+this.assert_equals('pprop "lname "pname 123  gprop "lname "pname', 123);
+this.assert_equals('gprop "lname "nosuchprop', []);
+this.assert_equals('plist "lname', ["pname", 123]);
+this.assert_equals('plistp "lname', 1);
+this.assert_equals('remprop "lname "pname  plist "lname', []);
+this.assert_equals('plistp "lname', 0);
+this.assert_equals('pprop "lname "pname 123  gprop "LNAME "PNAME', 123);
+
+this.assert_equals('unburyall erall  contents', [[], [], []]);
+
+this.assert_equals('unburyall erall  make "a 1  to b output 2 end  pprop "c "d "e  contents', [['b'], ['a'], ['c']]);
+this.assert_equals('unburyall erall  make "a 1  to b output 2 end  pprop "c "d "e  procedures', ['b']);
+
+this.assert_equals('memberp "firsts primitives', 1);
+this.assert_equals('memberp "nopenopefirsts primitives', 0);
+
+this.assert_equals('unburyall erall  make "a 1  to b output 2 end  pprop "c "d "e  globals', ['a']);
+this.assert_equals('unburyall erall  make "a 1  to b output 2 end  pprop "c "d "e  names', [[], ['a']]);
+this.assert_equals('unburyall erall  make "a 1  to b output 2 end  pprop "c "d "e  plists', [[], [], ['c']]);
+
+this.assert_equals('namelist "a', [[], ['a']]);
+this.assert_equals('namelist [a]', [[], ['a']]);
+this.assert_equals('namelist [a b c]', [[], ['a', 'b', 'c']]);
+this.assert_equals('pllist "a', [[], [], ['a']]);
+this.assert_equals('pllist [a]', [[], [], ['a']]);
+this.assert_equals('pllist [a b c]', [[], [], ['a', 'b', 'c']]);
+
+this.assert_equals('to foo end  arity "foo', [0, 0, 0]);
+this.assert_equals('to foo :a end  arity "foo', [1, 1, 1]);
+this.assert_equals('to foo :a :b end  arity "foo', [2, 2, 2]);
+this.assert_equals('to foo [:a 1] end  arity "foo', [0, 0, 1]);
+this.assert_equals('to foo [:a 1] [:b 1] end  arity "foo', [0, 0, 2]);
+this.assert_equals('to foo :a [:b 1] end  arity "foo', [1, 1, 2]);
+this.assert_equals('to foo :a :b [:c 1] end  arity "foo', [2, 2, 3]);
+this.assert_equals('to foo [:r] end  arity "foo', [0, 0, -1]);
+this.assert_equals('to foo :a [:r] end  arity "foo', [1, 1, -1]);
+this.assert_equals('to foo :a :b [:r] end  arity "foo', [2, 2, -1]);
+this.assert_equals('to foo [:a 1] [:r] end  arity "foo', [0, 0, -1]);
+this.assert_equals('to foo [:a 1] [:b 1] [:r] end  arity "foo', [0, 0, -1]);
+this.assert_equals('to foo :a [:b 1] [:r] end  arity "foo', [1, 1, -1]);
+this.assert_equals('to foo :a :b [:c 1] [:r] end  arity "foo', [2, 2, -1]);
+
+this.assert_equals('to foo 0 end  arity "foo', [0, 0, 0]);
+this.assert_equals('to foo :a 1 end  arity "foo', [1, 1, 1]);
+this.assert_equals('to foo :a :b 2 end  arity "foo', [2, 2, 2]);
+this.assert_equals('to foo [:a 1] 0 end  arity "foo', [0, 0, 1]);
+this.assert_equals('to foo [:a 1] 1 end  arity "foo', [0, 1, 1]);
+this.assert_equals('to foo [:a 1] [:b 1] 0 end  arity "foo', [0, 0, 2]);
+this.assert_equals('to foo [:a 1] [:b 1] 1 end  arity "foo', [0, 1, 2]);
+this.assert_equals('to foo [:a 1] [:b 1] 2 end  arity "foo', [0, 2, 2]);
+this.assert_equals('to foo :a [:b 1] 1 end  arity "foo', [1, 1, 2]);
+this.assert_equals('to foo :a [:b 1] 2 end  arity "foo', [1, 2, 2]);
+this.assert_equals('to foo :a :b [:c 1] 2 end  arity "foo', [2, 2, 3]);
+this.assert_equals('to foo :a :b [:c 1] 3 end  arity "foo', [2, 3, 3]);
+this.assert_equals('to foo [:r] 4 end  arity "foo', [0, 4, -1]);
+this.assert_equals('to foo :a [:r] 4 end  arity "foo', [1, 4, -1]);
+this.assert_equals('to foo :a :b [:r] 4 end  arity "foo', [2, 4, -1]);
+this.assert_equals('to foo :a [:b 1] [:r] 4 end  arity "foo', [1, 4, -1]);
+this.assert_equals('to foo [:a 1] [:r] 4 end  arity "foo', [0, 4, -1]);
+this.assert_equals('to foo [:a 1] [:b 1] [:r] 4 end  arity "foo', [0, 4, -1]);
+this.assert_equals('to foo :a :b [:c 1] [:r] 4 end  arity "foo', [2, 4, -1]);
+
+this.assert_equals('unburyall erall  make "a 1  make "b 2  to a output 1 end  to b output 2 end  erase [[a] [b]]  contents', [['b'], ['a'], []]);
+this.assert_equals('unburyall erall  make "a 1  make "b 2  to a output 1 end  to b output 2 end  erall  contents', [[], [], []]);
+
+this.assert_equals('unburyall erall  make "a 1  to b output 2 end  pprop "c "d "e  erps [[b]]  contents', [[], ['a'], ['c']]);
+this.assert_equals('unburyall erall  make "a 1  to b output 2 end  pprop "c "d "e  erns [[a]]  contents', [['b'], [], ['c']]);
+this.assert_equals('unburyall erall  make "a 1  to b output 2 end  pprop "c "d "e  erpls [[c]]  contents', [['b'], ['a'], []]);
+
+this.assert_equals('unburyall erall  make "a 1  to b output 2 end  pprop "c "d "e  ern "a  contents', [['b'], [], ['c']]);
+this.assert_equals('unburyall erall  make "a 1  to b output 2 end  pprop "c "d "e  ern [a]  contents', [['b'], [], ['c']]);
+this.assert_equals('unburyall erall  make "a 1  to b output 2 end  pprop "c "d "e  erpl "c  contents', [['b'], ['a'], []]);
+this.assert_equals('unburyall erall  make "a 1  to b output 2 end  pprop "c "d "e  erpl [c]  contents', [['b'], ['a'], []]);
+
+this.assert_equals('unburyall erall  make "a 1  to b output 2 end  pprop "c "d "e  bury [[b]]  contents', [[], ['a'], ['c']]);
+this.assert_equals('unburyall erall  make "a 1  to b output 2 end  pprop "c "d "e  bury [[] [a]]  contents', [['b'], [], ['c']]);
+this.assert_equals('unburyall erall  make "a 1  to b output 2 end  pprop "c "d "e  bury [[] [] [c]]  contents', [['b'], ['a'], []]);
+this.assert_equals('unburyall erall  make "a 1  to b output 2 end  pprop "c "d "e  buryall  contents', [[], [], []]);
+
+this.assert_equals('unburyall erall  make "a 1  to b output 2 end  pprop "c "d "e  buryall unbury [[b]]  contents', [['b'], [], []]);
+this.assert_equals('unburyall erall  make "a 1  to b output 2 end  pprop "c "d "e  buryall unbury [[] [a]]  contents', [[], ['a'], []]);
+this.assert_equals('unburyall erall  make "a 1  to b output 2 end  pprop "c "d "e  buryall unbury [[] [] [c]]  contents', [[], [], ['c']]);
+this.assert_equals('unburyall erall  make "a 1  to b output 2 end  pprop "c "d "e  buryall  unburyall  contents', [['b'], ['a'], ['c']]);
