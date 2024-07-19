@@ -1102,3 +1102,147 @@ QUnit.test("Graphics", function(t) {
   this.assert_equals('setbackground [0 50 99] background', '#0080ff');
   this.assert_pixel('setbackground "white', 150, 150, white);
   this.assert_pixel('setbackground "red', 150, 150, red);
+  
+  this.assert_equals('pendown pendownp', 1);
+  this.assert_equals('penup pendownp', 0);
+
+  this.assert_equals('penpaint penmode', 'PAINT');
+  this.assert_equals('penerase penmode', 'ERASE');
+  this.assert_equals('penreverse penmode', 'REVERSE');
+
+  this.assert_equals('setpencolor 0 pencolor', 'black');
+  this.assert_equals('setpencolor "#123456 pencolor', '#123456');
+
+  this.assert_equals('setpalette 8 "pink  palette 8', 'pink');
+  this.assert_equals('setpalette 9 [0 50 99]  palette 9', '#0080ff');
+
+  this.assert_equals('setpensize 6 pensize', [6, 6]);
+
+  this.assert_equals('setsc 0 background', 'black');
+  this.assert_equals('setsc 0 getscreencolor', 'black');
+  this.assert_equals('setsc 0 getsc', 'black');
+  this.assert_equals('setsc "#123456 background', '#123456');
+  this.assert_equals('setsc "#123456 getscreencolor', '#123456');
+  this.assert_equals('setsc "#123456 getsc', '#123456');
+  this.assert_equals('setsc [0 50 99] background', '#0080ff');
+  this.assert_equals('setsc [0 50 99] getscreencolor', '#0080ff');
+
+  this.assert_equals('button', 0);
+  this.assert_equals('buttonp', 0);
+  this.assert_equals('button?', 0);
+  this.assert_equals('mousepos', [0, 0]);
+  this.assert_equals('clickpos', [0, 0]);
+});
+
+QUnit.test("Workspace Management", function(t) {
+  t.expect(197);
+
+  this.assert_equals('to square :x output :x * :x end  square 5', 25);
+  this.assert_equals('to foo output 5 end  foo', 5);
+  this.assert_equals('to foo :x :y output 5 end  foo 1 2', 5);
+  this.assert_equals('to foo :x :y output :x + :y end  foo 1 2', 3);
+  this.assert_equals('to foo :x :y output :x + :y end  def "foo', 'to foo :x :y\n  output :x + :y\nend');
+  this.assert_equals('to foo :x bar 1 "a + :x [ 1 2 ] end  def "foo', 'to foo :x\n  bar 1 "a + :x [ 1 2 ]\nend');
+  this.assert_equals('to foo output 1 + 2 - 3 * 4 / 5 % 6 ^ -1 end  def "foo', 'to foo\n  output 1 + 2 - 3 * 4 / 5 % 6 ^ -1\nend');
+
+  this.assert_equals('to square :x output :x * :x end  copydef "multbyself "square  multbyself 5', 25);
+
+  this.assert_equals('define "square [[x][output :x * :x]]  square 5', 25);
+  this.assert_equals('make "a 0  define "p [[][repeat 5 [ make "a :a + 1 ]]]  p 5  :a', 5);
+
+  this.assert_equals('to foo :x :y output :x + :y end  text "foo',
+                     [['x', 'y'], ['output', ':x', '+', ':y']]);
+  this.assert_equals('to foo :x bar 1 "a + :x [ 1 2 ] end  text "foo',
+                     [['x'], ['bar', '1', '"a', '+', ':x', [ '1', '2' ]]]);
+  this.assert_equals('to foo output 1 + 2 - 3 * 4 / 5 % 6 ^ -1 end  text "foo',
+                     [[], ['output', '1', '+', '2', '-', '3', '*', '4', '/', '5', '%', '6', '^', '<UNARYMINUS>', '1']]);
+
+  this.assert_equals('to foo (output 1) end  (foo)', 1);
+
+  this.assert_error('to foo :a (output :a) end  (foo)', 'Not enough inputs for FOO');
+  this.assert_equals('to foo :a (output :a) end  (foo 1)', 1);
+
+  this.assert_error('to foo :a :b output (list :a :b) end  (foo)', 'Not enough inputs for FOO');
+  this.assert_error('to foo :a :b output (list :a :b) end  (foo 1)', 'Not enough inputs for FOO');
+  this.assert_equals('to foo :a :b output (list :a :b)) end  (foo 1 2)', [1, 2]);
+  this.assert_equals('to foo :a :b output (list :a :b)) end  foo 1 2', [1, 2]);
+  this.assert_equals('to foo :a :b output (list :a :b)) end  foo 1 2 3', 3);
+
+  this.assert_equals('to foo [:a 6] output (list :a) end  (foo)', [6]);
+  this.assert_equals('to foo [:a 6] output (list :a) end  (foo 1)', [1]);
+  this.assert_equals('to foo [:a 6] [:b 7] output (list :a :b) end  (foo)', [6, 7]);
+  this.assert_equals('to foo [:a 6] [:b 7] output (list :a :b) end  (foo 1)', [1, 7]);
+  this.assert_equals('to foo [:a 6] [:b 7] output (list :a :b) end  (foo 1 2)', [1, 2]);
+  this.assert_error('to foo [:a 6] [:b 7] output (list :a :b) end  (foo 1 2 3)', 'Too many inputs for FOO');
+
+  this.assert_equals('to foo :a [:b 6] output (list :a :b) end  (foo 1)', [1, 6]);
+  this.assert_equals('to foo :a [:b 6] output (list :a :b) end  (foo 1 2)', [1, 2]);
+
+  this.assert_error('to foo :a :b [:c 6] output (list :a :b :c) end  (foo 1)', 'Not enough inputs for FOO');
+  this.assert_equals('to foo :a :b [:c 6] output (list :a :b :c) end  (foo 1 2)', [1, 2, 6]);
+  this.assert_equals('to foo :a :b [:c 6] output (list :a :b :c) end  (foo 1 2 3)', [1, 2, 3]);
+
+  this.assert_equals('to foo [:r] output :r end  (foo)', []);
+  this.assert_equals('to foo [:r] output :r end  (foo 1 2)', [1, 2]);
+
+  this.assert_error('to foo :a [:r] output (list :a :r) end  (foo)', 'Not enough inputs for FOO');
+  this.assert_equals('to foo :a [:r] output (list :a :r) end  (foo 1)', [1, []]);
+  this.assert_equals('to foo :a [:r] output (list :a :r) end  (foo 1 2)', [1, [2]]);
+  this.assert_equals('to foo :a [:r] output (list :a :r) end  (foo 1 2 3)', [1, [2, 3]]);
+
+  this.assert_equals('to foo :a :b [:r] output (list :a :b :r) end  (foo 1 2)', [1, 2, []]);
+  this.assert_equals('to foo :a :b [:r] output (list :a :b :r) end  (foo 1 2 3)', [1, 2, [3]]);
+  this.assert_equals('to foo [:a 6] [:r] output (list :a :r) end  (foo)', [6, []]);
+  this.assert_equals('to foo [:a 6] [:r] output (list :a :r) end  (foo 1)', [1, []]);
+  this.assert_equals('to foo [:a 6] [:r] output (list :a :r) end  (foo 1 2)', [1, [2]]);
+  this.assert_equals('to foo [:a 6] [:r] output (list :a :r) end  (foo 1 2 3)', [1, [2, 3]]);
+
+  this.assert_error('to foo 4 end', 'TO: Bad default number of inputs for FOO');
+  this.assert_error('to foo :a :b 1 end', 'TO: Bad default number of inputs for FOO');
+  this.assert_error('to foo :a :b 3 end', 'TO: Bad default number of inputs for FOO');
+  this.assert_error('to foo :a [:b 0] 0 end', 'TO: Bad default number of inputs for FOO');
+  this.assert_error('to foo :a [:b 0] 3 end', 'TO: Bad default number of inputs for FOO');
+
+  this.assert_equals('to foo :a 1 output (list :a) end  (foo 1)', [1]);
+  this.assert_equals('to foo :a :b 2 output (list :a :b) end  (foo 1 2)', [1, 2]);
+  this.assert_equals('to foo [:a 6] 0 output (list :a) end  (list foo 1 2 3)', [[6], 1, 2, 3]);
+  this.assert_equals('to foo [:a 6] 1 output (list :a) end  (list foo 1 2 3)', [[1], 2, 3]);
+  this.assert_equals('to foo :a [:b 6] 1 output (list :a :b) end  (list foo 1 2 3)', [[1, 6], 2, 3]);
+  this.assert_equals('to foo :a [:b 6] 2 output (list :a :b) end  (list foo 1 2 3)', [[1, 2], 3]);
+
+  this.assert_equals('to foo [:r] 2 output :r end  (list foo 1 2 3 4)', [[1, 2], 3, 4]);
+  this.assert_equals('to foo :a [:r] 1 output (list :a :r) end  (list foo 1 2 3 4)', [[1, []], 2, 3, 4]);
+  this.assert_equals('to foo :a [:r] 2 output (list :a :r) end  (list foo 1 2 3 4)', [[1, [2]], 3, 4]);
+  this.assert_equals('to foo :a [:r] 3 output (list :a :r) end  (list foo 1 2 3 4)', [[1, [2, 3]], 4]);
+  this.assert_equals('to foo [:a 6] [:r] 0 output (list :a :r) end  (list foo 1 2 3 4)', [[6, []], 1, 2, 3, 4]);
+  this.assert_equals('to foo [:a 6] [:r] 1 output (list :a :r) end  (list foo 1 2 3 4)', [[1, []], 2, 3, 4]);
+  this.assert_equals('to foo [:a 6] [:r] 2 output (list :a :r) end  (list foo 1 2 3 4)', [[1, [2]], 3, 4]);
+  this.assert_equals('to foo [:a 6] [:r] 3 output (list :a :r) end  (list foo 1 2 3 4)', [[1, [2, 3]], 4]);
+  this.assert_equals('to foo :a [:b 6] [:r] 1 output (list :a :b :r) end  (list foo 1 2 3 4)', [[1, 6, []], 2, 3, 4]);
+  this.assert_equals('to foo :a [:b 6] [:r] 2 output (list :a :b :r) end  (list foo 1 2 3 4)', [[1, 2, []], 3, 4]);
+  this.assert_equals('to foo :a [:b 6] [:r] 3 output (list :a :b :r) end  (list foo 1 2 3 4)', [[1, 2, [3]], 4]);
+  this.assert_equals('to foo :a [:b 6] [:r] 4 output (list :a :b :r) end  (list foo 1 2 3 4)', [[1, 2, [3, 4]]]);
+
+  this.assert_equals('to foo :a [:b :a + 5] output (list :a :b) end  (foo 1)', [1, 6]);
+  this.assert_equals('to foo :a [:b :a + 5] [:c :b * :b ] output :c  end  (foo 1)', 36);
+
+  this.assert_equals('to foo :a [:b 1 + 2] [:c] 2 (show :a :b :c)  end  text "foo',
+                     [['a', ["b", ['1', '+', '2']], ['c'], 2], ['(', 'show', ':a', ':b', ':c', ')']]);
+
+  this.assert_equals('to foo :a [:b 1 + 2] [:c] 2 (show :a :b :c)  end  def "foo',
+                     'to foo :a [:b 1 + 2] [:c] 2\n  ( show :a :b :c )\nend');
+
+  this.assert_equals('define "foo [[a [b 1 + 2] [c] 2] [ (show :a :b :c) ]]  text "foo',
+                     [['a', ["b", ['1', '+', '2']], ['c'], 2], ['(', 'show', ':a', ':b', ':c', ')']]);
+
+  this.assert_equals('make "foo 5 :foo', 5);
+  this.assert_equals('make "foo "a :foo', 'a');
+  this.assert_equals('make "foo [a b] :foo', ["a", "b"]);
+  this.assert_equals('make "n "alpha make :n "beta :alpha', 'beta');
+
+  this.assert_equals('to dofoo ' +
+                '  make "foo 456 ' +
+                '  output :foo ' +
+                'end ' +
+                'make "foo 123 ' +
+                'dofoo + :foo', 456 + 456);
