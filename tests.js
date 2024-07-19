@@ -809,3 +809,158 @@ QUnit.test("Arithmetic", function(t) {
   }
   this.assert_equals('rerandom  make "x random 100  rerandom  make "y random 100  :x - :y', 0);
   this.assert_equals('(rerandom 123) make "x random 100  (rerandom 123)  make "y random 100  :x - :y', 0);
+  
+  this.assert_stream('type form 123.456 10 0', '       123');
+  this.assert_stream('type form 123.456 10 1', '     123.5');
+  this.assert_stream('type form 123.456 10 2', '    123.46'); 
+  this.assert_stream('type form 123.456 10 3', '   123.456');
+  this.assert_stream('type form 123.456 10 4', '  123.4560');
+  this.assert_stream('type form 123.456 10 5', ' 123.45600');
+  this.assert_stream('type form 123.456 10 6', '123.456000');
+  this.assert_stream('type form 123.456 10 7', '123.4560000');
+  this.assert_stream('type form 123.456 10 8', '123.45600000');
+
+  this.assert_equals('bitand 1 2', 0);
+  this.assert_equals('bitand 7 2', 2);
+  this.assert_equals('(bitand 7 11 15)', 3);
+
+  this.assert_equals('bitor 1 2', 3);
+  this.assert_equals('bitor 7 2', 7);
+  this.assert_equals('(bitor 1 2 4)', 7);
+
+  this.assert_equals('bitxor 1 2', 3);
+  this.assert_equals('bitxor 7 2', 5);
+  this.assert_equals('(bitxor 1 2 7)', 4);
+
+  this.assert_equals('bitnot 0', -1);
+  this.assert_equals('bitnot -1', 0);
+  this.assert_equals('bitand (bitnot 123) 123', 0);
+
+  this.assert_equals('ashift 1 2', 4);
+  this.assert_equals('ashift 8 -2', 2);
+  this.assert_equals('lshift 1 2', 4);
+  this.assert_equals('lshift 8 -2', 2);
+
+  this.assert_equals('ashift -1024 -1', -512);
+  this.assert_equals('ashift -1 -1', -1);
+  this.assert_equals('lshift -1 -1', 0x7fffffff);
+});
+
+QUnit.test("Logical Operations", function(t) {
+  t.expect(29);
+
+  this.assert_equals('true', 1);
+  this.assert_equals('false', 0);
+  this.assert_equals('and 0 0', 0);
+  this.assert_equals('and 0 1', 0);
+  this.assert_equals('and 1 0', 0);
+  this.assert_equals('and 1 1', 1);
+  this.assert_equals('(and 0 0 0)', 0);
+  this.assert_equals('(and 1 0 1)', 0);
+  this.assert_equals('(and 1 1 1)', 1);
+  this.assert_equals('or 0 0', 0);
+  this.assert_equals('or 0 1', 1);
+  this.assert_equals('or 1 0', 1);
+  this.assert_equals('or 1 1', 1);
+  this.assert_equals('(or 0 0 0)', 0);
+  this.assert_equals('(or 1 0 1)', 1);
+  this.assert_equals('(or 1 1 1)', 1);
+  this.assert_equals('xor 0 0', 0);
+  this.assert_equals('xor 0 1', 1);
+  this.assert_equals('xor 1 0', 1);
+  this.assert_equals('xor 1 1', 0);
+  this.assert_equals('(xor 0 0 0)', 0);
+  this.assert_equals('(xor 1 0 1)', 0);
+  this.assert_equals('(xor 1 1 1)', 1);
+  this.assert_equals('not 0', 1);
+  this.assert_equals('not 1', 0);
+
+  this.assert_stream('and 0 (print "nope)', '');
+  this.assert_stream('or 1 (print "nope)', '');
+
+  this.assert_stream('and 1 (type "yup)', 'yup');
+  this.assert_stream('or 0 (type "yup)', 'yup');
+});
+
+QUnit.test("Graphics", function(t) {
+  t.expect(182);
+
+  var white = [0xff, 0xff, 0xff, 0xff],
+      black = [0, 0, 0, 0xff],
+      red = [0xff, 0, 0, 0xff];
+
+  this.run('clearscreen');
+  this.assert_equals('clean home (list heading xcor ycor)', [0, 0, 0]);
+  this.assert_pixel('cs', 150, 150, [0xff,0xff,0xff,0xff]);
+
+  this.assert_equals('home forward 100 pos', [0, 100]);
+  this.assert_equals('home fd 100 pos', [0, 100]);
+  this.assert_equals('home back 100 pos', [0, -100]);
+  this.assert_equals('home bk 100 pos', [0, -100]);
+  this.assert_equals('home left 45 heading', -45);
+  this.assert_equals('home lt 45 heading', -45);
+  this.assert_equals('home right 45 heading', 45);
+  this.assert_equals('home rt 45 heading', 45);
+
+  this.assert_equals('home \u2190 heading', -15);
+  this.assert_equals('home \u2192 heading', 15);
+  this.assert_equals('home \u2191 pos', [0, 10]);
+  this.assert_equals('home \u2193 pos', [0, -10]);
+
+  this.assert_equals('setpos [ 12 34 ] pos', [12, 34]);
+  this.assert_equals('setxy 56 78 pos', [56, 78]);
+  this.assert_equals('setxy 0 0 (list xcor ycor)', [0, 0]);
+  this.assert_equals('setx 123 xcor', 123);
+  this.assert_equals('sety 45 ycor', 45);
+  this.assert_equals('setheading 69 heading', 69);
+  this.assert_equals('seth 13 heading', 13);
+
+  this.assert_equals('forward 100 rt 90 home (list heading xcor ycor)', [0, 0, 0]);
+
+  this.assert_equals('home arc 123 456 (list heading xcor ycor)', [0, 0, 0]);
+
+  this.assert_pixels('cs  setpw 10  arc 45 100', [
+    [150, 150, white],
+    [150+100*Math.cos(Math.PI * 8/8), 150-100*Math.sin(Math.PI * 8/8)|0, white],
+    [150+100*Math.cos(Math.PI * 7/8), 150-100*Math.sin(Math.PI * 7/8)|0, white],
+    [150+100*Math.cos(Math.PI * 6/8), 150-100*Math.sin(Math.PI * 6/8)|0, white],
+    [150+100*Math.cos(Math.PI * 5/8), 150-100*Math.sin(Math.PI * 5/8)|0, white],
+    [150+100*Math.cos(Math.PI * 4/8), 150-100*Math.sin(Math.PI * 4/8)|0, black],
+    [150+100*Math.cos(Math.PI * 3/8), 150-100*Math.sin(Math.PI * 3/8)|0, black],
+    [150+100*Math.cos(Math.PI * 2/8), 150-100*Math.sin(Math.PI * 2/8)|0, black],
+    [150+100*Math.cos(Math.PI * 1/8), 150-100*Math.sin(Math.PI * 1/8)|0, white],
+    [150+100*Math.cos(Math.PI * 0/8), 150-100*Math.sin(Math.PI * 0/8)|0, white]
+  ]);
+  this.assert_pixels('cs  setpw 10  arc -45 100', [
+    [150, 150, white],
+    [150+100*Math.cos(Math.PI * 8/8), 150-100*Math.sin(Math.PI * 8/8)|0, white],
+    [150+100*Math.cos(Math.PI * 7/8), 150-100*Math.sin(Math.PI * 7/8)|0, white],
+    [150+100*Math.cos(Math.PI * 6/8), 150-100*Math.sin(Math.PI * 6/8)|0, black],
+    [150+100*Math.cos(Math.PI * 5/8), 150-100*Math.sin(Math.PI * 5/8)|0, black],
+    [150+100*Math.cos(Math.PI * 4/8), 150-100*Math.sin(Math.PI * 4/8)|0, black],
+    [150+100*Math.cos(Math.PI * 3/8), 150-100*Math.sin(Math.PI * 3/8)|0, white],
+    [150+100*Math.cos(Math.PI * 2/8), 150-100*Math.sin(Math.PI * 2/8)|0, white],
+    [150+100*Math.cos(Math.PI * 1/8), 150-100*Math.sin(Math.PI * 1/8)|0, white],
+    [150+100*Math.cos(Math.PI * 0/8), 150-100*Math.sin(Math.PI * 0/8)|0, white]
+  ]);
+
+  this.assert_pixels('cs  pu  setxy 50 50  arc 360 20  fill', [
+    [150, 150, white],
+    [150 + 50, 150 - 50, black]
+  ]);
+
+  ['"red', '4', '[99 0 0]'].forEach(function(color) {
+    this.assert_pixels('cs  pu  filled ' + color + ' [ arc 135 100 ]', [
+      [150, 150, white],
+      [150 + 100, 150 - 100, white],
+      [150 + 10, 150 - 90, red],
+      [150 + 90, 150, red],
+    ]);
+  }.bind(this));
+
+  this.assert_pixels('cs  pd  filled "black [ fd 100 pu bk 100 rt 90 fd 100 pd lt 90 fd 100 ]', [
+    [150 + 25, 150 - 50, black],
+    [150 + 75, 150 - 50, black],
+    [150 + 50, 150 - 25, white],
+    [150 + 50, 150 - 75, white],
+  ]);
