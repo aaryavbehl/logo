@@ -209,3 +209,153 @@ QUnit.module("Logo Unit Tests", {
     this.assert_equals('"abc\\~\n', 'abc~');
     this.assert_equals('"abc\\~\n"def', 'def');
   
+    this.assert_equals('"abc;comment\n"def', 'def');
+    this.assert_equals('"abc;comment~\ndef', 'abcdef');
+    this.assert_equals('"abc;comment~\n~\ndef', 'abcdef');
+    this.assert_equals('"abc;comment~\nde~\nf', 'abcdef');
+    this.assert_equals('"abc;comment\\~\n', 'abc');
+    this.assert_equals('"abc;comment\\~\n"def', 'def');
+    
+    this.assert_equals('count [\\]]', 1);
+    this.assert_equals('count [[][]]', 2);
+    this.assert_equals('count [[]{}[]]', 3);
+    this.assert_equals('count [\\[\\]\\{\\}\\[\\]]', 1);
+    this.assert_equals('count [ \\[ \\] \\{ \\} \\[ \\]]', 6);
+    this.assert_equals('count [   ]', 0);
+    this.assert_equals('count [ \\  ]', 1);
+    this.assert_equals('count [ \\ \\  ]', 1);
+    this.assert_equals('count [ \\  \\  ]', 2);
+    
+    this.assert_equals('count [ abc;com ment\ndef  ]', 2);
+    this.assert_equals('count [ abc;com ment~\ndef  ]', 1);
+    this.assert_equals('count [ abc;com ment\\~\ndef  ]', 2);
+    
+    this.assert_equals('"test', 'test');
+    
+    this.assert_equals('1', 1);
+    this.assert_equals('[ a b c ]', ["a", "b", "c"]);
+    this.assert_equals('[ 1 2 3 ]', ["1", "2", "3"]);
+    this.assert_equals('[ 1 -2 3 ]', ["1", "-2", "3"]);
+    this.assert_equals('[ 1-2 3 ]', ["1-2", "3"]);
+    this.assert_equals('[ 1 2 [ 3 ] 4 *5 ]', ["1", "2", [ "3" ], "4", "*5"]);
+    
+    this.assert_equals('-4', -4); 
+    this.assert_equals('- 4 + 10', 6); 
+    this.assert_equals('10 + - 4', 6); 
+    this.assert_equals('(-4)', -4); 
+    this.assert_equals('make "t 10 -4 :t', 10); 
+    this.assert_equals('make "t 10 - 4 :t', 6); 
+    this.assert_equals('make "t 10-4 :t', 6); 
+    this.assert_equals('make "t 10- 4 :t', 6); 
+    this.assert_equals('sum 10 -4', 6); 
+    this.assert_error('sum 10 - 4', 'Unexpected end of instructions'); 
+    this.assert_equals('sum 10 (-4)', 6); 
+    this.assert_equals('sum 10 ( -4 )', 6); 
+    this.assert_equals('sum 10 ( - 4 )', 6); 
+    this.assert_equals('sum 10 (- 4)', 6); 
+  
+      this.assert_equals('make "t 1 :t', 1);
+      this.assert_equals('MAKE "t 1 :t', 1);
+      this.assert_equals('MaKe "t 1 :t', 1);
+    
+      this.assert_equals('make "t 2 :t', 2);
+      this.assert_equals('make "T 3 :t', 3);
+      this.assert_equals('make "t 4 :T', 4);
+      this.assert_equals('make "T 5 :T', 5);
+    
+      this.assert_equals('to foo output 6 end  foo', 6);
+      this.assert_equals('to FOO output 7 end  foo', 7);
+      this.assert_equals('to foo output 8 end  FOO', 8);
+      this.assert_equals('to FOO output 9 end  FOO', 9);
+
+      this.assert_stream('print [ Hello World ]', 'Hello World\n');
+    
+      this.assert_stream('type .2 + .3', '0.5');
+      this.assert_equals('1e2', 100);
+      this.assert_equals('1e+2', 100);
+      this.assert_equals('1e-2', 0.01);
+      this.assert_equals('-1', -1);
+
+      this.assert_equals('count { a b c }', 3);
+      this.assert_equals('count { a b c }@0', 3);
+      this.assert_equals('count { a b c }@123', 3);
+      this.assert_equals('count { a b c } @ 0', 3);
+      this.assert_error('make "a count { 1 2 3 }@1.5', "Don't know what to do with 0.5", 9);
+      this.assert_equals('item 0 { 1 2 3 }@', '1');
+    
+      this.assert_equals('item 1 { 1 2 3 }@1', '1');
+      this.assert_equals('item 2 { 1 2 3 }@1', '2');
+      this.assert_equals('item 3 { 1 2 3 }@1', '3');
+    
+      this.assert_equals('item 2 { 1 2 3 }@2', '1');
+      this.assert_equals('item 3 { 1 2 3 }@2', '2');
+      this.assert_equals('item 4 { 1 2 3 }@2', '3');
+    
+      this.assert_equals('item -1 { 1 2 3 }@-1', '1');
+      this.assert_equals('item 0 { 1 2 3 }@-1', '2');
+    
+      this.assert_equals('count [ a b [ c d e ] f ]', 4);
+      this.assert_equals('count { a b { c d e } f }', 4);
+      this.assert_equals('count { a b [ c d e ] f }', 4);
+      this.assert_equals('count [ a b { c d e } f ]', 4);
+    
+    
+      this.assert_error('show ]', "Unexpected ']'");
+      this.assert_error('show }', "Unexpected '}'");
+      this.assert_error('show )', "Unexpected ')'");
+    });
+    
+    QUnit.test("Data Structure Primitives", function(t) {
+
+      this.assert_equals('word "hello "world', 'helloworld');
+      this.assert_equals('(word "a "b "c)', 'abc');
+      this.assert_equals('(word)', '');
+    
+      this.assert_equals('list 1 2', [1, 2]);
+      this.assert_equals('(list 1 2 3)', [1, 2, 3]);
+    
+      this.assert_stream('show array 2', '{[] []}\n');
+      this.assert_stream('make "a (array 5 0) ' +
+                         'repeat 5 [ setitem repcount-1 :a repcount*repcount ] ' +
+                         'show :a', '{1 4 9 16 25}@0\n');
+      this.assert_stream('make "a { 1 2 3 } ' +
+                         'show :a', '{1 2 3}\n');
+      this.assert_stream('make "a { 1 2 3 } @ 10' +
+                         'show :a', '{1 2 3}@10\n');
+    
+      this.assert_stream('show mdarray [2 2]', '{{[] []} {[] []}}\n');
+      this.assert_stream('show mdarray [2 2 2]', '{{{[] []} {[] []}} {{[] []} {[] []}}}\n');
+      this.assert_stream('show (mdarray [2 2] 0)', '{{[] []}@0 {[] []}@0}@0\n');
+      this.assert_error('mdarray [1 2 0]', 'MDARRAY: Array size must be positive integer');
+    
+      this.assert_stream('show (listtoarray [ 1 2 3 ])', '{1 2 3}\n');
+      this.assert_stream('show (listtoarray [ 1 2 3 ] 0)', '{1 2 3}@0\n');
+    
+      this.assert_equals('arraytolist {1 2 3}', ['1', '2', '3']);
+      this.assert_equals('arraytolist {1 2 3}@0', ['1', '2', '3']);
+    
+      this.assert_equals('sentence 1 2', [1, 2]);
+      this.assert_equals('se 1 2', [1, 2]);
+      this.assert_equals('(sentence 1)', [1]);
+      this.assert_equals('(sentence 1 2 3)', [1, 2, 3]);
+      this.assert_equals('sentence [a] [b]', ["a", "b"]);
+      this.assert_equals('sentence [a b] [c d]', ["a", "b", "c", "d"]);
+      this.assert_equals('sentence 1 [2 3]', [1, "2", "3"]);
+    
+      this.assert_equals('fput 0 ( list 1 2 3 )', [0, 1, 2, 3]);
+      this.assert_equals('fput "x "abc', 'xabc');
+    
+      this.assert_equals('lput 0 ( list 1 2 3 )', [1, 2, 3, 0]);
+      this.assert_equals('lput "x "abc', 'abcx');
+    
+      this.assert_equals('combine "a "b', 'ab');
+      this.assert_equals('combine "a [b]', ["a", "b"]);
+    
+      this.assert_equals('reverse [ a b c ]', ["c", "b", "a"]);
+      this.assert_equals('reverse "abc', 'cba');
+      this.assert_equals('(reverse [ a b c ] [ d e ])', ['c', 'b', 'a', 'd', 'e']);
+      this.assert_equals('(reverse "abc "de)', 'cbade');
+      this.assert_equals('(reverse "abc [ d e ])', ['c', 'b', 'a', 'd', 'e']);
+      this.assert_equals('(reverse [ a b c ] "de)', 'cbade');
+    
+      this.assert_equals('gensym <> gensym', 1);
