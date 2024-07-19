@@ -964,3 +964,141 @@ QUnit.test("Graphics", function(t) {
     [150 + 50, 150 - 25, white],
     [150 + 50, 150 - 75, white],
   ]);
+
+  this.assert_equals('setpos [ 12 34 ] pos', [12, 34]);
+  this.assert_equals('setx 123 xcor', 123);
+  this.assert_equals('sety 45 ycor', 45);
+  this.assert_equals('setheading 69 heading', 69);
+  this.assert_equals('seth 69 heading', 69);
+  this.assert_equals('setxy -100 -100 towards [ 0 0 ]', 45);
+
+  this.assert_equals('showturtle shownp', 1);
+  this.assert_equals('st shownp', 1);
+  this.assert_equals('hideturtle shownp', 0);
+  this.assert_equals('ht shownp', 0);
+  this.assert_equals('setpos [ 12 34 ] clean pos', [12, 34]);
+  this.assert_equals('setpos [ 12 34 ] clearscreen (list heading xcor ycor)', [0, 0, 0]);
+  this.assert_equals('setpos [ 12 34 ] cs (list heading xcor ycor)', [0, 0, 0]);
+  this.assert_equals('wrap turtlemode', 'WRAP');
+
+  this.assert_equals('setxy 0 0 setxy 160 160 (list xcor ycor)', [-140, -140]);
+  this.assert_equals('window turtlemode', 'WINDOW');
+  this.assert_equals('setxy 0 0 setxy 160 160 (list xcor ycor)', [160, 160]);
+
+  this.assert_equals('fence turtlemode', 'FENCE');
+  this.assert_equals('setxy 0 0 setxy 160 160 (list xcor ycor)', [150, 150]);
+
+  this.assert_equals('wrap turtlemode', 'WRAP');
+
+  this.assert_equals('(label "a 1 [ 2 [ 3 ] ])', undefined);
+  this.assert_equals('setlabelheight 5 labelsize', [5, 5]);
+  this.assert_equals('setlabelheight 10 labelsize', [10, 10]);
+
+  this.assert_equals('setpalette 8 "pink  palette 8', 'pink');
+  this.assert_equals('setpalette 9 [0 50 99]  palette 9', '#0080ff');
+
+  this.assert_equals('setlabelfont "Times\\ New\\ Roman  labelfont', 'Times New Roman');
+
+  this.assert_equals('cs  wrap  setscrunch 0.5 0.5  fd 50 pos', [0, 50]);
+  this.assert_equals('cs  wrap  setscrunch 0.5 0.5  fd 350 pos', [0, -250]);
+  this.assert_equals('cs  setscrunch 1 0.5  setxy 50 50  setscrunch 1 1  pos', [50, 25]);
+
+  this.assert_pixels('cs  setscrunch 0.5 1.5  setpw 10  arc 360 100', [
+    [150, 150, white],
+
+    [150 - 100, 150, white],
+    [150 + 100, 150, white],
+    [150 - 50, 150, black],
+    [150 + 50, 150, black],
+
+    [150, 150 - 100, white],
+    [150, 150 + 100, white],
+    [150, 150 - 149, black],
+    [150, 150 + 149, black]
+  ]);
+
+  this.assert_pixels('cs  setscrunch 0.5 3  setpw 10  arc 360 100', [
+    [150, 150, black],
+
+    [150 - 100, 150, white],
+    [150 + 100, 150, white],
+    [150 - 50, 150, black],
+    [150 + 50, 150, black],
+
+    [150, 150 - 100, white],
+    [150, 150 + 100, white],
+    [150, 150 - 149, white],
+    [150, 150 + 149, white]
+  ]);
+
+  this.run('cs setscrunch 1 1');
+
+  this.assert_equals('cs fd 100 setturtle 2 pos', [0, 0]);
+  this.assert_equals('cs fd 100 setturtle 2 rt 90 setturtle 1 pos', [0, 100]);
+  this.assert_equals('cs ht setturtle 2 shownp', 1);
+  this.assert_equals('cs setturtle 2 ht setturtle 1 shownp', 1);
+  this.assert_equals('cs ht setturtle 2 setturtle 1 shownp', 0);
+  this.assert_equals('cs ht ask 2 [ pu ] shownp', 0);
+  this.assert_equals('cs pu setturtle 2 pendownp', 1);
+  this.assert_equals('cs setturtle 2 pu setturtle 1 pendownp', 1);
+  this.assert_equals('cs pu setturtle 2 setturtle 1 pendownp', 0);
+  this.assert_equals('cs pu ask 2 [ ht ] pendownp', 0);
+
+  this.assert_equals('cs  setxy 100 100  setscrunch 2 2  pos', [50, 50]);
+  this.run('cs setscrunch 1 1');
+  this.assert_equals('cs  ask 2 [ setxy 100 100 ]  setscrunch 2 2  setturtle 2  pos', [50, 50]);
+  this.run('cs setscrunch 1 1');
+
+  this.assert_equals('showturtle shownp', 1);
+  this.assert_equals('hideturtle shownp', 0);
+
+  this.assert_equals('wrap turtlemode', 'WRAP');
+  this.assert_equals('window turtlemode', 'WINDOW');
+  this.assert_equals('fence turtlemode', 'FENCE');
+  this.assert_equals('wrap turtlemode', 'WRAP');
+
+  this.assert_equals('setlabelheight 5 labelsize', [5, 5]);
+
+  this.assert_equals('( item 2 bounds ) + ( item 1 bounds )', 0);
+  this.assert_equals('( item 4 bounds ) + ( item 3 bounds )', 0);
+  this.assert_equals('make "x ( item 1 bounds )  setscrunch 2 1  :x = (item 1 bounds) * 2', 1);
+  this.assert_equals('make "y ( item 3 bounds )  setscrunch 1 3  :x = (item 3 bounds) * 3', 1);
+
+  this.assert_equals('clearturtles turtle', 1);
+  this.assert_equals('clearturtles setturtle 10 setturtle 5 turtle', 5);
+  this.assert_equals('clearturtles setturtle 10 setturtle 5 turtles', 10);
+  this.assert_equals('clearscreen setturtle 3 turtles', 3);
+
+  this.assert_equals('pendown pendownp', 1);
+  this.assert_equals('penup pendownp', 0);
+  this.assert_equals('pd pendownp', 1);
+  this.assert_equals('pu pendownp', 0);
+  this.run('pendown');
+
+  this.assert_equals('penpaint penmode', 'PAINT');
+  this.assert_equals('penerase penmode', 'ERASE');
+  this.assert_equals('penreverse penmode', 'REVERSE');
+  this.run('penpaint');
+
+  this.assert_equals('setpencolor 0 pencolor', 'black');
+  this.assert_pixel('cs setpw 10  fd 0', 150, 150, black);
+
+  this.assert_equals('setpc 0 pencolor', 'black');
+  this.assert_pixel('cs setpw 10  fd 0', 150, 150, black);
+
+  this.assert_equals('setpencolor "#123456 pencolor', '#123456');
+  this.assert_pixel('cs setpw 10  fd 0', 150, 150, [0x12, 0x34, 0x56, 0xff]);
+
+  this.assert_equals('setpencolor [0 50 99] pencolor', '#0080ff');
+  this.assert_pixel('cs setpw 10  fd 0', 150, 150, [0, 0x80, 0xff, 0xff]);
+
+  this.assert_equals('setpensize 6 pensize', [6, 6]);
+  this.assert_equals('setpensize [6 6] pensize', [6, 6]);
+
+  this.assert_equals('setbackground 0 background', 'black');
+  this.assert_equals('setscreencolor 0 background', 'black');
+  this.assert_equals('setsc 0 background', 'black');
+  this.assert_equals('setbackground "#123456 background', '#123456');
+  this.assert_equals('setbackground [0 50 99] background', '#0080ff');
+  this.assert_pixel('setbackground "white', 150, 150, white);
+  this.assert_pixel('setbackground "red', 150, 150, red);
