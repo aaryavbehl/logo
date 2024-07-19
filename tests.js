@@ -1388,3 +1388,132 @@ this.assert_equals('unburyall erall  make "a 1  to b output 2 end  pprop "c "d "
 this.assert_equals('unburyall erall  make "a 1  to b output 2 end  pprop "c "d "e  buryall unbury [[] [a]]  contents', [[], ['a'], []]);
 this.assert_equals('unburyall erall  make "a 1  to b output 2 end  pprop "c "d "e  buryall unbury [[] [] [c]]  contents', [[], [], ['c']]);
 this.assert_equals('unburyall erall  make "a 1  to b output 2 end  pprop "c "d "e  buryall  unburyall  contents', [['b'], ['a'], ['c']]);
+this.assert_equals('unburyall erall  make "a 1  to b output 2 end  pprop "c "d "e  buriedp [[b]]', 0);
+this.assert_equals('unburyall erall  make "a 1  to b output 2 end  pprop "c "d "e  bury [[b]]  buriedp [[b]]', 1);
+this.assert_equals('unburyall erall  make "a 1  to b output 2 end  pprop "c "d "e  bury [[b]]  buriedp [[] [a]]', 0);
+this.assert_equals('unburyall erall  make "a 1  to b output 2 end  pprop "c "d "e  bury [[b]]  buriedp [[] [] [c]]', 0);
+this.assert_equals('unburyall erall  make "a 1  to b output 2 end  pprop "c "d "e  buriedp [[] [a]]', 0);
+this.assert_equals('unburyall erall  make "a 1  to b output 2 end  pprop "c "d "e  bury [[] [a]]  buriedp [[b]]', 0);
+this.assert_equals('unburyall erall  make "a 1  to b output 2 end  pprop "c "d "e  bury [[] [a]]  buriedp [[] [a]]', 1);
+this.assert_equals('unburyall erall  make "a 1  to b output 2 end  pprop "c "d "e  bury [[] [a]]  buriedp [[] [] [c]]', 0);
+this.assert_equals('unburyall erall  make "a 1  to b output 2 end  pprop "c "d "e  buriedp [[] [] [c]]', 0);
+this.assert_equals('unburyall erall  make "a 1  to b output 2 end  pprop "c "d "e  bury [[] [] [c]]  buriedp [[b]]', 0);
+this.assert_equals('unburyall erall  make "a 1  to b output 2 end  pprop "c "d "e  bury [[] [] [c]]  buriedp [[] [a]]', 0);
+this.assert_equals('unburyall erall  make "a 1  to b output 2 end  pprop "c "d "e  bury [[] [] [c]]  buriedp [[] [] [c]]', 1);
+
+this.assert_equals('unburyall erall  make "a 1  to b output 2 end  pprop "c "d "e  buryname "a  contents', [['b'], [], ['c']]);
+this.assert_equals('unburyall erall  make "a 1  to b output 2 end  pprop "c "d "e  buryall unburyname "a  contents', [[], ['a'], []]);
+
+this.assert_equals('buried', [['b'], [], ['c']]);
+
+this.assert_equals('stepped', [[],[],[]]);
+this.assert_equals('traced', [[],[],[]]);
+
+this.assert_equals('pprop "pl "p 1  erase [[] [] [pl]]  gprop "pl "p', []);
+
+});
+
+QUnit.test("Control Structures", function(t) {
+  t.expect(123);
+
+  this.assert_equals('make "c 0  run [ ]  :c', 0);
+  this.assert_equals('make "c 0  run [ make "c 5 ]  :c', 5);
+
+  this.assert_equals('run [1]', 1);
+  this.assert_error('show run [ ]', 'No output from procedure');
+
+  this.assert_equals('runresult [ make "x 1 ]', []);
+  this.assert_equals('runresult [ 1 + 2 ]', [3]);
+
+  this.assert_equals('make "c 0  repeat 5 [ make "c :c + 1 ]  :c', 5);
+  this.assert_equals('make "c 0  repeat 4 [ make "c :c + repcount ]  :c', 10);
+  this.assert_equals('make "c 0  repeat 4 [ make "c :c + # ]  :c', 10);
+
+  this.assert_equals('make "c 0  to foo forever [ make "c :c + 1 if repcount = 5 [ stop ] ] end  foo  :c', 5);
+  this.assert_equals('make "c 0  to foo forever [ make "c :c + repcount if repcount = 4 [ stop ] ] end  foo  :c', 10);
+
+  this.assert_equals('make "r "a  if 1 [ make "r "b ]  :r', 'b');
+  this.assert_equals('make "r "a  if 0 [ make "r "b ]  :r', 'a');
+  this.assert_equals('if 1 [ "a ]', 'a');
+  this.assert_error('show if 0 [ "a ]', 'No output from procedure');
+  this.assert_equals('make "r "a  if [1<2] [ make "r "b ]  :r', 'b');
+  this.assert_equals('make "r "a  if [1>2] [ make "r "b ]  :r', 'a');
+  this.assert_equals('if [1<2] [ "a ]', 'a');
+  this.assert_error('show if [1>2] [ "a ]', 'No output from procedure');
+
+  this.assert_equals('(if 1 [ make "r "a ] [ make "r "b ])  :r', 'a');
+  this.assert_equals('(if 0 [ make "r "a ] [ make "r "b ])  :r', 'b');
+  this.assert_equals('(if 1 [ "a ] [ "b ])', 'a');
+  this.assert_equals('(if 0 [ "a ] [ "b ])', 'b');
+  this.assert_equals('(if [1<2] [ make "r "a ] [ make "r "b ])  :r', 'a');
+  this.assert_equals('(if [1>2] [ make "r "a ] [ make "r "b ])  :r', 'b');
+  this.assert_equals('(if [1<2] [ "a ] [ "b ])', 'a');
+  this.assert_equals('(if [1>2] [ "a ] [ "b ])', 'b');
+
+  this.assert_equals('ifelse 1 [ make "r "a ] [ make "r "b ]  :r', 'a');
+  this.assert_equals('ifelse 0 [ make "r "a ] [ make "r "b ]  :r', 'b');
+  this.assert_equals('ifelse 1 [ "a ] [ "b ]', 'a');
+  this.assert_equals('ifelse 0 [ "a ] [ "b ]', 'b');
+  this.assert_equals('ifelse [1<2] [ make "r "a ] [ make "r "b ]  :r', 'a');
+  this.assert_equals('ifelse [1>2] [ make "r "a ] [ make "r "b ]  :r', 'b');
+  this.assert_equals('ifelse [1<2] [ "a ] [ "b ]', 'a');
+  this.assert_equals('ifelse [1>2] [ "a ] [ "b ]', 'b');
+
+  this.assert_equals('to foo if 1 [ output "a ] output "b end  foo', 'a');
+  this.assert_equals('to foo if 0 [ output "a ] output "b end  foo', 'b');
+
+  this.assert_equals('make "c 1  test 2 > 1  iftrue  [ make "c 2 ]  :c', 2);
+  this.assert_equals('make "c 1  test 2 > 1  ift  [ make "c 2 ]  :c', 2);
+  this.assert_equals('make "c 1  test 2 > 1  iffalse [ make "c 2 ]  :c', 1);
+  this.assert_equals('make "c 1  test 2 > 1  iff [ make "c 2 ]  :c', 1);
+
+  this.assert_equals('test 2 > 1  iftrue  [ "a ]', 'a');
+  this.assert_error('test 1 > 2  show iftrue  [ "a ]', 'No output from procedure');
+  this.assert_equals('test 1 > 2  iffalse [ "a ]', 'a');
+  this.assert_error('test 2 > 1  show iffalse [ "a ]', 'No output from procedure');
+
+  this.assert_error('to x iftrue [ "a ] end  x', 'IFTRUE: Called without TEST');
+  this.assert_error('to x iffalse [ "b ] end  x', 'IFFALSE: Called without TEST');
+
+  this.assert_equals('to foo forever [ if repcount = 5 [ make "c 234 stop ] ] end  foo  :c', 234);
+
+  this.assert_stream('catch "x [ show "a throw "x show "c ] show "b', 'a\nb\n');
+  this.assert_equals('catch "x [ show "a (throw "x "z) show "b ]', 'z');
+  this.assert_error('catch "x [ throw "q ]', 'No CATCH for tag Q');
+  this.assert_error('throw "q', 'No CATCH for tag Q');
+
+  this.assert_equals('catch "x [ show "a throw "x show "b ] error',
+                     [21, 'No CATCH for tag X', 'THROW', -1]);
+  this.assert_equals('catch "x [ show "a (throw "x "z) show "b ] error',
+                     [35, 'No CATCH for tag X', 'THROW', -1]);
+  this.assert_equals('catch "ERROR [ show 1 / 0 ] error',
+                     [4, 'Division by zero', 'SHOW', -1]);
+
+  var now;
+  this.queue(function() { now = Date.now(); });
+  this.assert_equals('wait 60/6', undefined);
+  this.queue(function() { t.ok((Date.now() - now) >= (1000/6)); });
+
+  this.assert_equals('forever [ if repcount = 5 [ bye ] ]', undefined);
+
+  this.assert_equals('to foo output 123 end  foo', 123);
+  this.assert_equals('to foo op 123 end  foo', 123);
+
+
+  this.assert_equals('to foo .maybeoutput 5 end  foo', 5);
+  this.assert_equals('to foo .maybeoutput make "c 0 end  foo', undefined);
+
+
+  this.assert_equals('ignore 1 > 2', undefined);
+
+  this.assert_equals('`[foo baz ,[bf [a b c]] garply ,@[bf [a b c]]]',
+                     [ 'foo', 'baz', ['b', 'c'], 'garply', 'b', 'c']);
+  this.assert_equals('make "n "x `[",:n]', ['"x']);
+  this.assert_equals('make "n "x `[:,:n]', [':x']);
+
+
+  this.assert_equals('make "x 0  for [ r 1 5 ] [ make "x :x + :r ]  :x', 15);
+  this.assert_equals('make "x 0  for [ r 0 10 2 ] [ make "x :x + :r ]  :x', 30);
+
+  this.assert_equals('make "x 0  for [ r 10 0 -2 ] [ make "x :x + :r ]  :x', 30);
+  this.assert_equals('make "x 0  for [ r 10 0 -2-2 ] [ make "x :x + :r ]  :x', 18);
