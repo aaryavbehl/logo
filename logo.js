@@ -823,3 +823,144 @@ function LogoInterpreter(turtle, stream, savehook)
 
       throw err("Don't know how to {name:U}", { name: name }, ERRORS.BAD_PROC);
     }
+    if (procedure.special) {
+
+        self.stack.push(name);
+        try {
+          procedure.call(self, tokenlist);
+          return function() { };
+        } finally {
+          self.stack.pop();
+        }
+      }
+      
+          var args = [];
+          if (natural) {
+
+            for (var i = 0; i < procedure.default; ++i) {
+              args.push(expression(tokenlist));
+            }
+          } else {
+
+            while (tokenlist.length && !peek(tokenlist, [')'])) {
+              args.push(expression(tokenlist));
+            }
+            tokenlist.shift(); 
+      
+            if (args.length < procedure.minimum)
+              throw err("Not enough inputs for {name:U}", {name: name}, ERRORS.NOT_ENOUGH_INPUTS);
+            if (procedure.maximum !== -1 && args.length > procedure.maximum)
+              throw err("Too many inputs for {name:U}", {name: name}, ERRORS.TOO_MANY_INPUTS);
+          }
+      
+          if (procedure.noeval) {
+            return function() {
+              self.stack.push(name);
+              return promiseFinally(procedure.apply(self, args),
+                                    function() { self.stack.pop(); });
+            };
+          }
+      
+          return function() {
+            self.stack.push(name);
+            return promiseFinally(serialExecute(args.slice()).then(function(args) {
+              return procedure.apply(self, args);
+            }), function() { self.stack.pop(); });
+          };
+        };
+      
+        function aexpr(atom) {
+          if (atom === undefined) {
+            throw err("Expected number", ERRORS.BAD_INPUT);
+          }
+          switch (Type(atom)) {
+          case 'word':
+            if (isNumber(atom))
+              return parseFloat(atom);
+            break;
+          }
+          throw err("Expected number", ERRORS.BAD_INPUT);
+        }
+
+        function sexpr(atom) {
+          if (atom === undefined) throw err("Expected string", ERRORS.BAD_INPUT);
+          if (atom === UNARY_MINUS) return '-';
+          if (Type(atom) === 'word') return String(atom);
+      
+          throw new err("Expected string", ERRORS.BAD_INPUT);
+        }
+
+        function lexpr(atom) {
+          if (atom === undefined)
+            throw err("{_PROC_}: Expected list", ERRORS.BAD_INPUT);
+          switch (Type(atom)) {
+          case 'word':
+            return Array.from(String(atom));
+          case 'list':
+            return copy(atom);
+          }
+      
+          throw err("{_PROC_}: Expected list", ERRORS.BAD_INPUT);
+        }
+
+        function sifw(atom, list) {
+          return (Type(atom) === 'word') ? list.join('') : list;
+        }
+
+        function copy(value) {
+          switch (Type(value)) {
+          case 'list': return value.map(copy);
+          default: return value;
+          }
+        }
+      
+        function equal(a, b) {
+          if (Type(a) !== Type(b)) return false;
+          switch (Type(a)) {
+          case 'word':
+            if (typeof a === 'number' || typeof b === 'number')
+              return Number(a) === Number(b);
+            else
+              return String(a) === String(b);
+          case 'list':
+            if (a.length !== b.length)
+              return false;
+            for (var i = 0; i < a.length; ++i) {
+              if (!equal(a[i], b[i]))
+                return false;
+            }
+            return true;
+          case 'array':
+            return a === b;
+          }
+          return undefined;
+        }
+      
+        self.execute = function(statements, options) {
+          options = Object(options);
+
+          statements = statements.slice();
+      
+          var lastResult;
+          return promiseLoop(function(loop, resolve, reject) {
+            if (self.forceBye) {
+              self.forceBye = false;
+              reject(new Bye);
+              return;
+            }
+            if (!statements.length) {
+              resolve(lastResult);
+              return;
+            }
+            Promise.resolve(evaluateExpression(statements))
+              .then(function(result) {
+                if (result !== undefined && !options.returnResult) {
+                  reject(err("Don't know what to do with {result}", {result: result},
+                        ERRORS.BAD_OUTPUT));
+                  return;
+                }
+                lastResult = result;
+                loop();
+              }, reject);
+          });
+        };
