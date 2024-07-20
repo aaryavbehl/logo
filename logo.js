@@ -681,3 +681,145 @@ function LogoInterpreter(turtle, stream, savehook)
       var op;
       while (peek(list, ['+', '-'])) {
         op = list.shift();
+        
+
+      lhs = function(lhs) {
+        var rhs = multiplicativeExpression(list);
+        switch (op) {
+          case "+": return defer(function(lhs, rhs) { return aexpr(lhs) + aexpr(rhs); }, lhs, rhs);
+          case "-": return defer(function(lhs, rhs) { return aexpr(lhs) - aexpr(rhs); }, lhs, rhs);
+          default: throw new Error("Internal error in expression parser");
+        }
+      } (lhs);
+    }
+
+    return lhs;
+  }
+
+  function multiplicativeExpression(list) {
+    var lhs = powerExpression(list);
+    var op;
+    while (peek(list, ['*', '/', '%'])) {
+      op = list.shift();
+
+      lhs = function(lhs) {
+        var rhs = powerExpression(list);
+        switch (op) {
+          case "*": return defer(function(lhs, rhs) { return aexpr(lhs) * aexpr(rhs); }, lhs, rhs);
+          case "/": return defer(function(lhs, rhs) {
+            var n = aexpr(lhs), d = aexpr(rhs);
+            if (d === 0) { throw err("Division by zero", ERRORS.BAD_INPUT); }
+            return n / d;
+          }, lhs, rhs);
+          case "%": return defer(function(lhs, rhs) {
+            var n = aexpr(lhs), d = aexpr(rhs);
+            if (d === 0) { throw err("Division by zero", ERRORS.BAD_INPUT); }
+            return n % d;
+          }, lhs, rhs);
+          default: throw new Error("Internal error in expression parser");
+        }
+      } (lhs);
+    }
+
+    return lhs;
+  }
+
+  function powerExpression(list) {
+    var lhs = unaryExpression(list);
+    var op;
+    while (peek(list, ['^'])) {
+      op = list.shift();
+      lhs = function(lhs) {
+        var rhs = unaryExpression(list);
+        return defer(function(lhs, rhs) { return Math.pow(aexpr(lhs), aexpr(rhs)); }, lhs, rhs);
+      } (lhs);
+    }
+
+    return lhs;
+  }
+
+  function unaryExpression(list) {
+    var rhs, op;
+
+    if (peek(list, [UNARY_MINUS])) {
+      op = list.shift();
+      rhs = unaryExpression(list);
+      return defer(function(rhs) { return -aexpr(rhs); }, rhs);
+    } else {
+      return finalExpression(list);
+    }
+  }
+
+  function finalExpression(list) {
+    if (!list.length)
+      throw err("Unexpected end of instructions", ERRORS.MISSING_PAREN);
+
+    var atom = list.shift();
+
+    var result, literal, varname;
+
+    switch (Type(atom)) {
+    case 'array':
+    case 'list':
+      return function() { return atom; };
+
+    case 'word':
+      if (isNumber(atom)) {
+
+        atom = parseFloat(atom);
+        return function() { return atom; };
+      }
+
+      atom = String(atom);
+      if (atom.charAt(0) === '"' || atom.charAt(0) === "'") {
+
+        literal = atom.substring(1);
+        return function() { return literal; };
+      }
+      if (atom.charAt(0) === ':') {
+
+        varname = atom.substring(1);
+        return function() { return getvar(varname); };
+      }
+      if (atom === '(') {
+
+        if (list.length && Type(list[0]) === 'word' && self.routines.has(String(list[0])) &&
+            !(list.length > 1 && Type(list[1]) === 'word' && isInfix(String(list[1])))) {
+
+          atom = list.shift();
+          return self.dispatch(atom, list, false);
+        }
+
+        result = expression(list);
+
+        if (!list.length)
+          throw err("Expected ')'", ERRORS.MISSING_PAREN);
+        if (!peek(list, [')']))
+          throw err("Expected ')', saw {word}", { word: list.shift() }, ERRORS.MISSING_PAREN);
+        list.shift();
+        return result;
+      }
+      if (atom === ')')
+        throw err("Unexpected ')'", ERRORS.BAD_PAREN);
+
+      return self.dispatch(atom, list, true);
+
+    default: throw new Error("Internal error in expression parser");
+    }
+  }
+
+  self.stack = [];
+
+  self.dispatch = function(name, tokenlist, natural) {
+    name = name.toUpperCase();
+    var procedure = self.routines.get(name);
+    if (!procedure) {
+
+      var m;
+      if ((m = /^(\w+?)(\d+)$/.exec(name)) && self.routines.get(m[1])) {
+        throw err("Need a space between {name:U} and {value}",
+                  { name: m[1], value: m[2] }, ERRORS.MISSING_SPACE);
+      }
+
+      throw err("Don't know how to {name:U}", { name: name }, ERRORS.BAD_PROC);
+    }
