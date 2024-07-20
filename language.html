@@ -595,3 +595,148 @@ of comparison.</p>
     <dd>Without moving the turtle, draws an arc centered on the turtle, starting at the turtle's heading.
     <dd class=example>arc 180 100</dd>
   </dl>
+  
+<h4>6.2 Turtle Motion Queries</h4>
+<dl>
+  <dt><code>pos</code>
+  <dt><code>xcor</code>
+  <dt><code>ycor</code>
+  <dd>Outputs the current turtle position as [ x y ], x or y respectively
+  <dd class=example>show pos</dd>
+
+  <dt><code>heading</code>
+  <dd>Outputs the current turtle heading
+  <dd class=example>show heading</dd>
+
+  <dt><code>towards [ <var>expr</var> <var>expr</var> ]</code>
+  <dd>Outputs the heading towards the specified [ x y ] coordinates
+  <dd class=example>show towards [ 0 0 ]</dd>
+
+  <dt><code>scrunch</code>
+  <dd>Outputs the current graphics scaling factors
+  <dd class=example>show scrunch</dd>
+
+  <dt><code>bounds</code>
+  <dd>Outputs the current graphics screen bounds [ xmin xmax ymin ymax ]
+  <dd class=example>show bounds</dd>
+</dl>
+
+<h4>6.3 Turtle and Window Control</h4>
+<dl>
+  <dt><code>showturtle</code>
+  <dt><code>st</code>
+  <dd>Show the turtle
+
+  <dt><code>hideturtle</code>
+  <dt><code>ht</code>
+  <dd>Hide the turtle
+
+  <dt><code>clean</code>
+  <dd>Clear the drawing area
+
+  <dt><code>clearscreen</code>
+  <dt><code>cs</code>
+  <dd>Same as clean and home together
+
+  <dt><code>wrap</code>
+  <dd>If the turtle moves off the edge of the screen it will continue on the other side.
+  (default)
+
+  <dt><code>window</code>
+  <dd>The turtle can move past the edges of the screen, unbounded.
+
+  <dt><code>fence</code>
+  <dd>If the turtle attempts to move past the edge of the screen it will stop.
+
+  <dt><code>fill</code>
+  <dd>Does a paint bucket flood fill at the turtle's position.
+  <dd class=example>arc 360 100  fill</dd>
+
+  <dt><code>filled <var>fillcolor</var> [ <var>statements ...</var> ]</code>
+  <dd>Execute <var>statements</var> without drawing but keeping track of turtle movements.
+    When complete, fill the region traced by the turtle with <var>fillcolor</var>
+    and outline the region with the current pen style.
+  <dd class=example>filled "red [ repeat 5 [ fd 100  rt 144 ] ]</dd>
+
+  <dt><code>label <var>expr</var></code>
+  <dd>Draw a word (same logic as <code>print</code>) on the graphics display at the turtle location
+  <dd class=example>repeat 8 [ label "Logo  rt 45 ]</dd>
+
+  <dt><code>setlabelheight <var>expr</var></code>
+  <dd>Set the height for text drawn by <code>label</code>, in pixels
+  <dd class=example>setlabelheight 100  label "Logo</dd>
+
+  <dt><code>setlabelfont <var>expr</var></code>
+  <dd>Set the font for text drawn by <code>label</code>
+  <dd class=example>setlabelfont "Times\ New\ Roman  label "Logo</dd>
+
+  <dt><code>setscrunch <var>sx</var> <var>sy</var></code>
+  <dd>Set the graphics scaling factors
+  <dd class=example>setscrunch 1 2  arc 360 100</dd>
+
+  <dt><code>setturtle <var>index</var></code>
+  <dd>Switch to the turtle numbered <var>index</var> (starting from 1 for the default turtle present at start).
+    If the turtle has not been used yet, it will be created at the center, facing upwards, visible, with the pen down.
+  <dd class=example>setturtle 2  rt 90 fd 100</dd>
+
+  <dt><code>ask <var>turtleindex</var> [ <var>statements ...</var> ]</code>
+  <dd>Execute <var>statements</var> as turtle number <var>turtleindex</var>.
+  <dd class=example>ask 2 [ rt 90 fd 100 ]</dd>
+
+  <dt><code>clearturtles</code>
+  <dd>Remove all turtles, keeping the current one as index 1.
+  <dd class=example>fd 50 setturtle 2 rt 90 fd 100 clearturtles </dd>
+</dl>
+
+<h4>6.4 Turtle and Window Queries</h4>
+<dl>
+  <dt><code>shownp</code>
+  <dt><code>shown?</code>
+  <dd>Outputs 1 if the turtle is shown, 0 if the turtle is hidden
+
+  <dt><code>turtlemode</code>
+  <dd>Outputs <code>WRAP</code>, <code>WINDOW</code> or <code>FENCE</code>
+
+  <dt><code>labelsize</code>
+  <dd>Outputs the height of text drawn by <code>label</code>, in pixels
+
+  <dt><code>labelfont</code>
+  <dd>Outputs the name of the font drawn by <code>label</code>
+
+  <dt><code>turtle</code>
+  <dd>Outputs the index of the currently-active turtle
+
+  <dt><code>turtles</code>
+  <dd>Outputs the largest index that has been passed to <code>setturtle</code>
+</dl>
+
+<h4>6.5 Pen and Background Control</h4>
+<dl>
+  <dt><code>pendown</code>
+  <dt><code>pd</code>
+  <dd>Turtle resumes leaving a trail
+
+  <dt><code>penup</code>
+  <dt><code>pu</code>
+  <dd>Turtle stops leaving a trail
+
+  <dt><code>penpaint</code>
+  <dt><code>ppt</code>
+  <dt><code>penerase</code>
+  <dt><code>pe</code>
+  <dt><code>penreverse</code>
+  <dt><code>px</code>
+  <dd>Change the turtle drawing mode -
+    <em>paint</em> (the default) leaves a colored trail,
+    <em>erase</em> restores the background,
+    <em>reverse</em> inverts the background.
+  <dd class=example>setpw 10  px  repeat 5 [ fd 100 rt 144 ]</dd>
+
+  <dt><code>setpencolor <var>logocolor</var></code>
+  <dt><code>setpencolor <var>csscolor</var></code>
+  <dt><code>setpencolor [<var>r</var> <var>g</var> <var>b</var>]</code>
+  <dd>Set pen/text color. Color can be a standard Logo color number (0-15), CSS color string (<a target="_blank" href="https://www.w3.org/TR/css3-color/">CSS color names or #rrggbb</a>), or in the list version, r/g/b values in 0...99.
+  <dd>The standard Logo colors are:
+  <style>
+    #colortable td { width: 25%; padding-left: 4px; padding-right: 4px; text-align: center; }
+  </style>
