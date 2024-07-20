@@ -964,3 +964,128 @@ function LogoInterpreter(turtle, stream, savehook)
               }, reject);
           });
         };
+        
+  self.bye = function() {
+    self.forceBye = true;
+  };
+
+  var lastRun = Promise.resolve();
+
+  self.queueTask = function(task) {
+    var promise = lastRun.then(function() {
+      return Promise.resolve(task());
+    });
+    lastRun = promise.catch(function(){});
+    return promise;
+  };
+
+  self.run = function(string, options) {
+    options = Object(options);
+    return self.queueTask(function() {
+      // Parse it
+      var atoms = parse(string);
+
+      return self.execute(atoms, options)
+        .catch(function(err) {
+          if (!(err instanceof Bye))
+            throw err;
+        });
+    });
+  };
+
+  self.definition = function(name, proc) {
+
+    function defn(atom) {
+      switch (Type(atom)) {
+      case 'word': return String(atom);
+      case 'list': return '[ ' + atom.map(defn).join(' ') + ' ]';
+      case 'array': return '{ ' + atom.list.map(defn).join(' ') + ' }' +
+          (atom.origin === 1 ? '' : '@' + atom.origin);
+      default: throw new Error("Internal error: unknown type");
+      }
+    }
+
+    var def = "to " + name;
+
+    def += proc.inputs.map(function(i) {
+      return ' :' + i;
+    }).join('');
+    def += proc.optional_inputs.map(function(op) {
+      return ' [:' + op[0] + ' ' + op[1].map(defn).join(' ') + ']';
+    }).join('');
+    if (proc.rest)
+      def += ' [:' + proc.rest + ']';
+    if (proc.def !== undefined)
+      def += ' ' + proc.def;
+
+    def += "\n";
+    def += "  " + proc.block.map(defn).join(" ").replace(new RegExp(UNARY_MINUS + ' ', 'g'), '-');
+    def += "\n" + "end";
+
+    return def;
+  };
+
+  self.procdefs = function() {
+    var defs = [];
+    self.routines.forEach(function(name, proc) {
+      if (!proc.primitive) {
+        defs.push(self.definition(name, proc));
+      }
+    });
+    return defs.join("\n\n");
+  };
+
+  self.copydef = function(newname, oldname) {
+    self.routines.set(newname, self.routines.get(oldname));
+  };
+
+  function stringify(thing) {
+    switch (Type(thing)) {
+    case 'list':
+      return "[" + thing.map(stringify).join(" ") + "]";
+    case 'array':
+      return "{" + thing.list.map(stringify).join(" ") + "}" +
+        (thing.origin === 1 ? '' : '@' + thing.origin);
+    default:
+      return sexpr(thing);
+    }
+  }
+
+  function stringify_nodecorate(thing) {
+    switch (Type(thing)) {
+    case 'list':
+      return thing.map(stringify).join(" ");
+    case 'array':
+      return thing.list.map(stringify).join(" ");
+    default:
+      return sexpr(thing);
+    }
+  }
+  
+  function def(name, fn, props) {
+    fn.minimum = fn.default = fn.maximum = fn.length;
+    if (props) {
+      Object.keys(props).forEach(function(key) {
+        fn[key] = props[key];
+      });
+    }
+    fn.primitive = true;
+    if (Array.isArray(name)) {
+      name.forEach(function(name) {
+        self.routines.set(name, fn);
+      });
+    } else {
+      self.routines.set(name, fn);
+    }
+  }
+
+  def("to", function(list) {
+    var name = sexpr(list.shift());
+    if (isNumber(name) || isOperator(name))
+      throw err("TO: Expected identifier", ERRORS.BAD_INPUT);
+
+    var inputs = []; 
+    var optional_inputs = []; 
+    var rest = undefined;
+    var length = undefined;
+    var block = [];
