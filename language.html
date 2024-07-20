@@ -315,3 +315,140 @@ of comparison.</p>
     <dt><code>lowercase <var>expr</var></code>
     <dd>Outputs string converted to upper/lowercase
     <dd class=example>show uppercase "abc</dd>
+    <dd class=example>show lowercase "ABC</dd>
+  
+<dt><code>standout <var>expr</var></code>
+<dd>Outputs string with alphanumeric characters in bold
+<dd class=example>show standout "ABCabc123</dd>
+
+<dt><code>parse <var>word</var></code>
+<dd>Outputs word parsed as a list.
+<dd class=example>show parse "1+2</dd>
+
+<dt><code>runparse <var>word</var></code>
+<dd>Outputs word parsed as instructions.
+<dd class=example>show runparse "1+2</dd>
+
+</dl>
+
+<h3 id="sec3">3. Communication</h3>
+<h4>3.1 Transmitters</h4>
+<dl>
+  <dt><code>print <var>thing</var></code>
+  <dt><code>pr <var>thing</var></code>
+  <dt>(<code>print <var>thing1</var> <var>thing2</var> ...)</code>
+  <dt>(<code>pr <var>thing1</var> <var>thing2</var> ...)</code>
+  <dd>Print inputs to the text screen, separated by spaces, and followed by a newline.
+  Square brackets are only put around sublists.
+  <dd class=example>print "hello</dd>
+
+  <dt><code>type <var>thing</var></code>
+  <dt>(<code>type <var>thing1</var> <var>thing2</var> ...)</code>
+  <dd>Like <code>print</code> but with no trailing newline.
+  <dd class=example>type "hel  type "lo</dd>
+
+  <dt><code>show <var>thing</var></code>
+  <dt>(<code>show <var>thing1</var> <var>thing2</var> ...)</code>
+  <dd>Like <code>print</code> but with square brackets around list inputs.
+  <dd class=example>show "hello</dd>
+</dl>
+
+<h4>3.2 Receivers</h4>
+<dl>
+  <dt><code>readlist</code>
+  <dt><code>(readlist <var>promptstr</var>)</code>
+  <dd>Prompt the user for a line of input. The result is a list of words.
+  <dd class=example>show readlist</dd>
+  <dd class=example>make "colors (readlist [Type some colors:])  show :colors</dd>
+
+  <dt><code>readword</code>
+  <dt><code>(readword <var>promptstr</var>)</code>
+  <dd>Prompt the user for a line of input. The result (including spaces) is the single word output.
+  <dd class=example>show readword</dd>
+  <dd class=example>make "name (readword [What is your name?])  show :name</dd>
+</dl>
+
+<h4>3.4 Terminal Access</h4>
+<dl>
+  <dt><code>cleartext</code>
+  <dt><code>ct</code>
+  <dd>Clear the text screen.
+
+  <dt><code>settextcolor <var>color</var></code>
+  <dd>Change the text color.
+
+  <dt><code>textcolor</code>
+  <dd>Output the current text color.
+
+  <dt><code>increasefont</code>
+  <dt><code>decreasefont</code>
+  <dd>Increase/decrease the text size.
+
+  <dt><code>settextsize <var>height</var></code>
+  <dd>Change the text size (in pixels).
+
+  <dt><code>textsize</code>
+  <dd>Output the current text size (in pixels).
+
+  <dt><code>setfont <var>name</var></code>
+  <dd>Change the text font.
+
+  <dt><code>font</code>
+  <dd>Output the current text font.
+</dl>
+
+<h3 id="sec4">4. Arithmetic</h3>
+<h4>4.1 Numeric Operations</h4>
+<p>Inputs are numbers or numeric expressions, output is a number.</p>
+
+<dl>
+  <dt><code>sum <var>expr</var> <var>expr</var></code>
+  <dt><code>(sum <var>expr</var> <var>...</var>)</code>
+  <dt><code><var>expr</var> + <var>expr</var></code>
+  <dt><code>difference <var>expr</var> <var>expr</var></code>
+  <dt><code><var>expr</var> - <var>expr</var></code>
+  <dt><code>product <var>expr</var> <var>expr</var></code>
+  <dt><code>(product <var>expr</var> <var>...</var>)</code>
+  <dt><code><var>expr</var> * <var>expr</var></code>
+  <dt><code>quotient <var>expr</var> <var>expr</var></code>
+  <dt><code>(quotient <var>expr</var>)</code>
+  <dt><code><var>expr</var> / <var>expr</var></code>
+  <dt><code>power <var>expr</var> <var>expr</var></code>
+  <dt><code><var>expr</var> ^ <var>expr</var></code>
+  <dd>
+      Add, subtract, multiply, divide, and raise-to-the-power-of respectively.
+      A single input to quotient returns the reciprocal.
+
+  <dt><code>remainder <var>expr</var> <var>expr</var></code>
+  <dt><code><var>expr</var> % <var>expr</var></code>
+  <dt><code>modulo <var>expr</var> <var>expr</var></code>
+  <dd>
+    Outputs the remainder (modulus). For <code>remainder</code> and <code>%</code>
+    the result has the same sign as the first input; for <code>modulo</code> the
+    result has the same sign as a the second input.
+
+  <dt><code>minus <var>expr</var></code>
+  <dt><code>- <var>expr</var></code>
+  <dd>
+    Unary minus sign must begin a top-level expression, follow an infix
+    operator, or have a leading space and no trailing space.
+
+  <dt><code>abs <var>num</var></code>
+  <dd>Absolute value
+
+  <dt><code>int <var>num</var></code>
+  <dt><code>round <var>num</var></code>
+  <dd>Truncate or round a number, respectively.
+
+  <dt><code>sqrt <var>expr</var></code>
+  <dt><code>exp <var>expr</var></code>
+  <dt><code>log10 <var>expr</var></code>
+  <dt><code>ln <var>expr</var></code>
+  <dd>Square root, <i>e</i> to the power of, common logarithm, and natural logarithm, respectively.
+
+  <dt><code>arctan <var>expr</var></code>
+  <dt><code>(arctan <var>x</var> <var>y</var>)</code>
+  <dt><code>sin <var>expr</var></code>
+  <dt><code>cos <var>expr</var></code>
+  <dt><code>tan <var>expr</var></code>
+  <dd>The usual trig functions. Angles are in degrees.
