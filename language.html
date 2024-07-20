@@ -1000,3 +1000,137 @@ of comparison.</p>
   the second is a list of defined variables to erase, the third is a list of property lists to erase.
   Primitive procedures can't be erased unless <code>REDEFP</code> is <code>TRUE</code>.
   <dd class=example>erase [ [myproc] [myvar] [] ]</dd>
+
+  <dt><code>erall</code>
+    <dd>Erase all non-buried user-defined procedures, variables and property lists.
+  
+    <dt><code>erps</code>
+    <dd>Erase all non-buried user-defined procedures.
+  
+    <dt><code>erns</code>
+    <dd>Erase all non-buried variables.
+  
+    <dt><code>erpls</code>
+    <dd>Erase all non-buried property lists.
+  
+    <dt><code>ern <var>varname</var></code>
+    <dt><code>ern <var>varnamelist</var></code>
+    <dd>Erase the named variable(s).
+  
+    <dt><code>epl <var>plname</var></code>
+    <dt><code>epl <var>plnamelist</var></code>
+    <dd>Erase the named property list(s).
+  
+    <dt><code>bury <var>contentslist</var></code>
+    <dd>Takes a three member list, where the first is a list of user-defined procedure names to bury,
+    the second is a list of defined variables to bury, the third is a list of property lists to bury.
+  
+    <dt><code>buryall</code>
+    <dd>Bury all user-defined procedures, variables, and property lists.
+  
+    <dt><code>buryname <var>varname</var></code>
+    <dt><code>buryname <var>varnamelist</var></code>
+    <dd>Bury the given variable (or list of variables).
+  
+    <dt><code>unbury <var>contentslist</var></code>
+    <dd>Takes a three member list, where the first is a list of user-defined procedure names to unbury,
+    the second is a list of defined variables to unbury, the third is a list of property lists to unbury.
+  
+    <dt><code>unburyall</code>
+    <dd>Unbury all user-defined procedures, variables, and property lists.
+  
+    <dt><code>unburyname <var>varname</var></code>
+    <dt><code>unburyname <var>varnamelist</var></code>
+    <dd>Unbury the given variable (or list of variables).
+  
+    <dt><code>buriedp <var>contentslist</var></code>
+    <dt><code>buried? <var>contentslist</var></code>
+    <dd>Return 1 if the first named user-defined procedure, variable, or property list exists and
+      is buried, 0 otherwise.
+  
+  </dl>
+  
+  <h3 id="sec8">8. Control Structures</h3>
+  <h4>8.1 Control</h4>
+  <dl>
+    <dt><code>run [ <var>statements ...</var> ]</code>
+    <dd>Run the specified statements once
+    <dd class=example>run [ fd 100 rt 90 ]</dd>
+  
+    <dt><code>runresult [ <var>statements ...</var> ]</code>
+    <dd>Run the specified statements once. If the statements return a value, the result is a
+    list with the value as a single member. Otherwise, the result is an empty list.
+  
+    <dt><code>repeat <var>expr</var> [ <var>statements ...</var> ]</code>
+    <dd>Repeat statements <var>expr</var> times
+    <dd class=example>repeat 4 [ fd 100 rt 90 ]</dd>
+  
+    <dt><code>forever [ <var>statements ...</var> ]</code>
+    <dd>Repeat statements forever. Used inside a user-defined procedure
+    that terminates with <code>output</code>, <code>stop</code> or <code>bye</code>
+    <dd class=example>forever [ make "n random 100  show :n  if :n == 0 [ bye ] ]</dd>
+  
+    <dt><code>repcount</code>
+    <dt><code>#</code>
+    <dd>Outputs the current iteration number of the current <code>repeat</code> or <code>forever</code>
+    <dd class=example>repeat 10 [ show repcount ]</dd>
+    <dd class=example>repeat 10 [ show # ]</dd>
+  
+    <dt><code>if <var>expr</var> [ <var>statements ...</var> ]</code>
+    <dt><code>if [<var>expr</var>] [ <var>statements ...</var> ]</code>
+    <dd>Execute statements if the expression is non-zero
+    <dd class=example>if 2 > 1 [ show "yep ]</dd>
+  
+    <dt><code>ifelse <var>expr</var> [ <var>statements ...</var> ] [ <var>statements ...</var> ]</code>
+    <dt><code>ifelse [<var>expr</var>] [ <var>statements ...</var> ] [ <var>statements ...</var> ]</code>
+    <dd>Execute first set of statements if the expression is non-zero, otherwise execute the second set
+    <dd class=example>ifelse 1 > 2 [ show "yep ] [ show "nope ]</dd>
+  
+    <dt><code>test <var>expr</var></code>
+    <dt><code>test [<var>expr</var>]</code>
+    <dd>Test the specified expression, save the result in the local scope for subsequent use by <code>iftrue</code> or <code>iffalse</code>
+  
+    <dt><code>iftrue [ <var>statements ...</var>]</code>
+    <dt><code>ift [ <var>statements ...</var>]</code>
+    <dt><code>iffalse [ <var>statements ...</var>]</code>
+    <dt><code>iff [ <var>statements ...</var>]</code>
+    <dd>Run the statements if the result of the last local <code>test</code> was non-zero (true) or zero (false) respectively.
+    <dd class=example>test 1 > 2  iftrue [ show "yep ]  iffalse [ show "nope ]</dd>
+  
+    <dt><code>stop</code></dt>
+    <dd>End the running procedure with no output value.</dd>
+  
+    <dt><code>output <var>expr</var></code></dt>
+    <dt><code>op <var>expr</var></code></dt>
+    <dd>End the running procedure and output the specified value.</dd>
+  
+    <dt><code>catch tag instructionlist</code></dt>
+    <dd>Run instructions, but if an error with matching tag is thrown, return the thrown value (if any).
+      Use <code>"ERROR</code> to catch errors from regular procedures.
+    </dd>
+    <dd class=example>catch "t [ show "before throw "t show "after ]</dd>
+    <dd class=example>catch "error [ show 1 / 0 ] show error</dd>
+  
+    <dt><code>throw tag</code></dt>
+    <dt><code>(throw tag value)</code></dt>
+    <dd>Throw an error with the given tag which may be caught. An optional return value can be passed.</dd>
+    <dd class=example>show catch "t [ show "hello (throw "t "world) ]</dd>
+  
+    <dt><code>error</code></dt>
+    <dd>Outputs a list describing the last error caught:
+      an error number, an error message message, and the procedure name where the error occurred.
+    </dd>
+    <dd class=example>catch "error [ show 1 / 0 ] show error</dd>
+  
+    <dt><code>wait <var>time</var></code>
+    <dd>Pauses execution. <var>time</var> is in 60ths of a second.
+  
+    <dt><code>bye</code>
+    <dd>Terminate the program
+  
+    <dt><code>.maybeoutput <var>expr</var></code>
+    <dd>Like <code>output</code> if <var>expr</var> returns a value, like <code>stop</code> otherwise
+  
+    <dt><code>ignore <var>expr</var></code>
+    <dd>Evaluate and ignore results of the expression
+    <dd class=example>make "q [ 1 2 3 ]  ignore dequeue "q</dd>
