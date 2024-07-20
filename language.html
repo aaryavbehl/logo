@@ -740,3 +740,126 @@ of comparison.</p>
   <style>
     #colortable td { width: 25%; padding-left: 4px; padding-right: 4px; text-align: center; }
   </style>
+  
+  <table id="colortable">
+    <tr>
+      <td style="background-color: black; color: white;">0<br>black
+      <td style="background-color: blue;">1<br>blue
+      <td style="background-color: lime;">2<br>green
+      <td style="background-color: cyan;">3<br>cyan
+    <tr>
+      <td style="background-color: red;">4<br>red
+      <td style="background-color: magenta;">5<br>magenta
+      <td style="background-color: yellow;">6<br>yellow
+      <td style="background-color: white;">7<br>white
+    <tr>
+      <td style="background-color: brown;">8<br>brown
+      <td style="background-color: tan;">9<br>tan
+      <td style="background-color: green;">10<br>green
+      <td style="background-color: aquamarine;">11<br>aqua
+    <tr>
+      <td style="background-color: salmon;">12<br>salmon
+      <td style="background-color: purple;">13<br>purple
+      <td style="background-color: orange;">14<br>orange
+      <td style="background-color: gray;">15<br>gray
+  </table>
+  <dd class=example>setpencolor 4</dd>
+  <dd class=example>setpencolor "red</dd>
+  <dd class=example>setpencolor "#ff0000</dd>
+  <dd class=example>setpencolor [ 99 0 0 ]</dd>
+
+  <dt><code>setpalette <var>colornumber</var> <var>csscolor</var></code>
+  <dt><code>setpalette <var>colornumber</var> [<var>r</var> <var>g</var> <var>b</var>]</code>
+  <dd>Change one of the standard color entries (8 or above) to the given color.</dd>
+  <dd class=example>setpalette 8 "pink  setbg 8</dd>
+  <dd class=example>setpalette 8 "#ff4f00  setbg 8</dd>
+  <dd class=example>setpalette 8 [ 99 31 0 ]  setbg 8</dd>
+
+  <dt><code>setpensize <var>expr</var></code>
+  <dd>Set pen width in pixels. If <var>expr</var> is a list, the first member is used.
+
+  <dt><code>setbackground <var>color</var></code>
+  <dt><code>setscreencolor <var>color</var></code>
+  <dt><code>setsc <var>color</var></code>
+  <dd>Set the background color; same options as <code>setpencolor</code>
+  <dd class=example>setbackground "red</dd>
+</dl>
+
+<h4>6.6 Pen Queries</h4>
+<dl>
+  <dt><code>pendownp</code>
+  <dt><code>pendown?</code>
+  <dd>Outputs 1 if the pen is down, 0 otherwise
+  <dd class=example>show pendown?</dd>
+
+  <dt><code>penmode</code>
+  <dd>Outputs <code>PAINT</code>, <code>ERASE</code> or <code>REVERSE</code>
+  <dd class=example>show penmode</dd>
+
+  <dt><code>pencolor</code>
+  <dt><code>pc</code>
+  <dd>Outputs the current pen color. This will be a CSS color string, not necessarily the value passed in.
+  <dd class=example>show pencolor</dd>
+
+  <dt><code>palette <var>colornumber</var></code>
+  <dd>Outputs the a palette entry. This will be a CSS color string, not necessarily the value passed in.</dd>
+  <dd class=example>show palette 8</dd>
+
+  <dt><code>pensize</code>
+  <dd>Outputs a two element list with the pen width and height (usually the same).
+  <dd class=example>show pensize</dd>
+
+  <dt><code>background</code>
+  <dt><code>bg</code>
+  <dt><code>getscreencolor</code>
+  <dt><code>getsc</code>
+  <dd>Outputs the background color. This will be a CSS color string, not necessarily the value passed in.
+  <dd class=example>show background</dd>
+</dl>
+
+<h4>6.7 Bitmap Operations</h4>
+<dl>
+  <dt><code>bitcut <var>width</var> <var>height</var></code>
+  <dd>Copy a bitmap, from the turtle's position <var>width</var> by <var>height</var> pixels.
+
+  <dt><code>bitpaste</code>
+  <dd>Paste the previously copied bitmap at the current turtle position.
+  <dd class=example>repeat 4 [ rt 90 fd 40 ] bitcut 50 50 pu fd 100 bitpaste</dd>
+</dl>
+
+<h4>6.8 Mouse/Touch Queries</h4>
+<dl>
+  <dt><code>mousepos</code></dt>
+  <dd>Outputs a list of the x, y coordinates of the last mouse position</dd>
+  <dd class=example>forever [setpos mousepos]</dd>
+
+  <dt><code>clickpos</code></dt>
+  <dd>Outputs a list of the x, y coordinates of the last mouse press</dd>
+  <dd class=example>forever [setpos clickpos]</dd>
+
+  <dt><code>buttonp</code></dt>
+  <dt><code>button?</code></dt>
+  <dd>Outputs 1 if any mouse button is down, 0 otherwise.</dd>
+  <dd class=example>forever [ifelse button? [pd] [pu] setpos mousepos]</dd>
+
+  <dt><code>button</code></dt>
+  <dd>Outputs a number indicating the pressed mouse buttons
+    (<code>1</code> = left, 2 = right, etc) or 0 for none.
+
+  <dt><code>touches</code></dt>
+  <dd>Outputs a list of current touch coordinates</dd>
+  <dd class=example>forever [ifelse count touches [setpos first touches pendown] [penup]]</dd>
+</dl>
+
+<h3 id="sec7">7. Workspace Management</h3>
+<h4>7.1 Procedure Definition</h4>
+<dl>
+  <dt><code>to <var>procname</var> <var>inputs ...</var> <var>statements ...</var> end</code>
+  <dd>Define a new named procedure. Inputs can be:
+    <ul>
+      <li>Required: <code>:a :b</code></li>
+      <li>Optional (with default values): <code>[:c 5] [:d 7]</code></li>
+      <li>Rest (remaining inputs as a list): <code>[:r]</code></li>
+      <li>Default number of inputs: <code>3</code>
+    </ul>
+  <dd class=example>to star :n  repeat 5 [ fd :n rt 144 ]  end</dd>
