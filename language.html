@@ -1134,3 +1134,125 @@ of comparison.</p>
     <dt><code>ignore <var>expr</var></code>
     <dd>Evaluate and ignore results of the expression
     <dd class=example>make "q [ 1 2 3 ]  ignore dequeue "q</dd>
+      
+    <dt><code>` <var>list</var></code></dt>
+    <dd>Outputs the list with substitutions:
+      <ul>
+        <li><code>, <var>instructionlist</var></code> replaced by output
+        <li><code>,@ <var>instructionlist</var></code> replaced by output list members
+        <li><code>",<var>instruction</var></code> replaced by output prefixed with "
+        <li><code>,@<var>instruction</var></code> replaced by output prefixed with :
+      </ul>
+    </dd>
+    <dd class=example>show `[a b ,[bf [c d e]] f ,@[bf [g h i]]]</dd>
+    <dd class=example>make "v "x  show `[",:v :,:v]</dd>
+
+  <dt><code>for <var>controllist</var> [ <var>statements ...</var>]</code>
+  <dd>Typical <code>for</code> loop. The <var>controllist</var> specifies three or four members:
+  the local <var>varname</var>, <var>start</var> value, <var>limit</var> value,
+  and optional <var>step</var> size.
+  <dd class=example>for [ a 1 10 ] [ show :a ]</dd>
+  <dd class=example>for [ a 0 20 2 ] [ show :a ]</dd>
+
+  <dt><code>dotimes [<var>varname</var> <var>times</var>] [ <var>statements ...</var></code></dt>
+  <dd>Run the statements the specified number of <var>times</var>. The variable
+    <var>varname</var> is set to the current iteration number.</dd>
+  <dd class=example>dotimes [ i 5 ] [ show :i * :i ]</dd>
+
+  <dt><code>do.while [ <var>statements ...</var>] <var>expr</var></code>
+  <dt><code>do.while [ <var>statements ...</var>] [<var>expr</var>]</code>
+  <dd>Runs the specified statements at least once, and repeats while the expression is non-zero (true).
+  <dd class=example>do.while [ make "a random 10  show :a ] :a < 8</dd>
+
+  <dt><code>while <var>expr</var> [ <var>statements ...</var>]</code>
+  <dt><code>while [<var>expr</var>] [ <var>statements ...</var>]</code>
+  <dd>Runs the specified statements only while the expression remains non-zero (true).
+  <dd class=example>while (random 2) = 0 [ show "zero ] show "one</dd>
+
+  <dt><code>do.until [ <var>statements ...</var>] <var>expr</var></code>
+  <dt><code>do.until [ <var>statements ...</var>] [<var>expr</var>]</code>
+  <dd>Runs the specified statements at least once, and repeats while the expression is zero (false).
+  <dd class=example>do.until [ make "a random 10  show :a ] :a < 8</dd>
+
+  <dt><code>until <var>expr</var> [ <var>statements ...</var>]</code>
+  <dt><code>until [<var>expr</var>] [ <var>statements ...</var>]</code>
+  <dd>Runs the specified statements only while the expression remains zero (false).
+  <dd class=example>until (random 2) = 0 [ show "one ] show "zero</dd>
+
+  <dt><code>case <var>value</var> [ <var>clauses ...</var> ] </code>
+  <dd>For each clause in order:
+    If the clause is of the form <code>[ ELSE <var>expr</var> ]</code>
+    then <var>expr</var> is evaluated and returned.
+    Otherwise, if the clause is of the form <code>[ [ <var>matches</var> ] <var>expr</var> ]</code>
+    and <var>value</var> is a member of <var>matches</var>
+    then <var>expr</var> is evaluated and returned.
+  <dd class=example>show case :var [ [ ["a] "AAA ] [ ["b] "BBB ] [ else "other ] ]</dd>
+
+  <dt><code>cond [ <var>clauses ...</var> ] </code>
+  <dd>For each clause in order:
+    If the clause is of the form <code>[ ELSE <var>expr</var> ]</code>
+    then <var>expr</var> is evaluated and returned.
+    Otherwise, if the clause is of the form <code>[ [ <var>expr1</var> ] <var>expr2</var> ]</code>
+    and <var>expr1</var> evaluates to non-zero (true) then <var>expr2</var> is evaluated and returned.
+  <dd class=example>show cond [ [ [:var = 1] "one] [ [:var = 2] "two] [ else "other ] ]</dd>
+</dl>
+
+<h4>8.2 Template-based Iteration</h4>
+
+<p>These higher-level procedures support only the <em>named procedure</em> form of template.
+The first input is the name of a procedure to call.</p>
+
+<dl>
+  <dt><code>apply <var>procname</var> <var>list</var></code>
+  <dd>Call <var>procname</var> with the members of <var>list</var> as inputs
+
+  <dt><code>invoke <var>procname</var> <var>input1</var></code>
+  <dt><code>(invoke <var>procname</var> <var>input1</var> ...)</code>
+  <dd>Call <var>procname</var> with the specified inputs as inputs
+  <dd class=example>invoke "show "hello</dd>
+
+  <dt><code>foreach <var>list</var> <var>procname</var></code>
+  <dd>call <var>procname</var> for each item in the list
+  <dd class=example>foreach [1 2 3] "show</dd>
+
+  <dt><code>map <var>procname</var> <var>list</var></code>
+  <dd>Outputs a list composed of the results of calling <var>procname</var> for each item in the list
+  <dd class=example>to double :n output :n * 2 end  show map "double [1 2 3]</dd>
+
+  <dt><code>filter <var>procname</var> <var>list</var></code>
+  <dd>Outputs a list composed of the input list where procname called on the item returns non-zero (true)
+  <dd class=example>to oddp :n output bitand :n 1 end  show filter "oddp [ 1 2 3 4 5 ]</dd>
+
+  <dt><code>find <var>procname</var> <var>list</var></code>
+  <dd>Outputs the first item in <var>list</var> for which calling <var>procname</var> on it returns non-zero (true).
+  If not found, the empty list is returned.
+  <dd class=example>to oddp :n output bitand :n 1 end  show find "oddp [ 2 8 4 7 10 9 ]</dd>
+
+  <dt><code>reduce <var>procname</var> <var>list</var></code>
+  <dt><code>(reduce <var>procname</var> <var>list</var> <var>initial</var>)</code>
+  <dd>Call <var>procname</var> repeatedly with two inputs - the current value and the next list item. If <var>initial</var> is not specified, the first list element is used instead.
+  <dd class=example>show reduce "sum [ 1 2 3 4 5 ]</dd>
+
+  <dt><code>crossmap <var>procname</var> <var>listlist</var></code>
+  <dt><code>(crossmap <var>procname</var> <var>list</var> <var>list</var> ...)</code>
+  <dd>Call <var>procname</var> repeatedly with inputs from the lists, in all possible combinations.
+  <dd class=example>show crossmap "word [[a b] [x y]]</dd>
+  <dd class=example>show (crossmap "word [a b c] [1 2 3 4])</dd>
+</dl>
+
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  Array.from(document.querySelectorAll('.example')).forEach(function(e) {
+    e.title = 'Click to try this example';
+    e.addEventListener('click', function() {
+      if (!window.parent) return;
+      var text = this.textContent || this.innerText;
+      window.parent.postMessage({
+        example: text
+      }, '*');
+    });
+  });
+});
+</script>
