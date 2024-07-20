@@ -263,3 +263,146 @@ function LogoInterpreter(turtle, stream, savehook)
     eof: {get: function() {
       return this._index >= this._string.length;
     }},
+    
+    peek: {value: function() {
+        var c = this._string.charAt(this._index);
+        if (c === '\\')
+          c += this._string.charAt(this._index + 1);
+        return c;
+      }},
+      get: {value: function() {
+        var c = this._next();
+        this._skip();
+        return c;
+      }},
+      _next: {value: function() {
+        var c = this._string.charAt(this._index++);
+        if (c === '\\')
+          c += this._string.charAt(this._index++);
+        return c;
+      }},
+      _skip: {value: function() {
+        while (!this.eof) {
+          var c = this.peek();
+          if (c === '~' && this._string.charAt(this._index + 1) === '\n') {
+            this._index += 2;
+          } else if (c === ';') {
+            do {
+              c = this._next();
+            } while (!this.eof && this.peek() !== '\n');
+            if (c === '~')
+              this._next();
+          } else {
+            return;
+          }
+        }
+      }},
+      rest: {get: function() {
+        return this._string.substring(this._index);
+      }}
+    });
+  
+    self.turtle = turtle;
+    self.stream = stream;
+    self.routines = new StringMap(true);
+    self.scopes = [new StringMap(true)];
+    self.plists = new StringMap(true);
+    self.prng = new PRNG(Math.random() * 0x7fffffff);
+    self.forceBye = false;
+
+    function Output(output) { this.output = output; }
+    Output.prototype.toString = function() { return this.output; };
+    Output.prototype.valueOf = function() { return this.output; };
+
+    function Bye() { }
+  
+    function Type(atom) {
+      if (atom === undefined) {
+
+        throw err("No output from procedure", ERRORS.NO_OUTPUT);
+      } else if (typeof atom === 'string' || typeof atom === 'number') {
+        return 'word';
+      } else if (Array.isArray(atom)) {
+        return 'list';
+      } else if (atom instanceof LogoArray) {
+        return 'array';
+      } else if ('then' in Object(atom)) {
+        throw new Error("Internal error: Unexpected value: a promise");
+      } else if (!atom) {
+        throw new Error("Internal error: Unexpected value: null");
+      } else {
+        throw new Error("Internal error: Unexpected value: unknown type");
+      }
+    }
+  
+    function parse(string) {
+      if (string === undefined) {
+        return undefined; 
+      }
+  
+      var atoms = [],
+          prev, r;
+  
+      var stream = new Stream(string);
+      while (stream.peek()) {
+        var atom;
+
+        var leading_space = isWS(stream.peek());
+        while (isWS(stream.peek()))
+          stream.get();
+        if (!stream.peek())
+          break;
+  
+        if (stream.peek() === '[') {
+          stream.get();
+          atom = parseList(stream);
+        } else if (stream.peek() === ']') {
+          throw err("Unexpected ']'", ERRORS.BAD_BRACKET);
+        } else if (stream.peek() === '{') {
+          stream.get();
+          atom = parseArray(stream);
+        } else if (stream.peek() === '}') {
+          throw err("Unexpected '}'", ERRORS.BAD_BRACE);
+        } else if (stream.peek() === '"') {
+          atom = parseQuoted(stream);
+        } else if (isOwnWord(stream.peek())) {
+          atom = stream.get();
+        } else if (inRange(stream.peek(), '0', '9')) {
+          atom = parseNumber(stream);
+        } else if (inChars(stream.peek(), OPERATOR_CHARS)) {
+          atom = parseOperator(stream);
+  
+          if (atom === '-') {
+            var trailing_space = isWS(stream.peek());
+            if (prev === undefined ||
+                (Type(prev) === 'word' && isInfix(prev)) ||
+                (Type(prev) === 'word' && prev === '(') ||
+                (leading_space && !trailing_space)) {
+              atom = UNARY_MINUS;
+            }
+          }
+        } else if (!inChars(stream.peek(), WORD_DELIMITER)) {
+          atom = parseWord(stream);
+        } else {
+
+          throw err("Couldn't parse: '{string}'", { string: stream.rest });
+        }
+        atoms.push(atom);
+        prev = atom;
+      }
+  
+      return atoms;
+    }
+  
+    function inRange(x, a, b) {
+      return a <= x && x <= b;
+    }
+  
+    function inChars(x, chars) {
+      return x && chars.indexOf(x) !== -1;
+    }
+  
+    var WS_CHARS = ' \f\n\r\t\v';
+    function isWS(c) {
+      return inChars(c, WS_CHARS);
+    }
