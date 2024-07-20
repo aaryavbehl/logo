@@ -406,3 +406,124 @@ function LogoInterpreter(turtle, stream, savehook)
     function isWS(c) {
       return inChars(c, WS_CHARS);
     }
+
+  var QUOTED_DELIMITER = WS_CHARS + '[](){}';
+  function parseQuoted(stream) {
+    var word = '';
+    while (!stream.eof && QUOTED_DELIMITER.indexOf(stream.peek()) === -1) {
+      var c = stream.get();
+      word += (c.charAt(0) === '\\') ? c.charAt(1) : c.charAt(0);
+    }
+    return word;
+  }
+
+  var OWNWORD_CHARS = '\u2190\u2191\u2192\u2193';
+  function isOwnWord(c) {
+    return inChars(c, OWNWORD_CHARS);
+  }
+ this
+
+  var WORD_DELIMITER = WS_CHARS + '[](){}+-*/%^=<>';
+  function parseWord(stream) {
+    var word = '';
+    while (!stream.eof && WORD_DELIMITER.indexOf(stream.peek()) === -1) {
+      var c = stream.get();
+      word += (c.charAt(0) === '\\') ? c.charAt(1) : c.charAt(0);
+    }
+    return word;
+  }
+
+  var OPERATOR_CHARS = '+-*/%^=<>[]{}()';
+  function parseOperator(stream) {
+    var word = '';
+    if (inChars(stream.peek(), OPERATOR_CHARS))
+      word += stream.get();
+    if ((word === '<' && stream.peek() === '=') ||
+        (word === '>' && stream.peek() === '=') ||
+        (word === '<' && stream.peek() === '>')) {
+      word += stream.get();
+    }
+    return word;
+  }
+
+  function isInfix(word) {
+    return ['+', '-', '*', '/', '%', '^', '=', '<', '>', '<=', '>=', '<>']
+      .includes(word);
+  }
+
+  function isOperator(word) {
+    return isInfix(word) || ['[', ']', '{', '}', '(', ')'].includes(word);
+  }
+
+  function parseNumber(stream) {
+    var word = '';
+    while (inRange(stream.peek(), '0', '9'))
+      word += stream.get();
+    if (stream.peek() === '.')
+      word += stream.get();
+    if (inRange(stream.peek(), '0', '9')) {
+      while (inRange(stream.peek(), '0', '9'))
+        word += stream.get();
+    }
+    if (stream.peek() === 'E' || stream.peek() === 'e') {
+      word += stream.get();
+      if (stream.peek() === '-' || stream.peek() === '+')
+        word += stream.get();
+      while (inRange(stream.peek(), '0', '9'))
+        word += stream.get();
+    }
+    return word;
+  }
+
+  function isNumber(s) {
+    return String(s).match(/^-?([0-9]*\.?[0-9]+(?:[eE][-+]?[0-9]+)?)$/);
+  }
+
+  function parseInteger(stream) {
+    var word = '';
+    if (stream.peek() === '-')
+      word += stream.get();
+    while (inRange(stream.peek(), '0', '9'))
+      word += stream.get();
+    return word;
+  }
+
+  function parseList(stream) {
+    var list = [],
+        atom = '',
+        c, r;
+
+    for (;;) {
+      do {
+        c = stream.get();
+      } while (isWS(c));
+
+      while (c && !isWS(c) && '[]{}'.indexOf(c) === -1) {
+        atom += c;
+        c = stream.get();
+      }
+
+      if (atom.length) {
+        list.push(atom);
+        atom = '';
+      }
+
+      if (!c)
+        throw err("Expected ']'", ERRORS.BAD_BRACKET);
+      if (isWS(c))
+        continue;
+      if (c === ']')
+        return list;
+      if (c === '[') {
+        list.push(parseList(stream));
+        continue;
+      }
+      if (c === '{') {
+        list.push(parseArray(stream));
+        continue;
+      }
+      if (c === '}')
+        throw err("Unexpected '}'", ERRORS.BAD_BRACE);
+      throw err("Unexpected '{c}'", {c: c});
+    }
+  }
