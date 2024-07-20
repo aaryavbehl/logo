@@ -527,3 +527,157 @@ function LogoInterpreter(turtle, stream, savehook)
       throw err("Unexpected '{c}'", {c: c});
     }
   }
+  function parseArray(stream) {
+    var list = [],
+        origin = 1,
+        atom = '',
+        c, r;
+  
+    for (;;) {
+      do {
+        c = stream.get();
+      } while (isWS(c));
+  
+      while (c && !isWS(c) && '[]{}'.indexOf(c) === -1) {
+        atom += c;
+        c = stream.get();
+      }
+  
+      if (atom.length) {
+        list.push(atom);
+        atom = '';
+      }
+  
+      if (!c)
+        throw err("Expected '}'", ERRORS.BAD_BRACE);
+      if (isWS(c))
+        continue;
+      if (c === '}') {
+        while (isWS(stream.peek()))
+          stream.get();
+        if (stream.peek() === '@') {
+          stream.get();
+          while (isWS(stream.peek()))
+            stream.get();
+          origin = Number(parseInteger(stream) || 0);
+        }
+        return LogoArray.from(list, origin);
+      }
+      if (c === '[') {
+        list.push(parseList(stream));
+        continue;
+      }
+      if (c === ']')
+        throw err("Unexpected ']'", ERRORS.BAD_BRACKET);
+      if (c === '{') {
+        list.push(parseArray(stream));
+        continue;
+      }
+      throw err("Unexpected '{c}'", {c: c});
+    }
+  }
+  
+    function reparse(list) {
+      return parse(stringify_nodecorate(list).replace(/([\\;])/g, '\\$1'));
+    }
+  
+    function maybegetvar(name) {
+      var lval = lvalue(name);
+      return lval ? lval.value : undefined;
+    }
+  
+    function getvar(name) {
+      var value = maybegetvar(name);
+      if (value !== undefined)
+        return value;
+      throw err("Don't know about variable {name:U}", {name: name}, ERRORS.BAD_VAR);
+    }
+  
+    function lvalue(name) {
+      for (var i = self.scopes.length - 1; i >= 0; --i) {
+        if (self.scopes[i].has(name)) {
+          return self.scopes[i].get(name);
+        }
+      }
+      return undefined;
+    }
+  
+    function setvar(name, value) {
+      value = copy(value);
+
+      var lval = lvalue(name);
+      if (lval) {
+        lval.value = value;
+      } else {
+
+        lval = {value: value};
+        self.scopes[0].set(name, lval);
+      }
+    }
+  
+    function local(name) {
+      var scope = self.scopes[self.scopes.length - 1];
+      scope.set(sexpr(name), {value: undefined});
+    }
+  
+    function setlocal(name, value) {
+      value = copy(value);
+      var scope = self.scopes[self.scopes.length - 1];
+      scope.set(sexpr(name), {value: value});
+    }
+
+    function peek(list, options) {
+      if (list.length < 1) { return false; }
+      var next = list[0];
+      return options.some(function(x) { return next === x; });
+  
+    }
+  
+    function evaluateExpression(list) {
+      return (expression(list))();
+    }
+  
+    function expression(list) {
+      return relationalExpression(list);
+    }
+  
+    function relationalExpression(list) {
+      var lhs = additiveExpression(list);
+      var op;
+      while (peek(list, ['=', '<', '>', '<=', '>=', '<>'])) {
+        op = list.shift();
+  
+        lhs = function(lhs) {
+          var rhs = additiveExpression(list);
+  
+          switch (op) {
+            case "<": return defer(function(lhs, rhs) { return (aexpr(lhs) < aexpr(rhs)) ? 1 : 0; }, lhs, rhs);
+            case ">": return defer(function(lhs, rhs) { return (aexpr(lhs) > aexpr(rhs)) ? 1 : 0; }, lhs, rhs);
+            case "=": return defer(function(lhs, rhs) { return equal(lhs, rhs) ? 1 : 0; }, lhs, rhs);
+  
+            case "<=": return defer(function(lhs, rhs) { return (aexpr(lhs) <= aexpr(rhs)) ? 1 : 0; }, lhs, rhs);
+            case ">=": return defer(function(lhs, rhs) { return (aexpr(lhs) >= aexpr(rhs)) ? 1 : 0; }, lhs, rhs);
+            case "<>": return defer(function(lhs, rhs) { return !equal(lhs, rhs) ? 1 : 0; }, lhs, rhs);
+            default: throw new Error("Internal error in expression parser");
+          }
+        } (lhs);
+      }
+  
+      return lhs;
+    }
+  
+    function defer(func /*, input...*/) {
+      var input = [].slice.call(arguments, 1);
+      return function() {
+        return serialExecute(input.slice())
+          .then(function(args) {
+            return func.apply(null, args);
+          });
+      };
+    }
+  
+    function additiveExpression(list) {
+      var lhs = multiplicativeExpression(list);
+      var op;
+      while (peek(list, ['+', '-'])) {
+        op = list.shift();
