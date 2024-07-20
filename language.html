@@ -452,3 +452,146 @@ of comparison.</p>
   <dt><code>cos <var>expr</var></code>
   <dt><code>tan <var>expr</var></code>
   <dd>The usual trig functions. Angles are in degrees.
+    
+  <dt><code>radarctan <var>expr</var></code>
+    <dt><code>(radarctan <var>x</var> <var>y</var>)</code>
+    <dt><code>radsin <var>expr</var></code>
+    <dt><code>radcos <var>expr</var></code>
+    <dt><code>radtan <var>expr</var></code>
+    <dd>The usual trig functions. Angles are in radians.
+  
+    <dt><code>iseq <var>first</var> <var>last</var></code>
+    <dd>Outputs a list with integers from <var>first</var> to <var>last</var>, inclusive
+    <dd class=example>show iseq 1 10</dd>
+  
+    <dt><code>rseq <var>first</var> <var>last</var> <var>count</var></code>
+    <dd>Outputs a list of <var>count</var> numbers from <var>first</var> to <var>last</var>, inclusive
+    <dd class=example>show rseq 1 9 5</dd>
+  </dl>
+  
+  <h4>4.2 Numeric Predicates</h4>
+  <dl>
+    <dt><code>lessp <var>expr</var> <var>expr</var></code>
+    <dt><code>less? <var>expr</var> <var>expr</var></code>
+    <dt><code><var>expr</var> &lt; <var>expr</var></code>
+  
+    <dt><code>greaterp <var>expr</var> <var>expr</var></code>
+    <dt><code>greater? <var>expr</var> <var>expr</var></code>
+    <dt><code><var>expr</var> &gt; <var>expr</var></code>
+  
+    <dt><code>lessequalp <var>expr</var> <var>expr</var></code>
+    <dt><code>lessequal? <var>expr</var> <var>expr</var></code>
+    <dt><code><var>expr</var> &lt;= <var>expr</var></code>
+  
+    <dt><code>greaterequalp <var>expr</var> <var>expr</var></code>
+    <dt><code>greaterequal? <var>expr</var> <var>expr</var></code>
+    <dt><code><var>expr</var> &gt;= <var>expr</var></code>
+  
+    <dd>Less than, greater than, less than or equal to, greater than or equal to,
+    respectively. Inputs are numbers or numeric expressions, output is 1 (true) or 0 (false).
+  </dl>
+  
+  <h4>4.3 Random Numbers</h4>
+  <dl>
+    <dt><code>random <var>expr</var></code>
+    <dt><code>(random <var>start</var> <var>end</var>)</code>
+    <dd>Outputs a random number from 0 through one less than <var>expr</var>, or from start to end inclusive.
+    <dd class=example>show random 10</dd>
+    <dd class=example>show (random 1 6)</dd>
+  
+  
+    <dt><code>rerandom</code>
+    <dt>(<code>rerandom <var>expr</var>)</code>
+    <dd>Reseeds the random number generator, either to a fixed value or the specified seed.
+  </dl>
+  
+  <h4>4.4 Print Formatting</h4>
+  <dl>
+    <dt><code>form <var>expr</var> <var>width</var> <var>precision</var></code>
+    <dd>Outputs a formatted string with the result of a numeric expression with <var>precision</var> decimal places and
+    padded on the left with spaces (if necessary) to be at least <var>width</width> characters long.
+    <dd class=example>show form 1/3 10 3</dd>
+  </dl>
+  
+  <h4>4.5 Bitwise Operations</h4>
+  <dl>
+    <dt><code>bitand <var>expr</var> <var>expr</var></code>
+    <dt><code>(bitand <var>expr</var> ...)</code>
+    <dt><code>bitor <var>expr</var> <var>expr</var></code>
+    <dt><code>(bitor <var>expr</var> ...)</code>
+    <dt><code>bitxor <var>expr</var> <var>expr</var></code>
+    <dt><code>(bitxor <var>expr</var> ...)</code>
+    <dt><code>bitnot <var>expr</var></code>
+    <dd>Bitwise and, or, exclusive-or, and not, respectively.
+  
+    <dt><code>ashift <var>expr</var> <var>bitcount</var></code>
+    <dd>Arithmetic bit shift. If bitcount is negative, shifts to the right, preserving sign.
+  
+    <dt><code>lshift <var>expr</var> <var>bitcount</var></code>
+    <dd>Logical bit shift. If bitcount is negative, shifts to the right, zero-filling.
+  </dl>
+  
+  <h3 id="sec5">5. Logical Operations</h3>
+  <dl>
+    <dt><code>true</code>
+    <dd>Outputs 1
+    <dt><code>false</code>
+    <dd>Outputs 0
+  
+    <dt><code>and <var>expr</var> <var>expr</var></code>
+    <dt><code>(and <var>expr</var> <var>...</var>)</code>
+    <dt><code>or  <var>expr</var> <var>expr</var></code>
+    <dt><code>(or <var>expr</var> <var>...</var>)</code>
+    <dt><code>xor <var>expr</var> <var>expr</var></code>
+    <dt><code>(xor <var>expr</var> <var>...</var>)</code>
+    <dt><code>not <var>expr</var></code>
+    <dd>Logical "and", "or", "exclusive-or", and "not", respectively.
+    Inputs are numbers or numeric expressions, output is 1 (true) or 0 (false).
+  </dl>
+  
+  <h3 id="sec6">6. Graphics</h3>
+  
+  <p>An introduction to <a target="_blank" href="https://www.cs.berkeley.edu/~bh/v1ch10/turtle.html">Turtle Geometry</a>.</p>
+  
+  <h4>6.1 Turtle Motion</h4>
+  <dl>
+    <dt><code>forward <var>expr</var></code>
+    <dt><code>fd <var>expr</var></code>
+    <dd>Move turtle forward <var>expr</var> pixels
+    <dd class=example>fd 100</dd>
+  
+    <dt><code>back <var>expr</var></code>
+    <dt><code>bk <var>expr</var></code>
+    <dd>Move turtle backward <var>expr</var> pixels
+    <dd class=example>bk 100</dd>
+  
+    <dt><code>left <var>expr</var></code>
+    <dt><code>lt <var>expr</var></code>
+    <dd>Rotate <var>expr</var> degrees counterclockwise
+    <dd class=example>lt 90</dd>
+  
+    <dt><code>right <var>expr</var></code>
+    <dt><code>rt <var>expr</var></code>
+    <dd>Rotate <var>expr</var> degrees clockwise
+    <dd class=example>rt 90</dd>
+  
+    <dt><code>setpos [ <var>expr</var> <var>expr</var> ]</code>
+    <dt><code>setxy <var>expr</var> <var>expr</var></code>
+    <dt><code>setx <var>expr</var></code>
+    <dt><code>sety <var>expr</var></code>
+    <dd>Move turtle to the specified location
+    <dd class=example>setpos [ 100 -100 ]</dd>
+    <dd class=example>setxy -100 100</dd>
+  
+    <dt><code>setheading <var>expr</var></code>
+    <dt><code>seth <var>expr</var></code>
+    <dd>Rotate the turtle to the specified heading
+    <dd class=example>setheading 45</dd>
+  
+    <dt><code>home</code>
+    <dd>Moves the turtle to center, pointing upwards
+  
+    <dt><code>arc <var>angle</var> <var>radius</var></code>
+    <dd>Without moving the turtle, draws an arc centered on the turtle, starting at the turtle's heading.
+    <dd class=example>arc 180 100</dd>
+  </dl>
