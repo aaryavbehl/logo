@@ -1505,3 +1505,130 @@ function LogoInterpreter(turtle, stream, savehook)
   def(["memberp", "member?"], function(thing, list) {
     return lexpr(list).some(function(x) { return equal(x, thing); }) ? 1 : 0;
   });
+
+  def(["substringp", "substring?"], function(word1, word2) {
+    return sexpr(word2).indexOf(sexpr(word1)) !== -1 ? 1 : 0;
+  });
+
+  def("count", function(thing) {
+    if (Type(thing) === 'array')
+      return thing.length;
+    return lexpr(thing).length;
+  });
+  def("ascii", function(chr) { return sexpr(chr).charCodeAt(0); });
+
+  def("char", function(integer) { return String.fromCharCode(aexpr(integer)); });
+
+  def("member", function(thing, input) {
+    var list = lexpr(input);
+    var index = list.findIndex(function(x) { return equal(x, thing); });
+    list = (index === -1) ? [] : list.slice(index);
+    return sifw(input, list);
+ });
+
+  def("lowercase", function(word) { return sexpr(word).toLowerCase(); });
+  def("uppercase", function(word) { return sexpr(word).toUpperCase(); });
+
+  def("standout", function(word) {
+
+    return sexpr(word)
+      .split('')
+      .map(function(c) {
+        var u = c.charCodeAt(0);
+        if ('A' <= c && c <= 'Z') {
+          u = u - 0x41 + 0x1D400;
+        } else if ('a' <= c && c <= 'z') {
+          u = u - 0x61 + 0x1D41A;
+        } else if ('0' <= c && c <= '9') {
+          u = u - 0x30 + 0x1D7CE;
+        } else {
+          return c;
+        }
+        var lead = ((u - 0x10000) >> 10) + 0xD800;
+        var trail = ((u - 0x10000) & 0x3FF) + 0xDC00;
+        return String.fromCharCode(lead, trail);
+      })
+      .join('');
+  });
+
+  def("parse", function(word) {
+    return parse('[' + sexpr(word) + ']')[0];
+  });
+
+  def("runparse", function(word) {
+    return parse(sexpr(word));
+  });
+
+  def(["print", "pr"], function(thing) {
+    var s = Array.from(arguments).map(stringify_nodecorate).join(" ");
+    return this.stream.write(s, "\n");
+  }, {minimum: 0, maximum: -1});
+  def("type", function(thing) {
+    var s = Array.from(arguments).map(stringify_nodecorate).join("");
+    return this.stream.write(s);
+  }, {minimum: 0, maximum: -1});
+  def("show", function(thing) {
+    var s = Array.from(arguments).map(stringify).join(" ");
+    return this.stream.write(s, "\n");
+  }, {minimum: 0, maximum: -1});
+
+  def("readlist", function() {
+    return (
+      (arguments.length > 0)
+        ? stream.read(stringify_nodecorate(arguments[0]))
+        : stream.read()
+    ).then(function(word) {
+      return parse('[' + word + ']')[0];
+    });
+  }, {maximum: 1});
+
+  def("readword", function() {
+    if (arguments.length > 0)
+      return stream.read(stringify_nodecorate(arguments[0]));
+    else
+      return stream.read();
+  }, {maximum: 1});
+
+  def(["cleartext", "ct"], function() {
+    return this.stream.clear();
+  });
+
+  def('settextcolor', function(color) {
+    this.stream.color = parseColor(color);
+  });
+
+  def('textcolor', function() {
+    return this.stream.color;
+  });
+
+  def('increasefont', function() {
+    this.stream.textsize = Math.round(this.stream.textsize * 1.25);
+  });
+
+  def('decreasefont', function() {
+    this.stream.textsize = Math.round(this.stream.textsize / 1.25);
+  });
+
+  def('settextsize', function(size) {
+    this.stream.textsize = aexpr(size);
+  });
+
+  def('textsize', function() {
+    return this.stream.textsize;
+  });
+
+  def('setfont', function(size) {
+    this.stream.font = sexpr(size);
+  });
+
+  def('font', function() {
+    return this.stream.font;
+  });
+  
+  def("sum", function(a, b) {
+    return Array.from(arguments).map(aexpr).reduce(function(a, b) { return a + b; }, 0);
+  }, {minimum: 0, maximum: -1});
+
+  def("difference", function(a, b) {
+    return aexpr(a) - aexpr(b);
+  });
