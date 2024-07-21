@@ -1632,3 +1632,138 @@ function LogoInterpreter(turtle, stream, savehook)
   def("difference", function(a, b) {
     return aexpr(a) - aexpr(b);
   });
+
+  def("minus", function(a) { return -aexpr(a); });
+
+  def("product", function(a, b) {
+    return Array.from(arguments).map(aexpr).reduce(function(a, b) { return a * b; }, 1);
+  }, {minimum: 0, maximum: -1});
+
+  def("quotient", function(a, b) {
+    if (b !== undefined)
+      return aexpr(a) / aexpr(b);
+    else
+      return 1 / aexpr(a);
+  }, {minimum: 1});
+
+  def("remainder", function(num1, num2) {
+    return aexpr(num1) % aexpr(num2);
+  });
+  def("modulo", function(num1, num2) {
+    num1 = aexpr(num1);
+    num2 = aexpr(num2);
+    return Math.abs(num1 % num2) * (num2 < 0 ? -1 : 1);
+  });
+
+  def("power", function(a, b) { return Math.pow(aexpr(a), aexpr(b)); });
+  def("sqrt", function(a) { return Math.sqrt(aexpr(a)); });
+  def("exp", function(a) { return Math.exp(aexpr(a)); });
+  def("log10", function(a) { return Math.log(aexpr(a)) / Math.LN10; });
+  def("ln", function(a) { return Math.log(aexpr(a)); });
+
+
+  function deg2rad(d) { return d / 180 * Math.PI; }
+  function rad2deg(r) { return r * 180 / Math.PI; }
+
+  def("arctan", function(a) {
+    if (arguments.length > 1) {
+      var x = aexpr(arguments[0]);
+      var y = aexpr(arguments[1]);
+      return rad2deg(Math.atan2(y, x));
+    } else {
+      return rad2deg(Math.atan(aexpr(a)));
+    }
+  }, {maximum: 2});
+
+  def("sin", function(a) { return Math.sin(deg2rad(aexpr(a))); });
+  def("cos", function(a) { return Math.cos(deg2rad(aexpr(a))); });
+  def("tan", function(a) { return Math.tan(deg2rad(aexpr(a))); });
+
+  def("radarctan", function(a) {
+    if (arguments.length > 1) {
+      var x = aexpr(arguments[0]);
+      var y = aexpr(arguments[1]);
+      return Math.atan2(y, x);
+    } else {
+      return Math.atan(aexpr(a));
+    }
+  }, {maximum: 2});
+
+  def("radsin", function(a) { return Math.sin(aexpr(a)); });
+  def("radcos", function(a) { return Math.cos(aexpr(a)); });
+  def("radtan", function(a) { return Math.tan(aexpr(a)); });
+
+  def("abs", function(a) { return Math.abs(aexpr(a)); });
+
+  function truncate(x) { return parseInt(x, 10); }
+
+  def("int", function(a) { return truncate(aexpr(a)); });
+  def("round", function(a) { return Math.round(aexpr(a)); });
+
+  def("iseq", function(a, b) {
+    a = truncate(aexpr(a));
+    b = truncate(aexpr(b));
+    var step = (a < b) ? 1 : -1;
+    var list = [];
+    for (var i = a; (step > 0) ? (i <= b) : (i >= b); i += step) {
+      list.push(i);
+    }
+    return list;
+  });
+
+  def("rseq", function(from, to, count) {
+    from = aexpr(from);
+    to = aexpr(to);
+    count = truncate(aexpr(count));
+    var step = (to - from) / (count - 1);
+    var list = [];
+    for (var i = from; (step > 0) ? (i <= to) : (i >= to); i += step) {
+      list.push(i);
+    }
+    return list;
+  });
+
+  def(["greaterp", "greater?"], function(a, b) { return aexpr(a) > aexpr(b) ? 1 : 0; });
+  def(["greaterequalp", "greaterequal?"], function(a, b) { return aexpr(a) >= aexpr(b) ? 1 : 0; });
+  def(["lessp", "less?"], function(a, b) { return aexpr(a) < aexpr(b) ? 1 : 0; });
+  def(["lessequalp", "lessequal?"], function(a, b) { return aexpr(a) <= aexpr(b) ? 1 : 0; });
+
+  def("random", function(max) {
+    if (arguments.length < 2) {
+      max = aexpr(max);
+      return Math.floor(this.prng.next() * max);
+    } else {
+      var start = aexpr(arguments[0]);
+      var end = aexpr(arguments[1]);
+      return Math.floor(this.prng.next() * (end - start + 1)) + start;
+    }
+  }, {maximum: 2});
+
+  def("rerandom", function() {
+    var seed = (arguments.length > 0) ? aexpr(arguments[0]) : 2345678901;
+    return this.prng.seed(seed);
+  }, {maximum: 1});
+
+  def("form", function(num, width, precision) {
+    num = aexpr(num);
+    width = aexpr(width);
+    precision = aexpr(precision);
+
+    var str = num.toFixed(precision);
+    if (str.length < width)
+      str = Array(1 + width - str.length).join(' ') + str;
+    return str;
+  });
+
+  def("bitand", function(num1, num2) {
+    return Array.from(arguments).map(aexpr).reduce(function(a, b) { return a & b; }, -1);
+  }, {minimum: 0, maximum: -1});
+  def("bitor", function(num1, num2) {
+    return Array.from(arguments).map(aexpr).reduce(function(a, b) { return a | b; }, 0);
+  }, {minimum: 0, maximum: -1});
+  def("bitxor", function(num1, num2) {
+    return Array.from(arguments).map(aexpr).reduce(function(a, b) { return a ^ b; }, 0);
+  }, {minimum: 0, maximum: -1});
+  def("bitnot", function(num) {
+    return ~aexpr(num);
+  });
