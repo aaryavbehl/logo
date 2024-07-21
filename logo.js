@@ -2421,7 +2421,7 @@ function LogoInterpreter(turtle, stream, savehook)
         }.bind(this));
       }
     });
-    
+
     def("erall", function() {
       this.routines.keys().filter(function(x) {
         return !this.routines.get(x).primitive && !this.routines.get(x).buried;
@@ -2568,3 +2568,115 @@ function LogoInterpreter(turtle, stream, savehook)
               this.routines.get(name).buried = false;
           }.bind(this));
         }
+        
+    if (list.length) {
+      var vars = lexpr(list.shift());
+
+      this.scopes.forEach(function(scope) {
+        vars.forEach(function(name) {
+          name = sexpr(name);
+          if (scope.has(name))
+            scope.get(name).buried = false;
+        });
+      });
+    }
+
+    if (list.length) {
+      var plists = lexpr(list.shift());
+      plists.forEach(function(name) {
+        name = sexpr(name);
+        if (this.plists.has(name))
+          this.plists.get(name).buried = false;
+      }.bind(this));
+    }
+  });
+
+  def("unburyall", function() {
+    this.routines.forEach(function(name, proc) {
+      proc.buried = false;
+    });
+
+    this.scopes.forEach(function(scope) {
+      scope.forEach(function(name, entry) {
+        entry.buried = false;
+      });
+    });
+
+    this.plists.forEach(function(name, entry) {
+      entry.buried = false;
+    });
+  });
+
+  def("unburyname", function(varname) {
+    var unbury = this.routines.get('unbury');
+    var namelist = this.routines.get('namelist');
+    return unbury.call(this, namelist.call(this, varname));
+  });
+
+  def(["buriedp", "buried?"], function(list) {
+    list = lexpr(list);
+    var name;
+
+    if (list.length) {
+      var procs = lexpr(list.shift());
+      if (procs.length) {
+        name = sexpr(procs[0]);
+        return (this.routines.has(name) && this.routines.get(name).buried) ? 1 : 0;
+      }
+    }
+
+    if (list.length) {
+      var vars = lexpr(list.shift());
+      if (vars.length) {
+        name = sexpr(vars[0]);
+
+        return (this.scopes[0].has(name) && this.scopes[0].get(name).buried) ? 1 : 0;
+      }
+    }
+
+    if (list.length) {
+      var plists = lexpr(list.shift());
+      if (plists.length) {
+        name = sexpr(plists[0]);
+        return (this.plists.has(name) && this.plists.get(name).buried) ? 1 : 0;
+      }
+    }
+
+    return 0;
+  });
+
+  def("run", function(statements) {
+    statements = reparse(lexpr(statements));
+    return this.execute(statements, {returnResult: true});
+  });
+
+  def("runresult", function(statements) {
+    statements = reparse(lexpr(statements));
+    return this.execute(statements, {returnResult: true})
+      .then(function(result) {
+        if (result !== undefined)
+          return [result];
+        else
+          return [];
+      });
+  });
+
+  def("repeat", function(count, statements) {
+    count = aexpr(count);
+    statements = reparse(lexpr(statements));
+    var old_repcount = this.repcount;
+    var i = 1;
+    return promiseFinally(
+      promiseLoop(function(loop, resolve, reject) {
+        if (i > count) {
+          resolve();
+          return;
+        }
+        this.repcount = i++;
+        this.execute(statements)
+          .then(promiseYield)
+          .then(loop, reject);
+      }.bind(this)), function() {
+        this.repcount = old_repcount;
+      }.bind(this));
+  });
