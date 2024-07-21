@@ -1373,3 +1373,135 @@ function LogoInterpreter(turtle, stream, savehook)
         if (set.has(x)) { return false; } else { set.add(x); return true; }
       }));
     });
+    
+  def("split", function(thing, list) {
+    var l = lexpr(list);
+    return lexpr(list)
+      .reduce(function(ls, i) {
+        return (equal(i, thing) ? ls.push([]) : ls[ls.length - 1].push(i), ls);
+      }, [[]])
+      .filter(function(l) { return l.length > 0; })
+      .map(function(e) { return sifw(list, e); });
+  });
+
+  def("quoted", function(thing) {
+    if (Type(thing) === 'word')
+      return '"' + thing;
+    return thing;
+  });
+
+  function contains(atom, value) {
+    if (atom === value) return true;
+    switch (Type(atom)) {
+    case 'list':
+      return atom.some(function(a) { return contains(a, value); });
+    case 'array':
+      return atom.list.some(function(a) { return contains(a, value); });
+    default:
+      return false;
+    }
+  }
+
+  def("setitem", function(index, array, value) {
+    index = aexpr(index);
+    if (Type(array) !== 'array')
+      throw err("{_PROC_}: Expected array", ERRORS.BAD_INPUT);
+    if (contains(value, array))
+      throw err("{_PROC_}: Can't create circular array", ERRORS.BAD_INPUT);
+    array.setItem(index, value);
+  });
+
+  def("mdsetitem", function(indexes, thing, value) {
+    indexes = lexpr(indexes).map(aexpr).map(function(n) { return n|0; });
+    if (Type(thing) !== 'array')
+      throw err("{_PROC_}: Expected array", ERRORS.BAD_INPUT);
+    if (contains(value, thing))
+      throw err("{_PROC_}: Can't create circular array", ERRORS.BAD_INPUT);
+    while (indexes.length > 1) {
+      thing = item(indexes.shift(), thing);
+      if (Type(thing) !== 'array')
+        throw err("{_PROC_}: Expected array", ERRORS.BAD_INPUT);
+    }
+    thing.setItem(indexes.shift(), value);
+  });
+
+  def(".setfirst", function(list, value) {
+     if (Type(list) !== 'list')
+      throw err("{_PROC_}: Expected list", ERRORS.BAD_INPUT);
+    list[0] = value;
+  });
+
+  def(".setbf", function(list, value) {
+    if (Type(list) !== 'list')
+      throw err("{_PROC_}: Expected non-empty list", ERRORS.BAD_INPUT);
+    if (list.length < 1)
+      throw err("{_PROC_}: Expected non-empty list", ERRORS.BAD_INPUT);
+    value = lexpr(value);
+    list.length = 1;
+    list.push.apply(list, value);
+  });
+
+  def(".setitem", function(index, array, value) {
+    index = aexpr(index);
+    if (Type(array) !== 'array')
+      throw err("{_PROC_}: Expected array", ERRORS.BAD_INPUT);
+    array.setItem(index, value);
+  });
+
+  def("push", function(stackname, thing) {
+    var got = getvar(stackname);
+    var stack = lexpr(got);
+    stack.unshift(thing);
+    setvar(stackname, sifw(got, stack));
+  });
+
+  def("pop", function(stackname) {
+    var got = getvar(stackname);
+    var stack = lexpr(got);
+    var atom = stack.shift();
+    setvar(stackname, sifw(got, stack));
+    return atom;
+  });
+
+  def("queue", function(stackname, thing) {
+    var got = getvar(stackname);
+    var queue = lexpr(got);
+    queue.push(thing);
+    setvar(stackname, sifw(got, queue));
+  });
+
+  def("dequeue", function(stackname) {
+    var got = getvar(stackname);
+    var queue = lexpr(got);
+    var atom = queue.pop();
+    setvar(stackname, sifw(got, queue));
+    return atom;
+  });
+
+  def(["wordp", "word?"], function(thing) { return Type(thing) === 'word' ? 1 : 0; });
+  def(["listp", "list?"], function(thing) { return Type(thing) === 'list' ? 1 : 0; });
+  def(["arrayp", "array?"], function(thing) { return Type(thing) === 'array' ? 1 : 0; });
+  def(["numberp", "number?"], function(thing) {
+    return Type(thing) === 'word' && isNumber(thing) ? 1 : 0;
+  });
+  def(["numberwang"], function(thing) { return this.prng.next() < 0.5 ? 1 : 0; });
+
+  def(["equalp", "equal?"], function(a, b) { return equal(a, b) ? 1 : 0; });
+  def(["notequalp", "notequal?"], function(a, b) { return !equal(a, b) ? 1 : 0; });
+
+  def(["emptyp", "empty?"], function(thing) {
+    switch (Type(thing)) {
+    case 'word': return String(thing).length === 0 ? 1 : 0;
+    case 'list': return thing.length === 0 ? 1 : 0;
+    default: return 0;
+    }
+  });
+  def(["beforep", "before?"], function(word1, word2) {
+    return sexpr(word1) < sexpr(word2) ? 1 : 0;
+  });
+
+  def(".eq", function(a, b) { return a === b && a && typeof a === 'object'; });
+
+  def(["memberp", "member?"], function(thing, list) {
+    return lexpr(list).some(function(x) { return equal(x, thing); }) ? 1 : 0;
+  });
