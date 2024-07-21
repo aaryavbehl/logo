@@ -2172,3 +2172,129 @@ function LogoInterpreter(turtle, stream, savehook)
   def("localmake", function(varname, value) {
     setlocal(sexpr(varname), value);
   });
+
+  def("thing", function(varname) {
+    return getvar(sexpr(varname));
+  });
+
+  def("global", function(varname) {
+    var globalscope = this.scopes[0];
+    Array.from(arguments).forEach(function(name) {
+      globalscope.set(sexpr(name), {value: undefined}); });
+  }, {maximum: -1});
+
+  def("pprop", function(plistname, propname, value) {
+    plistname = sexpr(plistname);
+    propname = sexpr(propname);
+    var plist = this.plists.get(plistname);
+    if (!plist) {
+      plist = new StringMap(true);
+      this.plists.set(plistname, plist);
+    }
+    plist.set(propname, value);
+  });
+
+  def("gprop", function(plistname, propname) {
+    plistname = sexpr(plistname);
+    propname = sexpr(propname);
+    var plist = this.plists.get(plistname);
+    if (!plist || !plist.has(propname))
+      return [];
+    return plist.get(propname);
+  });
+
+  def("remprop", function(plistname, propname) {
+    plistname = sexpr(plistname);
+    propname = sexpr(propname);
+    var plist = this.plists.get(plistname);
+    if (plist) {
+      plist['delete'](propname);
+      if (plist.empty()) {
+
+        this.plists['delete'](plistname);
+      }
+    }
+  });
+
+  def("plist", function(plistname) {
+    plistname = sexpr(plistname);
+    var plist = this.plists.get(plistname);
+    if (!plist)
+      return [];
+
+    var result = [];
+    plist.forEach(function(key, value) {
+      result.push(key);
+      result.push(copy(value));
+    });
+    return result;
+  });
+
+  def(["procedurep", "procedure?"], function(name) {
+    name = sexpr(name);
+    return this.routines.has(name) ? 1 : 0;
+  });
+
+  def(["primitivep", "primitive?"], function(name) {
+    name = sexpr(name);
+    return (this.routines.has(name) &&
+            this.routines.get(name).primitive) ? 1 : 0;
+  });
+
+  def(["definedp", "defined?"], function(name) {
+    name = sexpr(name);
+    return (this.routines.has(name) &&
+            !this.routines.get(name).primitive) ? 1 : 0;
+  });
+
+  def(["namep", "name?"], function(varname) {
+    try {
+      return getvar(sexpr(varname)) !== undefined ? 1 : 0;
+    } catch (e) {
+      return 0;
+    }
+  });
+
+  def(["plistp", "plist?"], function(plistname) {
+    plistname = sexpr(plistname);
+    return this.plists.has(plistname) ? 1 : 0;
+  });
+
+  def("contents", function() {
+    return [
+      this.routines.keys().filter(function(x) {
+        return !this.routines.get(x).primitive && !this.routines.get(x).buried;
+      }.bind(this)),
+      this.scopes.reduce(
+        function(list, scope) {
+          return list.concat(scope.keys().filter(function(x) { return !scope.get(x).buried; })); },
+        []),
+      this.plists.keys().filter(function(x) {
+        return !this.plists.get(x).buried;
+      }.bind(this))
+    ];
+  });
+
+  def("buried", function() {
+    return [
+      this.routines.keys().filter(function(x) {
+        return !this.routines.get(x).primitive && this.routines.get(x).buried; }.bind(this)),
+      this.scopes.reduce(
+        function(list, scope) {
+          return list.concat(scope.keys().filter(function(x) { return scope.get(x).buried; })); },
+        []),
+      this.plists.keys().filter(function(x) { return this.plists.get(x).buried; }.bind(this))
+    ];
+  });
+
+  def("traced", function() {
+    return [
+      this.routines.keys().filter(function(x) {
+        return !this.routines.get(x).primitive && this.routines.get(x).traced; }.bind(this)),
+      this.scopes.reduce(
+        function(list, scope) {
+          return list.concat(scope.keys().filter(function(x) { return scope.get(x).traced; })); },
+        []),
+      this.plists.keys().filter(function(x) { return this.plists.get(x).traced; }.bind(this))
+    ];
+  });
