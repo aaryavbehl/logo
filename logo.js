@@ -1235,3 +1235,141 @@ function LogoInterpreter(turtle, stream, savehook)
     }
     return list;
   }, {minimum: 0, maximum: -1});
+
+  def("fput", function(thing, list) {
+    var l = lexpr(list);
+    l.unshift(thing);
+    return sifw(list, l);
+  });
+  
+  def("lput", function(thing, list) {
+      var l = lexpr(list);
+      l.push(thing);
+      return sifw(list, l);
+    });
+  
+    def("array", function(size) {
+      size = aexpr(size);
+      if (size < 1)
+        throw err("{_PROC_}: Array size must be positive integer", ERRORS.BAD_INPUT);
+      var origin = (arguments.length < 2) ? 1 : aexpr(arguments[1]);
+      return new LogoArray(size, origin);
+    }, {maximum: 2});
+  
+    def("mdarray", function(sizes) {
+      sizes = lexpr(sizes).map(aexpr).map(function(n) { return n|0; });
+      if (sizes.some(function(size) { return size < 1; }))
+        throw err("{_PROC_}: Array size must be positive integer", ERRORS.BAD_INPUT);
+      var origin = (arguments.length < 2) ? 1 : aexpr(arguments[1]);
+  
+      function make(index) {
+        var n = sizes[index], a = new LogoArray(n, origin);
+        if (index + 1 < sizes.length) {
+          for (var i = 0; i < n; ++i)
+            a.setItem(i + origin, make(index + 1));
+        }
+        return a;
+      }
+  
+      return make(0);
+    }, {maximum: 2});
+  
+    def("listtoarray", function(list) {
+      list = lexpr(list);
+      var origin = 1;
+      if (arguments.length > 1)
+        origin = aexpr(arguments[1]);
+      return LogoArray.from(list, origin);
+    }, {maximum: 2});
+  
+    def("arraytolist", function(array) {
+      if (Type(array) !== 'array') {
+        throw err("{_PROC_}: Expected array", ERRORS.BAD_INPUT);
+      }
+      return array.list.slice();
+    });
+  
+    def("combine", function(thing1, thing2) {
+      if (Type(thing2) !== 'list') {
+        return this.routines.get('word')(thing1, thing2);
+      } else {
+        return this.routines.get('fput')(thing1, thing2);
+      }
+    });
+  
+    def("reverse", function(list) {
+      var tail = (arguments.length > 1) ? arguments[1] : (Type(list) === 'list' ? [] : '');
+      return sifw(tail, lexpr(list).reverse().concat(lexpr(tail)));
+    }, {maximum: 2});
+  
+    this.gensym_index = 0;
+    def("gensym", function() {
+      ++this.gensym_index;
+      return 'G' + this.gensym_index;
+    });
+  
+    def("first", function(list) { return lexpr(list)[0]; });
+  
+    def("firsts", function(list) {
+      return lexpr(list).map(function(x) { return x[0]; });
+    });
+  
+    def("last", function(list) { list = lexpr(list); return list[list.length - 1]; });
+  
+    def(["butfirst", "bf"], function(list) {
+      return sifw(list, lexpr(list).slice(1));
+    });
+  
+    def(["butfirsts", "bfs"], function(list) {
+      return lexpr(list).map(function(x) { return sifw(x, lexpr(x).slice(1)); });
+    });
+  
+    def(["butlast", "bl"], function(list) {
+      return Type(list) === 'word' ? String(list).slice(0, -1) : lexpr(list).slice(0, -1);
+    });
+  
+    function item(index, thing) {
+      switch (Type(thing)) {
+      case 'list':
+        if (index < 1 || index > thing.length)
+          throw err("{_PROC_}: Index out of bounds", ERRORS.BAD_INPUT);
+        return thing[index - 1];
+      case 'array':
+        return thing.item(index);
+      default:
+        thing = sexpr(thing);
+        if (index < 1 || index > thing.length)
+          throw err("{_PROC_}: Index out of bounds", ERRORS.BAD_INPUT);
+        return thing.charAt(index - 1);
+      }
+    }
+  
+    def("item", function(index, thing) {
+      index = aexpr(index)|0;
+      return item(index, thing);
+    });
+  
+    def("mditem", function(indexes, thing) {
+      indexes = lexpr(indexes).map(aexpr).map(function(n) { return n|0; });
+      while (indexes.length)
+        thing = item(indexes.shift(), thing);
+      return thing;
+    });
+  
+    def("pick", function(list) {
+      list = lexpr(list);
+      var i = Math.floor(this.prng.next() * list.length);
+      return list[i];
+    });
+  
+    def("remove", function(thing, list) {
+      return sifw(list, lexpr(list).filter(function(x) { return !equal(x, thing); }));
+    });
+  
+    def("remdup", function(list) {
+
+      var set = new Set();
+      return sifw(list, lexpr(list).filter(function(x) {
+        if (set.has(x)) { return false; } else { set.add(x); return true; }
+      }));
+    });
