@@ -2421,3 +2421,150 @@ function LogoInterpreter(turtle, stream, savehook)
         }.bind(this));
       }
     });
+    
+    def("erall", function() {
+      this.routines.keys().filter(function(x) {
+        return !this.routines.get(x).primitive && !this.routines.get(x).buried;
+      }.bind(this)).forEach(function(name) {
+        this.routines['delete'](name);
+        saveproc(name);
+      }.bind(this));
+    
+      this.scopes.forEach(function(scope) {
+        scope.keys().filter(function(x) {
+          return !scope.get(x).buried;
+        }).forEach(function(name) {
+          scope['delete'](name);
+        });
+      });
+    
+      this.plists.keys().filter(function(x) {
+        return !this.plists.get(x).buried;
+      }.bind(this)).forEach(function(name) {
+        this.plists['delete'](name);
+      }.bind(this));
+    });
+    
+      def("erps", function() {
+        this.routines.keys().filter(function(x) {
+          return !this.routines.get(x).primitive && !this.routines.get(x).buried;
+        }.bind(this)).forEach(function(name) {
+          this.routines['delete'](name);
+          saveproc(name);
+        }.bind(this));
+      });
+    
+      def("erns", function() {
+        this.scopes.forEach(function(scope) {
+          scope.keys().filter(function(x) {
+            return !scope.get(x).buried;
+          }).forEach(function(name) {
+            scope['delete'](name);
+          });
+        });
+      });
+    
+      def("erpls", function() {
+        this.plists.keys().filter(function(x) {
+          return !this.plists.get(x).buried;
+        }.bind(this)).forEach(function(key) {
+          this.plists['delete'](key);
+        }.bind(this));
+      });
+    
+      def("ern", function(varname) {
+        var varnamelist;
+        if (Type(varname) === 'list')
+          varnamelist = lexpr(varname);
+        else
+          varnamelist = [sexpr(varname)];
+    
+        this.scopes.forEach(function(scope) {
+          varnamelist.forEach(function(name) {
+            name = sexpr(name);
+            scope['delete'](name);
+          });
+        });
+      });
+    
+      def("erpl", function(plname) {
+        var plnamelist;
+        if (Type(plname) === 'list') {
+          plnamelist = lexpr(plname);
+        } else {
+          plnamelist = [sexpr(plname)];
+        }
+    
+        plnamelist.forEach(function(name) {
+          name = sexpr(name);
+          this.plists['delete'](name);
+        }.bind(this));
+      });
+    
+      def("bury", function(list) {
+        list = lexpr(list);
+
+        if (list.length) {
+          var procs = lexpr(list.shift());
+          procs.forEach(function(name) {
+            name = sexpr(name);
+            if (this.routines.has(name))
+              this.routines.get(name).buried = true;
+          }.bind(this));
+        }
+
+        if (list.length) {
+          var vars = lexpr(list.shift());
+
+          this.scopes.forEach(function(scope) {
+            vars.forEach(function(name) {
+              name = sexpr(name);
+              if (scope.has(name))
+                scope.get(name).buried = true;
+            });
+          });
+        }
+
+        if (list.length) {
+          var plists = lexpr(list.shift());
+          plists.forEach(function(name) {
+            name = sexpr(name);
+            if (this.plists.has(name))
+              this.plists.get(name).buried = true;
+          }.bind(this));
+        }
+      });
+    
+      def("buryall", function() {
+        this.routines.forEach(function(name, proc) {
+          proc.buried = true;
+        });
+    
+        this.scopes.forEach(function(scope) {
+          scope.forEach(function(name, entry) {
+            entry.buried = true;
+          });
+        });
+    
+        this.plists.forEach(function(name, entry) {
+          entry.buried = true;
+        });
+      });
+    
+      def("buryname", function(varname) {
+        var bury = this.routines.get('bury');
+        var namelist = this.routines.get('namelist');
+        return bury.call(this, namelist.call(this, varname));
+      });
+    
+      def("unbury", function(list) {
+        list = lexpr(list);
+
+        if (list.length) {
+          var procs = lexpr(list.shift());
+          procs.forEach(function(name) {
+            name = sexpr(name);
+            if (this.routines.has(name))
+              this.routines.get(name).buried = false;
+          }.bind(this));
+        }
