@@ -1833,7 +1833,6 @@ function LogoInterpreter(turtle, stream, savehook)
 
   def(["\u2193"], function() { return turtle.move(-10); });
 
-
   def("setpos", function(l) {
     l = lexpr(l);
     if (l.length !== 2) throw err("{_PROC_}: Expected list of length 2", ERRORS.BAD_INPUT);
@@ -1897,4 +1896,139 @@ function LogoInterpreter(turtle, stream, savehook)
     if (!isFinite(sx) || sx === 0 || !isFinite(sy) || sy === 0)
       throw err("{_PROC_}: Expected non-zero values", ERRORS.BAD_INPUT);
     turtle.scrunch = [sx, sy];
+  });
+  
+  def("setturtle", function(index) {
+    index = aexpr(index)|0;
+    if (index < 1)
+      throw err("{_PROC_}: Expected positive turtle index", ERRORS.BAD_INPUT);
+    turtle.currentturtle = index - 1;
+  });
+
+  def("ask", function(index, statements) {
+    index = aexpr(index)|0;
+    if (index < 1)
+      throw err("{_PROC_}: Expected positive turtle index", ERRORS.BAD_INPUT);
+    statements = reparse(lexpr(statements));
+    var originalturtle = turtle.currentturtle;
+    turtle.currentturtle = index - 1;
+    return promiseFinally(
+      this.execute(statements),
+      function() {
+        turtle.currentturtle = originalturtle;
+      });
+  });
+
+  def("clearturtles", function() {
+    turtle.clearturtles();
+  });
+
+  def(["shownp", "shown?"], function() {
+    return turtle.visible ? 1 : 0;
+  });
+
+  def("turtlemode", function() {
+    return turtle.turtlemode.toUpperCase();
+  });
+
+  def("labelsize", function() {
+    return [turtle.fontsize, turtle.fontsize];
+  });
+
+  def("labelfont", function() {
+    return turtle.fontname;
+  });
+
+  def("turtles", function() {
+    return turtle.turtles;
+  });
+
+  def("turtle", function() {
+    return turtle.currentturtle + 1;
+  });
+
+  def(["pendown", "pd"], function() { turtle.pendown = true; });
+  def(["penup", "pu"], function() { turtle.pendown = false; });
+
+  def(["penpaint", "ppt"], function() { turtle.penmode = 'paint'; });
+  def(["penerase", "pe"], function() { turtle.penmode = 'erase'; });
+  def(["penreverse", "px"], function() { turtle.penmode = 'reverse'; });
+
+  this.colorAlias = null;
+
+  var PALETTE = {
+    0: "black", 1: "blue", 2: "lime", 3: "cyan",
+    4: "red", 5: "magenta", 6: "yellow", 7: "white",
+    8: "brown", 9: "tan", 10: "green", 11: "aquamarine",
+    12: "salmon", 13: "purple", 14: "orange", 15: "gray"
+  };
+
+  function parseColor(color) {
+    function adjust(n) {
+
+      n = Math.min(99, Math.max(0, Math.floor(n)));
+
+      return Math.floor(n * 255 / 99);
+    }
+    if (Type(color) === 'list') {
+      var r = adjust(aexpr(color[0]));
+      var g = adjust(aexpr(color[1]));
+      var b = adjust(aexpr(color[2]));
+      var rr = (r < 16 ? "0" : "") + r.toString(16);
+      var gg = (g < 16 ? "0" : "") + g.toString(16);
+      var bb = (b < 16 ? "0" : "") + b.toString(16);
+      return '#' + rr + gg + bb;
+    }
+    color = sexpr(color);
+    if (Object.prototype.hasOwnProperty.call(PALETTE, color))
+      return PALETTE[color];
+    if (self.colorAlias)
+      return self.colorAlias(color) || color;
+    return color;
+  }
+
+  def(["setpencolor", "setpc", "setcolor"], function(color) {
+    turtle.color = parseColor(color);
+  });
+
+  def("setpalette", function(colornumber, color) {
+    colornumber = aexpr(colornumber);
+    if (colornumber < 8)
+      throw err("{_PROC_}: Expected number greater than 8", ERRORS.BAD_INPUT);
+    PALETTE[colornumber] = parseColor(color);
+  });
+
+  def(["setpensize", "setwidth", "setpw"], function(a) {
+    if (Type(a) === 'list')
+      turtle.penwidth = aexpr(a[0]);
+    else
+      turtle.penwidth = aexpr(a);
+  });
+
+  def(["setbackground", "setbg", "setscreencolor", "setsc"], function(color) {
+    turtle.bgcolor = parseColor(color);
+  });
+
+  def(["pendownp", "pendown?"], function() {
+    return turtle.pendown ? 1 : 0;
+  });
+
+  def("penmode", function() {
+    return turtle.penmode.toUpperCase();
+  });
+
+  def(["pencolor", "pc"], function() {
+    return turtle.color;
+  });
+
+  def("palette", function(colornumber) {
+    return PALETTE[aexpr(colornumber)];
+  });
+
+  def("pensize", function() {
+    return [turtle.penwidth, turtle.penwidth];
+  });
+
+  def(["background", "bg", "getscreencolor", "getsc"], function() {
+    return turtle.bgcolor;
   });
