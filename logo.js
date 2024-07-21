@@ -2032,3 +2032,143 @@ function LogoInterpreter(turtle, stream, savehook)
   def(["background", "bg", "getscreencolor", "getsc"], function() {
     return turtle.bgcolor;
   });
+  
+  def("mousepos", function() {
+    return turtle.mousepos;
+  });
+
+  def("clickpos", function() {
+    return turtle.clickpos;
+  });
+
+  def(["buttonp", "button?"], function() {
+    return turtle.button > 0 ? 1 : 0;
+  });
+
+  def("button", function() {
+    return turtle.button;
+  });
+
+  def("touches", function() {
+    return turtle.touches;
+  });
+
+  def("bitcut", function(w, h) {
+    return turtle.copy(w, h);
+  });
+
+  def("bitpaste", function() {
+    return turtle.paste();
+  });
+
+  def("define", function(name, list) {
+    name = sexpr(name);
+    list = lexpr(list);
+    if (list.length != 2)
+      throw err("{_PROC_}: Expected list of length 2", ERRORS.BAD_INPUT);
+
+    var inputs = [];
+    var optional_inputs = [];
+    var rest = undefined;
+    var def = undefined;
+    var block = reparse(lexpr(list[1]));
+
+    var ins = lexpr(list[0]);
+    var REQUIRED = 0, OPTIONAL = 1, REST = 2, DEFAULT = 3, ERROR = 4;
+    var state = REQUIRED;
+    while (ins.length) {
+      var atom = ins.shift();
+      if (state === REQUIRED) {
+        if (Type(atom) === 'word') {
+          inputs.push(atom);
+          continue;
+        }
+        state = OPTIONAL;
+      }
+
+      if (state === OPTIONAL) {
+        if (Type(atom) === 'list' && atom.length > 1 && Type(atom[0]) === 'word') {
+          optional_inputs.push([atom.shift(), atom]);
+          continue;
+        }
+        state = REST;
+      }
+
+      if (state === REST) {
+        state = DEFAULT;
+        if (Type(atom) === 'list' && atom.length === 1 && Type(atom[0]) === 'word') {
+          rest = atom[0];
+          continue;
+        }
+      }
+
+      if (state === DEFAULT) {
+        state = ERROR;
+        if (Type(atom) === 'word' && isNumber(atom)) {
+          def = parseFloat(atom);
+          continue;
+        }
+      }
+
+      throw err("{_PROC_}: Unexpected inputs", ERRORS.BAD_INPUT);
+    }
+
+    defineProc(name, inputs, optional_inputs, rest, def, block);
+  });
+
+  def("text", function(name) {
+    var proc = this.routines.get(sexpr(name));
+    if (!proc)
+      throw err("{_PROC_}: Don't know how to {name:U}", { name: name }, ERRORS.BAD_PROC);
+    if (!proc.inputs) {
+      throw err("{_PROC_}: Can't show definition of primitive {name:U}", { name: name },
+               ERRORS.IS_PRIMITIVE);
+    }
+
+    var inputs = proc.inputs.concat(proc.optional_inputs);
+    if (proc.rest)
+      inputs.push([proc.rest]);
+    if (proc.def !== undefined)
+      inputs.push(proc.def);
+    return [inputs, proc.block];
+  });
+
+  def("copydef", function(newname, oldname) {
+
+    newname = sexpr(newname);
+    oldname = sexpr(oldname);
+
+    if (!this.routines.has(oldname)) {
+      throw err("{_PROC_}: Don't know how to {name:U}", { name: oldname }, ERRORS.BAD_PROC);
+    }
+
+    if (this.routines.has(newname)) {
+      if (this.routines.get(newname).special) {
+        throw err("{_PROC_}: Can't overwrite special {name:U}", { name: newname },
+                  ERRORS.BAD_INPUT);
+      }
+      if (this.routines.get(newname).primitive && !maybegetvar("redefp")) {
+        throw err("{_PROC_}: Can't overwrite primitives unless REDEFP is TRUE",
+                 ERRORS.BAD_INPUT);
+      }
+    }
+
+    this.routines.set(newname, this.routines.get(oldname));
+
+  });
+
+  def("make", function(varname, value) {
+    setvar(sexpr(varname), value);
+  });
+
+  def("name", function(value, varname) {
+    setvar(sexpr(varname), value);
+  });
+
+  def("local", function(varname) {
+    Array.from(arguments).forEach(function(name) { local(sexpr(name)); });
+  }, {maximum: -1});
+
+  def("localmake", function(varname, value) {
+    setlocal(sexpr(varname), value);
+  });
