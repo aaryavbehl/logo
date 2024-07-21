@@ -2680,3 +2680,140 @@ function LogoInterpreter(turtle, stream, savehook)
         this.repcount = old_repcount;
       }.bind(this));
   });
+
+  def("forever", function(statements) {
+    statements = reparse(lexpr(statements));
+    var old_repcount = this.repcount;
+    var i = 1;
+    return promiseFinally(
+      promiseLoop(function(loop, resolve, reject) {
+        this.repcount = i++;
+        this.execute(statements)
+          .then(promiseYield)
+          .then(loop, reject);
+      }.bind(this)), function() {
+        this.repcount = old_repcount;
+      }.bind(this));
+  });
+  
+    def(["repcount", "#"], function() {
+      return this.repcount;
+    });
+  
+    def("if", function(tf, statements) {
+      if (Type(tf) === 'list')
+        tf = evaluateExpression(reparse(tf));
+  
+      var statements2 = arguments[2];
+  
+      return Promise.resolve(tf)
+        .then(function(tf) {
+          tf = aexpr(tf);
+          statements = reparse(lexpr(statements));
+          if (!statements2) {
+            return tf ? this.execute(statements, {returnResult: true}) : undefined;
+          } else {
+            statements2 = reparse(lexpr(statements2));
+            return this.execute(tf ? statements : statements2, {returnResult: true});
+          }
+        }.bind(this));
+  
+    }, {maximum: 3});
+  
+    def("ifelse", function(tf, statements1, statements2) {
+      if (Type(tf) === 'list')
+        tf = evaluateExpression(reparse(tf));
+  
+      return Promise.resolve(tf)
+        .then(function(tf) {
+          tf = aexpr(tf);
+          statements1 = reparse(lexpr(statements1));
+          statements2 = reparse(lexpr(statements2));
+  
+          return this.execute(tf ? statements1 : statements2, {returnResult: true});
+        }.bind(this));
+    });
+  
+    def("test", function(tf) {
+      if (Type(tf) === 'list')
+        tf = evaluateExpression(reparse(tf));
+  
+      return Promise.resolve(tf)
+        .then(function(tf) {
+          tf = aexpr(tf);
+
+          this.scopes[this.scopes.length - 1]._test = tf;
+        }.bind(this));
+    });
+  
+    def(["iftrue", "ift"], function(statements) {
+      statements = reparse(lexpr(statements));
+      var tf = this.scopes[this.scopes.length - 1]._test;
+      if (tf === undefined)
+        throw err('{_PROC_}: Called without TEST', ERRORS.NO_TEST);
+      return tf ? this.execute(statements, {returnResult: true}) : undefined;
+    });
+  
+    def(["iffalse", "iff"], function(statements) {
+      statements = reparse(lexpr(statements));
+      var tf = this.scopes[this.scopes.length - 1]._test;
+      if (tf === undefined)
+        throw err('{_PROC_}: Called without TEST', ERRORS.NO_TEST);
+      return !tf ? this.execute(statements, {returnResult: true}) : undefined;
+    });
+  
+    def("stop", function() {
+      throw new Output();
+    });
+  
+    def(["output", "op"], function(atom) {
+      throw new Output(atom);
+    });
+  
+    this.last_error = undefined;
+  
+    def("catch", function(tag, instructionlist) {
+      tag = sexpr(tag).toUpperCase();
+      instructionlist = reparse(lexpr(instructionlist));
+      return this.execute(instructionlist, {returnResult: true})
+        .catch(function(error) {
+          if (!(error instanceof LogoError) || error.tag !== tag)
+            throw error;
+          this.last_error = error;
+          return error.value;
+        }.bind(this));
+    }, {maximum: 2});
+  
+    def("throw", function(tag) {
+      tag = sexpr(tag).toUpperCase();
+      var value = arguments[1];
+      var error = new LogoError(tag, value);
+      error.code = (arguments.length > 1) ? ERRORS.USER_GENERATED : ERRORS.THROW_ERROR;
+      throw error;
+    }, {maximum: 2});
+  
+    def("error", function() {
+      if (!this.last_error)
+        return [];
+  
+      var list = [
+        this.last_error.code,
+        this.last_error.message,
+        this.last_error.proc,
+        this.last_error.line
+      ];
+      this.last_error = undefined;
+      return list;
+    });
+
+    def("wait", function(time) {
+      return promiseYieldTime(Math.ceil(aexpr(time) / 60 * 1000));
+    });
+  
+    def("bye", function() {
+      throw new Bye;
+    });
+  
+    def(".maybeoutput", function(value) {
+      throw new Output(value);
+    });
