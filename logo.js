@@ -1767,3 +1767,134 @@ function LogoInterpreter(turtle, stream, savehook)
   def("bitnot", function(num) {
     return ~aexpr(num);
   });
+  
+  def("ashift", function(num1, num2) {
+    num1 = truncate(aexpr(num1));
+    num2 = truncate(aexpr(num2));
+    return num2 >= 0 ? num1 << num2 : num1 >> -num2;
+  });
+
+  def("lshift", function(num1, num2) {
+    num1 = truncate(aexpr(num1));
+    num2 = truncate(aexpr(num2));
+    return num2 >= 0 ? num1 << num2 : num1 >>> -num2;
+  });
+
+  def("true", function() { return 1; });
+  def("false", function() { return 0; });
+
+  def("and", function(a, b) {
+    var args = Array.from(arguments);
+    return booleanReduce(args, function(value) {return value;}, 1);
+  }, {noeval: true, minimum: 0, maximum: -1});
+
+  def("or", function(a, b) {
+    var args = Array.from(arguments);
+    return booleanReduce(args, function(value) {return !value;}, 0);
+  }, {noeval: true, minimum: 0, maximum: -1});
+
+  function booleanReduce(args, test, value) {
+    return promiseLoop(function(loop, resolve, reject) {
+      if (!args.length) {
+        resolve(value);
+        return;
+      }
+      Promise.resolve(args.shift()())
+        .then(function(result) {
+          if (!test(result)) {
+            resolve(result);
+            return;
+          }
+          value = result;
+          loop();
+        });
+    });
+  }
+
+  def("xor", function(a, b) {
+    return Array.from(arguments).map(aexpr)
+      .reduce(function(a, b) { return Boolean(a) !== Boolean(b); }, 0) ? 1 : 0;
+  }, {minimum: 0, maximum: -1});
+
+  def("not", function(a) {
+    return !aexpr(a) ? 1 : 0;
+  });
+
+  def(["forward", "fd"], function(a) { return turtle.move(aexpr(a)); });
+  def(["back", "bk"], function(a) { return turtle.move(-aexpr(a)); });
+  def(["left", "lt"], function(a) { return turtle.turn(-aexpr(a)); });
+  def(["right", "rt"], function(a) { return turtle.turn(aexpr(a)); });
+
+  def(["\u2190"], function() { return turtle.turn(-15); });
+
+  def(["\u2192"], function() { return turtle.turn(15); });
+
+  def(["\u2191"], function() { return turtle.move(10); });
+
+  def(["\u2193"], function() { return turtle.move(-10); });
+
+
+  def("setpos", function(l) {
+    l = lexpr(l);
+    if (l.length !== 2) throw err("{_PROC_}: Expected list of length 2", ERRORS.BAD_INPUT);
+    turtle.position = [aexpr(l[0]), aexpr(l[1])];
+  });
+  def("setxy", function(x, y) { turtle.position = [aexpr(x), aexpr(y)]; });
+  def("setx", function(x) { turtle.position = [aexpr(x), undefined]; });
+  def("sety", function(y) { turtle.position = [undefined, aexpr(y)]; });
+  def(["setheading", "seth"], function(a) { turtle.heading = aexpr(a); });
+
+  def("home", function() { return turtle.home(); });
+
+  def("arc", function(angle, radius) { return turtle.arc(aexpr(angle), aexpr(radius)); });
+
+  def("pos", function() { return turtle.position; });
+  def("xcor", function() { return turtle.position[0]; });
+  def("ycor", function() { return turtle.position[1]; });
+  def("heading", function() { return turtle.heading; });
+  def("towards", function(l) {
+    l = lexpr(l);
+    if (l.length !== 2) throw err("{_PROC_}: Expected list of length 2", ERRORS.BAD_INPUT);
+    return turtle.towards(aexpr(l[0]), aexpr(l[1]));
+  });
+  def("scrunch", function() { return turtle.scrunch; });
+  def("bounds", function() { return turtle.bounds; });
+
+  def(["showturtle", "st"], function() { turtle.visible = true; });
+  def(["hideturtle", "ht"], function() { turtle.visible = false; });
+  def("clean", function() { turtle.clear(); });
+  def(["clearscreen", "cs"], function() { turtle.clearscreen(); });
+
+  def("wrap", function() { turtle.turtlemode = 'wrap'; });
+  def("window", function() { turtle.turtlemode = 'window'; });
+  def("fence", function() { turtle.turtlemode = 'fence'; });
+
+  def("fill", function() { turtle.fill(); });
+
+  def("filled", function(fillcolor, statements) {
+    fillcolor = parseColor(fillcolor);
+    statements = reparse(lexpr(statements));
+    turtle.beginpath();
+    return promiseFinally(
+      this.execute(statements),
+      function() {
+        turtle.fillpath(fillcolor);
+      });
+  });
+
+  def("label", function(a) {
+    var s = Array.from(arguments).map(stringify_nodecorate).join(" ");
+    return turtle.drawtext(s);
+  }, {maximum: -1});
+
+  def("setlabelheight", function(a) { turtle.fontsize = aexpr(a); });
+
+  def("setlabelfont", function(a) { turtle.fontname = sexpr(a); });
+ 
+  def("setscrunch", function(sx, sy) {
+    sx = aexpr(sx);
+    sy = aexpr(sy);
+    if (!isFinite(sx) || sx === 0 || !isFinite(sy) || sy === 0)
+      throw err("{_PROC_}: Expected non-zero values", ERRORS.BAD_INPUT);
+    turtle.scrunch = [sx, sy];
+  });
