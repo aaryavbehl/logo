@@ -1089,3 +1089,149 @@ function LogoInterpreter(turtle, stream, savehook)
     var rest = undefined;
     var length = undefined;
     var block = [];
+    
+    var REQUIRED = 0, OPTIONAL = 1, REST = 2, DEFAULT = 3, BLOCK = 4;
+    var state = REQUIRED, sawEnd = false;
+    while (list.length) {
+      var atom = list.shift();
+      if (isKeyword(atom, 'END')) {
+        sawEnd = true;
+        break;
+      }
+
+      if (state === REQUIRED) {
+        if (Type(atom) === 'word' && String(atom).charAt(0) === ':') {
+          inputs.push(atom.substring(1));
+          continue;
+        }
+        state = OPTIONAL;
+      }
+
+      if (state === OPTIONAL) {
+        if (Type(atom) === 'list' && atom.length > 1 &&
+            String(atom[0]).charAt(0) === ':') {
+          optional_inputs.push([atom.shift().substring(1), atom]);
+          continue;
+        }
+        state = REST;
+      }
+
+      if (state === REST) {
+        state = DEFAULT;
+        if (Type(atom) === 'list' && atom.length === 1 &&
+            String(atom[0]).charAt(0) === ':') {
+          rest = atom[0].substring(1);
+          continue;
+        }
+      }
+
+      if (state === DEFAULT) {
+        state = BLOCK;
+        if (Type(atom) === 'word' && isNumber(atom)) {
+          length = parseFloat(atom);
+          continue;
+        }
+      }
+
+      block.push(atom);
+    }
+    if (!sawEnd)
+      throw err("TO: Expected END", ERRORS.BAD_INPUT);
+
+    defineProc(name, inputs, optional_inputs, rest, length, block);
+  }, {special: true});
+
+  function defineProc(name, inputs, optional_inputs, rest, def, block) {
+    if (self.routines.has(name) && self.routines.get(name).primitive)
+      throw err("{_PROC_}: Can't redefine primitive {name:U}", { name: name },
+                ERRORS.IS_PRIMITIVE);
+
+    if (def !== undefined &&
+        (def < inputs.length || (!rest && def > inputs.length + optional_inputs.length))) {
+      throw err("{_PROC_}: Bad default number of inputs for {name:U}", {name: name},
+               ERRORS.BAD_INPUT);
+    }
+
+    var length = (def === undefined) ? inputs.length : def;
+
+    var func = function() {
+
+      var scope = new StringMap(true);
+      self.scopes.push(scope);
+
+      var i = 0, op;
+      for (; i < inputs.length && i < arguments.length; ++i)
+        scope.set(inputs[i], {value: arguments[i]});
+      for (; i < inputs.length + optional_inputs.length && i < arguments.length; ++i) {
+        op = optional_inputs[i - inputs.length];
+        scope.set(op[0], {value: arguments[i]});
+      }
+      for (; i < inputs.length + optional_inputs.length; ++i) {
+        op = optional_inputs[i - inputs.length];
+        scope.set(op[0], {value: evaluateExpression(reparse(op[1]))});
+      }
+      if (rest)
+        scope.set(rest, {value: [].slice.call(arguments, i)});
+
+      return promiseFinally(self.execute(block).then(promiseYield, function(err) {
+        if (err instanceof Output)
+          return err.output;
+        throw err;
+      }), function() {
+        self.scopes.pop();
+      });
+    };
+
+    var proc = to_arity(func, length);
+    self.routines.set(name, proc);
+
+    proc.inputs = inputs;
+    proc.optional_inputs = optional_inputs;
+    proc.rest = rest;
+    proc.def = def;
+    proc.block = block;
+
+    proc.minimum = inputs.length;
+    proc.default = length;
+    proc.maximum = rest ? -1 : inputs.length + optional_inputs.length;
+
+    saveproc(name, self.definition(name, proc));
+  }
+
+
+  def("def", function(list) {
+
+    var name = sexpr(list);
+    var proc = this.routines.get(name);
+    if (!proc)
+      throw err("{_PROC_}: Don't know how to {name:U}", { name: name }, ERRORS.BAD_PROC);
+    if (!proc.inputs) {
+      throw err("{_PROC_}: Can't show definition of primitive {name:U}", { name: name },
+               ERRORS.IS_PRIMITIVE);
+    }
+
+    return this.definition(name, proc);
+  });
+
+  def("word", function(word1, word2) {
+    return arguments.length ?
+      Array.from(arguments).map(sexpr).reduce(function(a, b) { return a + b; }) : "";
+  }, {minimum: 0, maximum: -1});
+
+  def("list", function(thing1, thing2) {
+    return Array.from(arguments).map(function(x) { return x; }); // Make a copy
+  }, {minimum: 0, maximum: -1});
+
+  def(["sentence", "se"], function(thing1, thing2) {
+    var list = [];
+    for (var i = 0; i < arguments.length; ++i) {
+      var thing = arguments[i];
+      if (Type(thing) === 'list') {
+        thing = lexpr(thing);
+        list = list.concat(thing);
+      } else {
+        list.push(thing);
+      }
+    }
+    return list;
+  }, {minimum: 0, maximum: -1});
