@@ -2298,3 +2298,126 @@ function LogoInterpreter(turtle, stream, savehook)
       this.plists.keys().filter(function(x) { return this.plists.get(x).traced; }.bind(this))
     ];
   });
+
+  def(["stepped"], function() {
+    return [
+      this.routines.keys().filter(function(x) {
+        return !this.routines.get(x).primitive && this.routines.get(x).stepped; }.bind(this)),
+      this.scopes.reduce(
+        function(list, scope) {
+          return list.concat(scope.keys().filter(function(x) { return scope.get(x).stepped; })); },
+        []),
+      this.plists.keys().filter(function(x) { return this.plists.get(x).stepped; }.bind(this))
+    ];
+  });
+  
+    def("procedures", function() {
+      return this.routines.keys().filter(function(x) {
+        return !this.routines.get(x).primitive && !this.routines.get(x).buried;
+      }.bind(this));
+    });
+  
+    def("primitives", function() {
+      return this.routines.keys().filter(function(x) {
+        return this.routines.get(x).primitive & !this.routines.get(x).buried;
+      }.bind(this));
+    });
+  
+    def("globals", function() {
+      var globalscope = this.scopes[0];
+      return globalscope.keys().filter(function(x) {
+        return !globalscope.get(x).buried;
+      });
+    });
+  
+    def("names", function() {
+      return [
+        [],
+        this.scopes.reduce(function(list, scope) {
+          return list.concat(scope.keys().filter(function(x) {
+            return !scope.get(x).buried; })); }, [])
+      ];
+    });
+  
+    def("plists", function() {
+      return [
+        [],
+        [],
+        this.plists.keys().filter(function(x) {
+          return !this.plists.get(x).buried;
+        }.bind(this))
+      ];
+    });
+  
+    def("namelist", function(varname) {
+      if (Type(varname) === 'list')
+        varname = lexpr(varname);
+      else
+        varname = [sexpr(varname)];
+      return [[], varname];
+    });
+  
+    def("pllist", function(plname) {
+      if (Type(plname) === 'list') {
+        plname = lexpr(plname);
+      } else {
+        plname = [sexpr(plname)];
+      }
+      return [[], [], plname];
+    });
+  
+  
+    def("arity", function(name) {
+      name = sexpr(name);
+      var proc = this.routines.get(name);
+      if (!proc)
+        throw err("{_PROC_}: Don't know how to {name:U}", { name: name }, ERRORS.BAD_PROC);
+      if (proc.special)
+        return [-1, -1, -1];
+  
+      return [
+        proc.minimum,
+        proc.default,
+        proc.maximum
+      ];
+    });
+  
+    def("erase", function(list) {
+      list = lexpr(list);
+
+      if (list.length) {
+        var procs = lexpr(list.shift());
+        procs.forEach(function(name) {
+          name = sexpr(name);
+          if (this.routines.has(name)) {
+            if (this.routines.get(name).special)
+              throw err("Can't {_PROC_} special {name:U}", { name: name }, ERRORS.BAD_INPUT);
+            if (!this.routines.get(name).primitive || maybegetvar("redefp")) {
+              this.routines['delete'](name);
+              saveproc(name);
+            } else {
+              throw err("Can't {_PROC_} primitives unless REDEFP is TRUE", ERRORS.BAD_INPUT);
+            }
+          }
+        }.bind(this));
+      }
+
+      if (list.length) {
+        var vars = lexpr(list.shift());
+
+        this.scopes.forEach(function(scope) {
+          vars.forEach(function(name) {
+            name = sexpr(name);
+            scope['delete'](name);
+          });
+        });
+      }
+
+      if (list.length) {
+        var plists = lexpr(list.shift());
+        plists.forEach(function(name) {
+          name = sexpr(name);
+          this.plists['delete'](name);
+        }.bind(this));
+      }
+    });
