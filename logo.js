@@ -1,3 +1,4 @@
+
 function LogoInterpreter(turtle, stream, savehook)
 {
   'use strict';
@@ -67,7 +68,7 @@ function LogoInterpreter(turtle, stream, savehook)
     this.tag = tag;
     this.value = value;
     this.proc = self.stack[self.stack.length - 1];
-    this.code = -1; 
+    this.code = -1;
     this.line = -1; 
   }
 
@@ -135,7 +136,7 @@ function LogoInterpreter(turtle, stream, savehook)
       return Promise.resolve();
     }
   }
-  
+
   function promiseYieldTime(msec) {
 
     lastTimeYielded = Date.now() + msec * 2;
@@ -160,9 +161,9 @@ function LogoInterpreter(turtle, stream, savehook)
 
   function PRNG(seed) {
     var S = seed & 0x7fffffff, 
-        A = 48271, 
+        A = 48271,
         M = 0x7fffffff, 
-        Q = M / A,
+        Q = M / A, 
         R = M % A;
 
     this.next = function PRNG_next() {
@@ -258,154 +259,152 @@ function LogoInterpreter(turtle, stream, savehook)
     this._index = 0;
     this._skip();
   }
-  
   Object.defineProperties(Stream.prototype, {
     eof: {get: function() {
       return this._index >= this._string.length;
     }},
-    
     peek: {value: function() {
-        var c = this._string.charAt(this._index);
-        if (c === '\\')
-          c += this._string.charAt(this._index + 1);
-        return c;
-      }},
-      get: {value: function() {
-        var c = this._next();
-        this._skip();
-        return c;
-      }},
-      _next: {value: function() {
-        var c = this._string.charAt(this._index++);
-        if (c === '\\')
-          c += this._string.charAt(this._index++);
-        return c;
-      }},
-      _skip: {value: function() {
-        while (!this.eof) {
-          var c = this.peek();
-          if (c === '~' && this._string.charAt(this._index + 1) === '\n') {
-            this._index += 2;
-          } else if (c === ';') {
-            do {
-              c = this._next();
-            } while (!this.eof && this.peek() !== '\n');
-            if (c === '~')
-              this._next();
-          } else {
-            return;
-          }
-        }
-      }},
-      rest: {get: function() {
-        return this._string.substring(this._index);
-      }}
-    });
-  
-    self.turtle = turtle;
-    self.stream = stream;
-    self.routines = new StringMap(true);
-    self.scopes = [new StringMap(true)];
-    self.plists = new StringMap(true);
-    self.prng = new PRNG(Math.random() * 0x7fffffff);
-    self.forceBye = false;
-
-    function Output(output) { this.output = output; }
-    Output.prototype.toString = function() { return this.output; };
-    Output.prototype.valueOf = function() { return this.output; };
-
-    function Bye() { }
-  
-    function Type(atom) {
-      if (atom === undefined) {
-
-        throw err("No output from procedure", ERRORS.NO_OUTPUT);
-      } else if (typeof atom === 'string' || typeof atom === 'number') {
-        return 'word';
-      } else if (Array.isArray(atom)) {
-        return 'list';
-      } else if (atom instanceof LogoArray) {
-        return 'array';
-      } else if ('then' in Object(atom)) {
-        throw new Error("Internal error: Unexpected value: a promise");
-      } else if (!atom) {
-        throw new Error("Internal error: Unexpected value: null");
-      } else {
-        throw new Error("Internal error: Unexpected value: unknown type");
-      }
-    }
-  
-    function parse(string) {
-      if (string === undefined) {
-        return undefined; 
-      }
-  
-      var atoms = [],
-          prev, r;
-  
-      var stream = new Stream(string);
-      while (stream.peek()) {
-        var atom;
-
-        var leading_space = isWS(stream.peek());
-        while (isWS(stream.peek()))
-          stream.get();
-        if (!stream.peek())
-          break;
-  
-        if (stream.peek() === '[') {
-          stream.get();
-          atom = parseList(stream);
-        } else if (stream.peek() === ']') {
-          throw err("Unexpected ']'", ERRORS.BAD_BRACKET);
-        } else if (stream.peek() === '{') {
-          stream.get();
-          atom = parseArray(stream);
-        } else if (stream.peek() === '}') {
-          throw err("Unexpected '}'", ERRORS.BAD_BRACE);
-        } else if (stream.peek() === '"') {
-          atom = parseQuoted(stream);
-        } else if (isOwnWord(stream.peek())) {
-          atom = stream.get();
-        } else if (inRange(stream.peek(), '0', '9')) {
-          atom = parseNumber(stream);
-        } else if (inChars(stream.peek(), OPERATOR_CHARS)) {
-          atom = parseOperator(stream);
-  
-          if (atom === '-') {
-            var trailing_space = isWS(stream.peek());
-            if (prev === undefined ||
-                (Type(prev) === 'word' && isInfix(prev)) ||
-                (Type(prev) === 'word' && prev === '(') ||
-                (leading_space && !trailing_space)) {
-              atom = UNARY_MINUS;
-            }
-          }
-        } else if (!inChars(stream.peek(), WORD_DELIMITER)) {
-          atom = parseWord(stream);
+      var c = this._string.charAt(this._index);
+      if (c === '\\')
+        c += this._string.charAt(this._index + 1);
+      return c;
+    }},
+    get: {value: function() {
+      var c = this._next();
+      this._skip();
+      return c;
+    }},
+    _next: {value: function() {
+      var c = this._string.charAt(this._index++);
+      if (c === '\\')
+        c += this._string.charAt(this._index++);
+      return c;
+    }},
+    _skip: {value: function() {
+      while (!this.eof) {
+        var c = this.peek();
+        if (c === '~' && this._string.charAt(this._index + 1) === '\n') {
+          this._index += 2;
+        } else if (c === ';') {
+          do {
+            c = this._next();
+          } while (!this.eof && this.peek() !== '\n');
+          if (c === '~')
+            this._next();
         } else {
-
-          throw err("Couldn't parse: '{string}'", { string: stream.rest });
+          return;
         }
-        atoms.push(atom);
-        prev = atom;
       }
-  
-      return atoms;
+    }},
+    rest: {get: function() {
+      return this._string.substring(this._index);
+    }}
+  });
+
+  self.turtle = turtle;
+  self.stream = stream;
+  self.routines = new StringMap(true);
+  self.scopes = [new StringMap(true)];
+  self.plists = new StringMap(true);
+  self.prng = new PRNG(Math.random() * 0x7fffffff);
+  self.forceBye = false;
+
+  function Output(output) { this.output = output; }
+  Output.prototype.toString = function() { return this.output; };
+  Output.prototype.valueOf = function() { return this.output; };
+
+  function Bye() { }
+
+  function Type(atom) {
+    if (atom === undefined) {
+
+      throw err("No output from procedure", ERRORS.NO_OUTPUT);
+    } else if (typeof atom === 'string' || typeof atom === 'number') {
+      return 'word';
+    } else if (Array.isArray(atom)) {
+      return 'list';
+    } else if (atom instanceof LogoArray) {
+      return 'array';
+    } else if ('then' in Object(atom)) {
+      throw new Error("Internal error: Unexpected value: a promise");
+    } else if (!atom) {
+      throw new Error("Internal error: Unexpected value: null");
+    } else {
+      throw new Error("Internal error: Unexpected value: unknown type");
     }
-  
-    function inRange(x, a, b) {
-      return a <= x && x <= b;
+  }
+
+  function parse(string) {
+    if (string === undefined) {
+      return undefined;
     }
-  
-    function inChars(x, chars) {
-      return x && chars.indexOf(x) !== -1;
+
+    var atoms = [],
+        prev, r;
+
+    var stream = new Stream(string);
+    while (stream.peek()) {
+      var atom;
+
+      var leading_space = isWS(stream.peek());
+      while (isWS(stream.peek()))
+        stream.get();
+      if (!stream.peek())
+        break;
+
+      if (stream.peek() === '[') {
+        stream.get();
+        atom = parseList(stream);
+      } else if (stream.peek() === ']') {
+        throw err("Unexpected ']'", ERRORS.BAD_BRACKET);
+      } else if (stream.peek() === '{') {
+        stream.get();
+        atom = parseArray(stream);
+      } else if (stream.peek() === '}') {
+        throw err("Unexpected '}'", ERRORS.BAD_BRACE);
+      } else if (stream.peek() === '"') {
+        atom = parseQuoted(stream);
+      } else if (isOwnWord(stream.peek())) {
+        atom = stream.get();
+      } else if (inRange(stream.peek(), '0', '9')) {
+        atom = parseNumber(stream);
+      } else if (inChars(stream.peek(), OPERATOR_CHARS)) {
+        atom = parseOperator(stream);
+
+        if (atom === '-') {
+          var trailing_space = isWS(stream.peek());
+          if (prev === undefined ||
+              (Type(prev) === 'word' && isInfix(prev)) ||
+              (Type(prev) === 'word' && prev === '(') ||
+              (leading_space && !trailing_space)) {
+            atom = UNARY_MINUS;
+          }
+        }
+      } else if (!inChars(stream.peek(), WORD_DELIMITER)) {
+        atom = parseWord(stream);
+      } else {
+
+        throw err("Couldn't parse: '{string}'", { string: stream.rest });
+      }
+      atoms.push(atom);
+      prev = atom;
     }
-  
-    var WS_CHARS = ' \f\n\r\t\v';
-    function isWS(c) {
-      return inChars(c, WS_CHARS);
-    }
+
+    return atoms;
+  }
+
+  function inRange(x, a, b) {
+    return a <= x && x <= b;
+  }
+
+  function inChars(x, chars) {
+    return x && chars.indexOf(x) !== -1;
+  }
+
+  var WS_CHARS = ' \f\n\r\t\v';
+  function isWS(c) {
+    return inChars(c, WS_CHARS);
+  }
 
   var QUOTED_DELIMITER = WS_CHARS + '[](){}';
   function parseQuoted(stream) {
@@ -421,7 +420,6 @@ function LogoInterpreter(turtle, stream, savehook)
   function isOwnWord(c) {
     return inChars(c, OWNWORD_CHARS);
   }
- this
 
   var WORD_DELIMITER = WS_CHARS + '[](){}+-*/%^=<>';
   function parseWord(stream) {
@@ -527,27 +525,28 @@ function LogoInterpreter(turtle, stream, savehook)
       throw err("Unexpected '{c}'", {c: c});
     }
   }
+
   function parseArray(stream) {
     var list = [],
         origin = 1,
         atom = '',
         c, r;
-  
+
     for (;;) {
       do {
         c = stream.get();
       } while (isWS(c));
-  
+
       while (c && !isWS(c) && '[]{}'.indexOf(c) === -1) {
         atom += c;
         c = stream.get();
       }
-  
+
       if (atom.length) {
         list.push(atom);
         atom = '';
       }
-  
+
       if (!c)
         throw err("Expected '}'", ERRORS.BAD_BRACE);
       if (isWS(c))
@@ -576,112 +575,111 @@ function LogoInterpreter(turtle, stream, savehook)
       throw err("Unexpected '{c}'", {c: c});
     }
   }
-  
-    function reparse(list) {
-      return parse(stringify_nodecorate(list).replace(/([\\;])/g, '\\$1'));
+
+  function reparse(list) {
+    return parse(stringify_nodecorate(list).replace(/([\\;])/g, '\\$1'));
+  }
+
+  function maybegetvar(name) {
+    var lval = lvalue(name);
+    return lval ? lval.value : undefined;
+  }
+
+  function getvar(name) {
+    var value = maybegetvar(name);
+    if (value !== undefined)
+      return value;
+    throw err("Don't know about variable {name:U}", {name: name}, ERRORS.BAD_VAR);
+  }
+
+  function lvalue(name) {
+    for (var i = self.scopes.length - 1; i >= 0; --i) {
+      if (self.scopes[i].has(name)) {
+        return self.scopes[i].get(name);
+      }
     }
-  
-    function maybegetvar(name) {
-      var lval = lvalue(name);
-      return lval ? lval.value : undefined;
+    return undefined;
+  }
+
+  function setvar(name, value) {
+    value = copy(value);
+
+    var lval = lvalue(name);
+    if (lval) {
+      lval.value = value;
+    } else {
+
+      lval = {value: value};
+      self.scopes[0].set(name, lval);
     }
-  
-    function getvar(name) {
-      var value = maybegetvar(name);
-      if (value !== undefined)
-        return value;
-      throw err("Don't know about variable {name:U}", {name: name}, ERRORS.BAD_VAR);
-    }
-  
-    function lvalue(name) {
-      for (var i = self.scopes.length - 1; i >= 0; --i) {
-        if (self.scopes[i].has(name)) {
-          return self.scopes[i].get(name);
+  }
+
+  function local(name) {
+    var scope = self.scopes[self.scopes.length - 1];
+    scope.set(sexpr(name), {value: undefined});
+  }
+
+  function setlocal(name, value) {
+    value = copy(value);
+    var scope = self.scopes[self.scopes.length - 1];
+    scope.set(sexpr(name), {value: value});
+  }
+
+  function peek(list, options) {
+    if (list.length < 1) { return false; }
+    var next = list[0];
+    return options.some(function(x) { return next === x; });
+
+  }
+
+  function evaluateExpression(list) {
+    return (expression(list))();
+  }
+
+  function expression(list) {
+    return relationalExpression(list);
+  }
+
+  function relationalExpression(list) {
+    var lhs = additiveExpression(list);
+    var op;
+    while (peek(list, ['=', '<', '>', '<=', '>=', '<>'])) {
+      op = list.shift();
+
+      lhs = function(lhs) {
+        var rhs = additiveExpression(list);
+
+        switch (op) {
+          case "<": return defer(function(lhs, rhs) { return (aexpr(lhs) < aexpr(rhs)) ? 1 : 0; }, lhs, rhs);
+          case ">": return defer(function(lhs, rhs) { return (aexpr(lhs) > aexpr(rhs)) ? 1 : 0; }, lhs, rhs);
+          case "=": return defer(function(lhs, rhs) { return equal(lhs, rhs) ? 1 : 0; }, lhs, rhs);
+
+          case "<=": return defer(function(lhs, rhs) { return (aexpr(lhs) <= aexpr(rhs)) ? 1 : 0; }, lhs, rhs);
+          case ">=": return defer(function(lhs, rhs) { return (aexpr(lhs) >= aexpr(rhs)) ? 1 : 0; }, lhs, rhs);
+          case "<>": return defer(function(lhs, rhs) { return !equal(lhs, rhs) ? 1 : 0; }, lhs, rhs);
+          default: throw new Error("Internal error in expression parser");
         }
-      }
-      return undefined;
-    }
-  
-    function setvar(name, value) {
-      value = copy(value);
-
-      var lval = lvalue(name);
-      if (lval) {
-        lval.value = value;
-      } else {
-
-        lval = {value: value};
-        self.scopes[0].set(name, lval);
-      }
-    }
-  
-    function local(name) {
-      var scope = self.scopes[self.scopes.length - 1];
-      scope.set(sexpr(name), {value: undefined});
-    }
-  
-    function setlocal(name, value) {
-      value = copy(value);
-      var scope = self.scopes[self.scopes.length - 1];
-      scope.set(sexpr(name), {value: value});
+      } (lhs);
     }
 
-    function peek(list, options) {
-      if (list.length < 1) { return false; }
-      var next = list[0];
-      return options.some(function(x) { return next === x; });
-  
-    }
-  
-    function evaluateExpression(list) {
-      return (expression(list))();
-    }
-  
-    function expression(list) {
-      return relationalExpression(list);
-    }
-  
-    function relationalExpression(list) {
-      var lhs = additiveExpression(list);
-      var op;
-      while (peek(list, ['=', '<', '>', '<=', '>=', '<>'])) {
-        op = list.shift();
-  
-        lhs = function(lhs) {
-          var rhs = additiveExpression(list);
-  
-          switch (op) {
-            case "<": return defer(function(lhs, rhs) { return (aexpr(lhs) < aexpr(rhs)) ? 1 : 0; }, lhs, rhs);
-            case ">": return defer(function(lhs, rhs) { return (aexpr(lhs) > aexpr(rhs)) ? 1 : 0; }, lhs, rhs);
-            case "=": return defer(function(lhs, rhs) { return equal(lhs, rhs) ? 1 : 0; }, lhs, rhs);
-  
-            case "<=": return defer(function(lhs, rhs) { return (aexpr(lhs) <= aexpr(rhs)) ? 1 : 0; }, lhs, rhs);
-            case ">=": return defer(function(lhs, rhs) { return (aexpr(lhs) >= aexpr(rhs)) ? 1 : 0; }, lhs, rhs);
-            case "<>": return defer(function(lhs, rhs) { return !equal(lhs, rhs) ? 1 : 0; }, lhs, rhs);
-            default: throw new Error("Internal error in expression parser");
-          }
-        } (lhs);
-      }
-  
-      return lhs;
-    }
-  
-    function defer(func /*, input...*/) {
-      var input = [].slice.call(arguments, 1);
-      return function() {
-        return serialExecute(input.slice())
-          .then(function(args) {
-            return func.apply(null, args);
-          });
-      };
-    }
-  
-    function additiveExpression(list) {
-      var lhs = multiplicativeExpression(list);
-      var op;
-      while (peek(list, ['+', '-'])) {
-        op = list.shift();
-        
+    return lhs;
+  }
+
+  function defer(func /*, input...*/) {
+    var input = [].slice.call(arguments, 1);
+    return function() {
+      return serialExecute(input.slice())
+        .then(function(args) {
+          return func.apply(null, args);
+        });
+    };
+  }
+
+  function additiveExpression(list) {
+    var lhs = multiplicativeExpression(list);
+    var op;
+    while (peek(list, ['+', '-'])) {
+      op = list.shift();
 
       lhs = function(lhs) {
         var rhs = multiplicativeExpression(list);
@@ -823,148 +821,149 @@ function LogoInterpreter(turtle, stream, savehook)
 
       throw err("Don't know how to {name:U}", { name: name }, ERRORS.BAD_PROC);
     }
+
     if (procedure.special) {
 
-        self.stack.push(name);
-        try {
-          procedure.call(self, tokenlist);
-          return function() { };
-        } finally {
-          self.stack.pop();
-        }
+      self.stack.push(name);
+      try {
+        procedure.call(self, tokenlist);
+        return function() { };
+      } finally {
+        self.stack.pop();
       }
-      
-          var args = [];
-          if (natural) {
+    }
 
-            for (var i = 0; i < procedure.default; ++i) {
-              args.push(expression(tokenlist));
-            }
-          } else {
+    var args = [];
+    if (natural) {
 
-            while (tokenlist.length && !peek(tokenlist, [')'])) {
-              args.push(expression(tokenlist));
-            }
-            tokenlist.shift(); 
-      
-            if (args.length < procedure.minimum)
-              throw err("Not enough inputs for {name:U}", {name: name}, ERRORS.NOT_ENOUGH_INPUTS);
-            if (procedure.maximum !== -1 && args.length > procedure.maximum)
-              throw err("Too many inputs for {name:U}", {name: name}, ERRORS.TOO_MANY_INPUTS);
-          }
-      
-          if (procedure.noeval) {
-            return function() {
-              self.stack.push(name);
-              return promiseFinally(procedure.apply(self, args),
-                                    function() { self.stack.pop(); });
-            };
-          }
-      
-          return function() {
-            self.stack.push(name);
-            return promiseFinally(serialExecute(args.slice()).then(function(args) {
-              return procedure.apply(self, args);
-            }), function() { self.stack.pop(); });
-          };
-        };
-      
-        function aexpr(atom) {
-          if (atom === undefined) {
-            throw err("Expected number", ERRORS.BAD_INPUT);
-          }
-          switch (Type(atom)) {
-          case 'word':
-            if (isNumber(atom))
-              return parseFloat(atom);
-            break;
-          }
-          throw err("Expected number", ERRORS.BAD_INPUT);
-        }
+      for (var i = 0; i < procedure.default; ++i) {
+        args.push(expression(tokenlist));
+      }
+    } else {
 
-        function sexpr(atom) {
-          if (atom === undefined) throw err("Expected string", ERRORS.BAD_INPUT);
-          if (atom === UNARY_MINUS) return '-';
-          if (Type(atom) === 'word') return String(atom);
-      
-          throw new err("Expected string", ERRORS.BAD_INPUT);
-        }
+      while (tokenlist.length && !peek(tokenlist, [')'])) {
+        args.push(expression(tokenlist));
+      }
+      tokenlist.shift();
 
-        function lexpr(atom) {
-          if (atom === undefined)
-            throw err("{_PROC_}: Expected list", ERRORS.BAD_INPUT);
-          switch (Type(atom)) {
-          case 'word':
-            return Array.from(String(atom));
-          case 'list':
-            return copy(atom);
+      if (args.length < procedure.minimum)
+        throw err("Not enough inputs for {name:U}", {name: name}, ERRORS.NOT_ENOUGH_INPUTS);
+      if (procedure.maximum !== -1 && args.length > procedure.maximum)
+        throw err("Too many inputs for {name:U}", {name: name}, ERRORS.TOO_MANY_INPUTS);
+    }
+
+    if (procedure.noeval) {
+      return function() {
+        self.stack.push(name);
+        return promiseFinally(procedure.apply(self, args),
+                              function() { self.stack.pop(); });
+      };
+    }
+
+    return function() {
+      self.stack.push(name);
+      return promiseFinally(serialExecute(args.slice()).then(function(args) {
+        return procedure.apply(self, args);
+      }), function() { self.stack.pop(); });
+    };
+  };
+
+  function aexpr(atom) {
+    if (atom === undefined) {
+      throw err("Expected number", ERRORS.BAD_INPUT);
+    }
+    switch (Type(atom)) {
+    case 'word':
+      if (isNumber(atom))
+        return parseFloat(atom);
+      break;
+    }
+    throw err("Expected number", ERRORS.BAD_INPUT);
+  }
+
+  function sexpr(atom) {
+    if (atom === undefined) throw err("Expected string", ERRORS.BAD_INPUT);
+    if (atom === UNARY_MINUS) return '-';
+    if (Type(atom) === 'word') return String(atom);
+
+    throw new err("Expected string", ERRORS.BAD_INPUT);
+  }
+
+  function lexpr(atom) {
+    if (atom === undefined)
+      throw err("{_PROC_}: Expected list", ERRORS.BAD_INPUT);
+    switch (Type(atom)) {
+    case 'word':
+      return Array.from(String(atom));
+    case 'list':
+      return copy(atom);
+    }
+
+    throw err("{_PROC_}: Expected list", ERRORS.BAD_INPUT);
+  }
+
+  function sifw(atom, list) {
+    return (Type(atom) === 'word') ? list.join('') : list;
+  }
+
+  function copy(value) {
+    switch (Type(value)) {
+    case 'list': return value.map(copy);
+    default: return value;
+    }
+  }
+
+  function equal(a, b) {
+    if (Type(a) !== Type(b)) return false;
+    switch (Type(a)) {
+    case 'word':
+      if (typeof a === 'number' || typeof b === 'number')
+        return Number(a) === Number(b);
+      else
+        return String(a) === String(b);
+    case 'list':
+      if (a.length !== b.length)
+        return false;
+      for (var i = 0; i < a.length; ++i) {
+        if (!equal(a[i], b[i]))
+          return false;
+      }
+      return true;
+    case 'array':
+      return a === b;
+    }
+    return undefined;
+  }
+
+  self.execute = function(statements, options) {
+    options = Object(options);
+
+    statements = statements.slice();
+
+    var lastResult;
+    return promiseLoop(function(loop, resolve, reject) {
+      if (self.forceBye) {
+        self.forceBye = false;
+        reject(new Bye);
+        return;
+      }
+      if (!statements.length) {
+        resolve(lastResult);
+        return;
+      }
+      Promise.resolve(evaluateExpression(statements))
+        .then(function(result) {
+          if (result !== undefined && !options.returnResult) {
+            reject(err("Don't know what to do with {result}", {result: result},
+                  ERRORS.BAD_OUTPUT));
+            return;
           }
-      
-          throw err("{_PROC_}: Expected list", ERRORS.BAD_INPUT);
-        }
+          lastResult = result;
+          loop();
+        }, reject);
+    });
+  };
 
-        function sifw(atom, list) {
-          return (Type(atom) === 'word') ? list.join('') : list;
-        }
-
-        function copy(value) {
-          switch (Type(value)) {
-          case 'list': return value.map(copy);
-          default: return value;
-          }
-        }
-      
-        function equal(a, b) {
-          if (Type(a) !== Type(b)) return false;
-          switch (Type(a)) {
-          case 'word':
-            if (typeof a === 'number' || typeof b === 'number')
-              return Number(a) === Number(b);
-            else
-              return String(a) === String(b);
-          case 'list':
-            if (a.length !== b.length)
-              return false;
-            for (var i = 0; i < a.length; ++i) {
-              if (!equal(a[i], b[i]))
-                return false;
-            }
-            return true;
-          case 'array':
-            return a === b;
-          }
-          return undefined;
-        }
-      
-        self.execute = function(statements, options) {
-          options = Object(options);
-
-          statements = statements.slice();
-      
-          var lastResult;
-          return promiseLoop(function(loop, resolve, reject) {
-            if (self.forceBye) {
-              self.forceBye = false;
-              reject(new Bye);
-              return;
-            }
-            if (!statements.length) {
-              resolve(lastResult);
-              return;
-            }
-            Promise.resolve(evaluateExpression(statements))
-              .then(function(result) {
-                if (result !== undefined && !options.returnResult) {
-                  reject(err("Don't know what to do with {result}", {result: result},
-                        ERRORS.BAD_OUTPUT));
-                  return;
-                }
-                lastResult = result;
-                loop();
-              }, reject);
-          });
-        };
-        
   self.bye = function() {
     self.forceBye = true;
   };
@@ -982,7 +981,7 @@ function LogoInterpreter(turtle, stream, savehook)
   self.run = function(string, options) {
     options = Object(options);
     return self.queueTask(function() {
-      // Parse it
+
       var atoms = parse(string);
 
       return self.execute(atoms, options)
@@ -1061,7 +1060,7 @@ function LogoInterpreter(turtle, stream, savehook)
       return sexpr(thing);
     }
   }
-  
+
   function def(name, fn, props) {
     fn.minimum = fn.default = fn.maximum = fn.length;
     if (props) {
@@ -1086,10 +1085,9 @@ function LogoInterpreter(turtle, stream, savehook)
 
     var inputs = []; 
     var optional_inputs = []; 
-    var rest = undefined;
-    var length = undefined;
+    var length = undefined; 
     var block = [];
-    
+
     var REQUIRED = 0, OPTIONAL = 1, REST = 2, DEFAULT = 3, BLOCK = 4;
     var state = REQUIRED, sawEnd = false;
     while (list.length) {
@@ -1198,7 +1196,6 @@ function LogoInterpreter(turtle, stream, savehook)
     saveproc(name, self.definition(name, proc));
   }
 
-
   def("def", function(list) {
 
     var name = sexpr(list);
@@ -1219,7 +1216,7 @@ function LogoInterpreter(turtle, stream, savehook)
   }, {minimum: 0, maximum: -1});
 
   def("list", function(thing1, thing2) {
-    return Array.from(arguments).map(function(x) { return x; }); // Make a copy
+    return Array.from(arguments).map(function(x) { return x; }); 
   }, {minimum: 0, maximum: -1});
 
   def(["sentence", "se"], function(thing1, thing2) {
@@ -1241,139 +1238,139 @@ function LogoInterpreter(turtle, stream, savehook)
     l.unshift(thing);
     return sifw(list, l);
   });
-  
-  def("lput", function(thing, list) {
-      var l = lexpr(list);
-      l.push(thing);
-      return sifw(list, l);
-    });
-  
-    def("array", function(size) {
-      size = aexpr(size);
-      if (size < 1)
-        throw err("{_PROC_}: Array size must be positive integer", ERRORS.BAD_INPUT);
-      var origin = (arguments.length < 2) ? 1 : aexpr(arguments[1]);
-      return new LogoArray(size, origin);
-    }, {maximum: 2});
-  
-    def("mdarray", function(sizes) {
-      sizes = lexpr(sizes).map(aexpr).map(function(n) { return n|0; });
-      if (sizes.some(function(size) { return size < 1; }))
-        throw err("{_PROC_}: Array size must be positive integer", ERRORS.BAD_INPUT);
-      var origin = (arguments.length < 2) ? 1 : aexpr(arguments[1]);
-  
-      function make(index) {
-        var n = sizes[index], a = new LogoArray(n, origin);
-        if (index + 1 < sizes.length) {
-          for (var i = 0; i < n; ++i)
-            a.setItem(i + origin, make(index + 1));
-        }
-        return a;
-      }
-  
-      return make(0);
-    }, {maximum: 2});
-  
-    def("listtoarray", function(list) {
-      list = lexpr(list);
-      var origin = 1;
-      if (arguments.length > 1)
-        origin = aexpr(arguments[1]);
-      return LogoArray.from(list, origin);
-    }, {maximum: 2});
-  
-    def("arraytolist", function(array) {
-      if (Type(array) !== 'array') {
-        throw err("{_PROC_}: Expected array", ERRORS.BAD_INPUT);
-      }
-      return array.list.slice();
-    });
-  
-    def("combine", function(thing1, thing2) {
-      if (Type(thing2) !== 'list') {
-        return this.routines.get('word')(thing1, thing2);
-      } else {
-        return this.routines.get('fput')(thing1, thing2);
-      }
-    });
-  
-    def("reverse", function(list) {
-      var tail = (arguments.length > 1) ? arguments[1] : (Type(list) === 'list' ? [] : '');
-      return sifw(tail, lexpr(list).reverse().concat(lexpr(tail)));
-    }, {maximum: 2});
-  
-    this.gensym_index = 0;
-    def("gensym", function() {
-      ++this.gensym_index;
-      return 'G' + this.gensym_index;
-    });
-  
-    def("first", function(list) { return lexpr(list)[0]; });
-  
-    def("firsts", function(list) {
-      return lexpr(list).map(function(x) { return x[0]; });
-    });
-  
-    def("last", function(list) { list = lexpr(list); return list[list.length - 1]; });
-  
-    def(["butfirst", "bf"], function(list) {
-      return sifw(list, lexpr(list).slice(1));
-    });
-  
-    def(["butfirsts", "bfs"], function(list) {
-      return lexpr(list).map(function(x) { return sifw(x, lexpr(x).slice(1)); });
-    });
-  
-    def(["butlast", "bl"], function(list) {
-      return Type(list) === 'word' ? String(list).slice(0, -1) : lexpr(list).slice(0, -1);
-    });
-  
-    function item(index, thing) {
-      switch (Type(thing)) {
-      case 'list':
-        if (index < 1 || index > thing.length)
-          throw err("{_PROC_}: Index out of bounds", ERRORS.BAD_INPUT);
-        return thing[index - 1];
-      case 'array':
-        return thing.item(index);
-      default:
-        thing = sexpr(thing);
-        if (index < 1 || index > thing.length)
-          throw err("{_PROC_}: Index out of bounds", ERRORS.BAD_INPUT);
-        return thing.charAt(index - 1);
-      }
-    }
-  
-    def("item", function(index, thing) {
-      index = aexpr(index)|0;
-      return item(index, thing);
-    });
-  
-    def("mditem", function(indexes, thing) {
-      indexes = lexpr(indexes).map(aexpr).map(function(n) { return n|0; });
-      while (indexes.length)
-        thing = item(indexes.shift(), thing);
-      return thing;
-    });
-  
-    def("pick", function(list) {
-      list = lexpr(list);
-      var i = Math.floor(this.prng.next() * list.length);
-      return list[i];
-    });
-  
-    def("remove", function(thing, list) {
-      return sifw(list, lexpr(list).filter(function(x) { return !equal(x, thing); }));
-    });
-  
-    def("remdup", function(list) {
 
-      var set = new Set();
-      return sifw(list, lexpr(list).filter(function(x) {
-        if (set.has(x)) { return false; } else { set.add(x); return true; }
-      }));
-    });
-    
+  def("lput", function(thing, list) {
+    var l = lexpr(list);
+    l.push(thing);
+    return sifw(list, l);
+  });
+
+  def("array", function(size) {
+    size = aexpr(size);
+    if (size < 1)
+      throw err("{_PROC_}: Array size must be positive integer", ERRORS.BAD_INPUT);
+    var origin = (arguments.length < 2) ? 1 : aexpr(arguments[1]);
+    return new LogoArray(size, origin);
+  }, {maximum: 2});
+
+  def("mdarray", function(sizes) {
+    sizes = lexpr(sizes).map(aexpr).map(function(n) { return n|0; });
+    if (sizes.some(function(size) { return size < 1; }))
+      throw err("{_PROC_}: Array size must be positive integer", ERRORS.BAD_INPUT);
+    var origin = (arguments.length < 2) ? 1 : aexpr(arguments[1]);
+
+    function make(index) {
+      var n = sizes[index], a = new LogoArray(n, origin);
+      if (index + 1 < sizes.length) {
+        for (var i = 0; i < n; ++i)
+          a.setItem(i + origin, make(index + 1));
+      }
+      return a;
+    }
+
+    return make(0);
+  }, {maximum: 2});
+
+  def("listtoarray", function(list) {
+    list = lexpr(list);
+    var origin = 1;
+    if (arguments.length > 1)
+      origin = aexpr(arguments[1]);
+    return LogoArray.from(list, origin);
+  }, {maximum: 2});
+
+  def("arraytolist", function(array) {
+    if (Type(array) !== 'array') {
+      throw err("{_PROC_}: Expected array", ERRORS.BAD_INPUT);
+    }
+    return array.list.slice();
+  });
+
+  def("combine", function(thing1, thing2) {
+    if (Type(thing2) !== 'list') {
+      return this.routines.get('word')(thing1, thing2);
+    } else {
+      return this.routines.get('fput')(thing1, thing2);
+    }
+  });
+
+  def("reverse", function(list) {
+    var tail = (arguments.length > 1) ? arguments[1] : (Type(list) === 'list' ? [] : '');
+    return sifw(tail, lexpr(list).reverse().concat(lexpr(tail)));
+  }, {maximum: 2});
+
+  this.gensym_index = 0;
+  def("gensym", function() {
+    ++this.gensym_index;
+    return 'G' + this.gensym_index;
+  });
+
+  def("first", function(list) { return lexpr(list)[0]; });
+
+  def("firsts", function(list) {
+    return lexpr(list).map(function(x) { return x[0]; });
+  });
+
+  def("last", function(list) { list = lexpr(list); return list[list.length - 1]; });
+
+  def(["butfirst", "bf"], function(list) {
+    return sifw(list, lexpr(list).slice(1));
+  });
+
+  def(["butfirsts", "bfs"], function(list) {
+    return lexpr(list).map(function(x) { return sifw(x, lexpr(x).slice(1)); });
+  });
+
+  def(["butlast", "bl"], function(list) {
+    return Type(list) === 'word' ? String(list).slice(0, -1) : lexpr(list).slice(0, -1);
+  });
+
+  function item(index, thing) {
+    switch (Type(thing)) {
+    case 'list':
+      if (index < 1 || index > thing.length)
+        throw err("{_PROC_}: Index out of bounds", ERRORS.BAD_INPUT);
+      return thing[index - 1];
+    case 'array':
+      return thing.item(index);
+    default:
+      thing = sexpr(thing);
+      if (index < 1 || index > thing.length)
+        throw err("{_PROC_}: Index out of bounds", ERRORS.BAD_INPUT);
+      return thing.charAt(index - 1);
+    }
+  }
+
+  def("item", function(index, thing) {
+    index = aexpr(index)|0;
+    return item(index, thing);
+  });
+
+  def("mditem", function(indexes, thing) {
+    indexes = lexpr(indexes).map(aexpr).map(function(n) { return n|0; });
+    while (indexes.length)
+      thing = item(indexes.shift(), thing);
+    return thing;
+  });
+
+  def("pick", function(list) {
+    list = lexpr(list);
+    var i = Math.floor(this.prng.next() * list.length);
+    return list[i];
+  });
+
+  def("remove", function(thing, list) {
+    return sifw(list, lexpr(list).filter(function(x) { return !equal(x, thing); }));
+  });
+
+  def("remdup", function(list) {
+
+    var set = new Set();
+    return sifw(list, lexpr(list).filter(function(x) {
+      if (set.has(x)) { return false; } else { set.add(x); return true; }
+    }));
+  });
+
   def("split", function(thing, list) {
     var l = lexpr(list);
     return lexpr(list)
@@ -1506,6 +1503,7 @@ function LogoInterpreter(turtle, stream, savehook)
     return lexpr(list).some(function(x) { return equal(x, thing); }) ? 1 : 0;
   });
 
+
   def(["substringp", "substring?"], function(word1, word2) {
     return sexpr(word2).indexOf(sexpr(word1)) !== -1 ? 1 : 0;
   });
@@ -1624,7 +1622,7 @@ function LogoInterpreter(turtle, stream, savehook)
   def('font', function() {
     return this.stream.font;
   });
-  
+
   def("sum", function(a, b) {
     return Array.from(arguments).map(aexpr).reduce(function(a, b) { return a + b; }, 0);
   }, {minimum: 0, maximum: -1});
@@ -1767,7 +1765,7 @@ function LogoInterpreter(turtle, stream, savehook)
   def("bitnot", function(num) {
     return ~aexpr(num);
   });
-  
+
   def("ashift", function(num1, num2) {
     num1 = truncate(aexpr(num1));
     num2 = truncate(aexpr(num2));
@@ -1833,6 +1831,7 @@ function LogoInterpreter(turtle, stream, savehook)
 
   def(["\u2193"], function() { return turtle.move(-10); });
 
+
   def("setpos", function(l) {
     l = lexpr(l);
     if (l.length !== 2) throw err("{_PROC_}: Expected list of length 2", ERRORS.BAD_INPUT);
@@ -1889,7 +1888,7 @@ function LogoInterpreter(turtle, stream, savehook)
   def("setlabelheight", function(a) { turtle.fontsize = aexpr(a); });
 
   def("setlabelfont", function(a) { turtle.fontname = sexpr(a); });
- 
+
   def("setscrunch", function(sx, sy) {
     sx = aexpr(sx);
     sy = aexpr(sy);
@@ -1897,7 +1896,7 @@ function LogoInterpreter(turtle, stream, savehook)
       throw err("{_PROC_}: Expected non-zero values", ERRORS.BAD_INPUT);
     turtle.scrunch = [sx, sy];
   });
-  
+
   def("setturtle", function(index) {
     index = aexpr(index)|0;
     if (index < 1)
@@ -2032,7 +2031,7 @@ function LogoInterpreter(turtle, stream, savehook)
   def(["background", "bg", "getscreencolor", "getsc"], function() {
     return turtle.bgcolor;
   });
-  
+
   def("mousepos", function() {
     return turtle.mousepos;
   });
@@ -2154,7 +2153,6 @@ function LogoInterpreter(turtle, stream, savehook)
     }
 
     this.routines.set(newname, this.routines.get(oldname));
-
   });
 
   def("make", function(varname, value) {
@@ -2310,265 +2308,265 @@ function LogoInterpreter(turtle, stream, savehook)
       this.plists.keys().filter(function(x) { return this.plists.get(x).stepped; }.bind(this))
     ];
   });
-  
-    def("procedures", function() {
-      return this.routines.keys().filter(function(x) {
-        return !this.routines.get(x).primitive && !this.routines.get(x).buried;
-      }.bind(this));
-    });
-  
-    def("primitives", function() {
-      return this.routines.keys().filter(function(x) {
-        return this.routines.get(x).primitive & !this.routines.get(x).buried;
-      }.bind(this));
-    });
-  
-    def("globals", function() {
-      var globalscope = this.scopes[0];
-      return globalscope.keys().filter(function(x) {
-        return !globalscope.get(x).buried;
-      });
-    });
-  
-    def("names", function() {
-      return [
-        [],
-        this.scopes.reduce(function(list, scope) {
-          return list.concat(scope.keys().filter(function(x) {
-            return !scope.get(x).buried; })); }, [])
-      ];
-    });
-  
-    def("plists", function() {
-      return [
-        [],
-        [],
-        this.plists.keys().filter(function(x) {
-          return !this.plists.get(x).buried;
-        }.bind(this))
-      ];
-    });
-  
-    def("namelist", function(varname) {
-      if (Type(varname) === 'list')
-        varname = lexpr(varname);
-      else
-        varname = [sexpr(varname)];
-      return [[], varname];
-    });
-  
-    def("pllist", function(plname) {
-      if (Type(plname) === 'list') {
-        plname = lexpr(plname);
-      } else {
-        plname = [sexpr(plname)];
-      }
-      return [[], [], plname];
-    });
-  
-  
-    def("arity", function(name) {
-      name = sexpr(name);
-      var proc = this.routines.get(name);
-      if (!proc)
-        throw err("{_PROC_}: Don't know how to {name:U}", { name: name }, ERRORS.BAD_PROC);
-      if (proc.special)
-        return [-1, -1, -1];
-  
-      return [
-        proc.minimum,
-        proc.default,
-        proc.maximum
-      ];
-    });
-  
-    def("erase", function(list) {
-      list = lexpr(list);
 
-      if (list.length) {
-        var procs = lexpr(list.shift());
-        procs.forEach(function(name) {
-          name = sexpr(name);
-          if (this.routines.has(name)) {
-            if (this.routines.get(name).special)
-              throw err("Can't {_PROC_} special {name:U}", { name: name }, ERRORS.BAD_INPUT);
-            if (!this.routines.get(name).primitive || maybegetvar("redefp")) {
-              this.routines['delete'](name);
-              saveproc(name);
-            } else {
-              throw err("Can't {_PROC_} primitives unless REDEFP is TRUE", ERRORS.BAD_INPUT);
-            }
+  def("procedures", function() {
+    return this.routines.keys().filter(function(x) {
+      return !this.routines.get(x).primitive && !this.routines.get(x).buried;
+    }.bind(this));
+  });
+
+  def("primitives", function() {
+    return this.routines.keys().filter(function(x) {
+      return this.routines.get(x).primitive & !this.routines.get(x).buried;
+    }.bind(this));
+  });
+
+  def("globals", function() {
+    var globalscope = this.scopes[0];
+    return globalscope.keys().filter(function(x) {
+      return !globalscope.get(x).buried;
+    });
+  });
+
+  def("names", function() {
+    return [
+      [],
+      this.scopes.reduce(function(list, scope) {
+        return list.concat(scope.keys().filter(function(x) {
+          return !scope.get(x).buried; })); }, [])
+    ];
+  });
+
+  def("plists", function() {
+    return [
+      [],
+      [],
+      this.plists.keys().filter(function(x) {
+        return !this.plists.get(x).buried;
+      }.bind(this))
+    ];
+  });
+
+  def("namelist", function(varname) {
+    if (Type(varname) === 'list')
+      varname = lexpr(varname);
+    else
+      varname = [sexpr(varname)];
+    return [[], varname];
+  });
+
+  def("pllist", function(plname) {
+    if (Type(plname) === 'list') {
+      plname = lexpr(plname);
+    } else {
+      plname = [sexpr(plname)];
+    }
+    return [[], [], plname];
+  });
+
+
+  def("arity", function(name) {
+    name = sexpr(name);
+    var proc = this.routines.get(name);
+    if (!proc)
+      throw err("{_PROC_}: Don't know how to {name:U}", { name: name }, ERRORS.BAD_PROC);
+    if (proc.special)
+      return [-1, -1, -1];
+
+    return [
+      proc.minimum,
+      proc.default,
+      proc.maximum
+    ];
+  });
+
+  def("erase", function(list) {
+    list = lexpr(list);
+
+    if (list.length) {
+      var procs = lexpr(list.shift());
+      procs.forEach(function(name) {
+        name = sexpr(name);
+        if (this.routines.has(name)) {
+          if (this.routines.get(name).special)
+            throw err("Can't {_PROC_} special {name:U}", { name: name }, ERRORS.BAD_INPUT);
+          if (!this.routines.get(name).primitive || maybegetvar("redefp")) {
+            this.routines['delete'](name);
+            saveproc(name);
+          } else {
+            throw err("Can't {_PROC_} primitives unless REDEFP is TRUE", ERRORS.BAD_INPUT);
           }
-        }.bind(this));
-      }
-
-      if (list.length) {
-        var vars = lexpr(list.shift());
-
-        this.scopes.forEach(function(scope) {
-          vars.forEach(function(name) {
-            name = sexpr(name);
-            scope['delete'](name);
-          });
-        });
-      }
-
-      if (list.length) {
-        var plists = lexpr(list.shift());
-        plists.forEach(function(name) {
-          name = sexpr(name);
-          this.plists['delete'](name);
-        }.bind(this));
-      }
-    });
-
-    def("erall", function() {
-      this.routines.keys().filter(function(x) {
-        return !this.routines.get(x).primitive && !this.routines.get(x).buried;
-      }.bind(this)).forEach(function(name) {
-        this.routines['delete'](name);
-        saveproc(name);
+        }
       }.bind(this));
-    
+    }
+
+    if (list.length) {
+      var vars = lexpr(list.shift());
+
       this.scopes.forEach(function(scope) {
-        scope.keys().filter(function(x) {
-          return !scope.get(x).buried;
-        }).forEach(function(name) {
+        vars.forEach(function(name) {
+          name = sexpr(name);
           scope['delete'](name);
         });
       });
-    
-      this.plists.keys().filter(function(x) {
-        return !this.plists.get(x).buried;
-      }.bind(this)).forEach(function(name) {
+    }
+
+    if (list.length) {
+      var plists = lexpr(list.shift());
+      plists.forEach(function(name) {
+        name = sexpr(name);
         this.plists['delete'](name);
       }.bind(this));
+    }
+  });
+
+  def("erall", function() {
+    this.routines.keys().filter(function(x) {
+      return !this.routines.get(x).primitive && !this.routines.get(x).buried;
+    }.bind(this)).forEach(function(name) {
+      this.routines['delete'](name);
+      saveproc(name);
+    }.bind(this));
+
+    this.scopes.forEach(function(scope) {
+      scope.keys().filter(function(x) {
+        return !scope.get(x).buried;
+      }).forEach(function(name) {
+        scope['delete'](name);
+      });
     });
-    
-      def("erps", function() {
-        this.routines.keys().filter(function(x) {
-          return !this.routines.get(x).primitive && !this.routines.get(x).buried;
-        }.bind(this)).forEach(function(name) {
-          this.routines['delete'](name);
-          saveproc(name);
-        }.bind(this));
+
+    this.plists.keys().filter(function(x) {
+      return !this.plists.get(x).buried;
+    }.bind(this)).forEach(function(name) {
+      this.plists['delete'](name);
+    }.bind(this));
+  });
+
+  def("erps", function() {
+    this.routines.keys().filter(function(x) {
+      return !this.routines.get(x).primitive && !this.routines.get(x).buried;
+    }.bind(this)).forEach(function(name) {
+      this.routines['delete'](name);
+      saveproc(name);
+    }.bind(this));
+  });
+
+  def("erns", function() {
+    this.scopes.forEach(function(scope) {
+      scope.keys().filter(function(x) {
+        return !scope.get(x).buried;
+      }).forEach(function(name) {
+        scope['delete'](name);
       });
-    
-      def("erns", function() {
-        this.scopes.forEach(function(scope) {
-          scope.keys().filter(function(x) {
-            return !scope.get(x).buried;
-          }).forEach(function(name) {
-            scope['delete'](name);
-          });
-        });
+    });
+  });
+
+  def("erpls", function() {
+    this.plists.keys().filter(function(x) {
+      return !this.plists.get(x).buried;
+    }.bind(this)).forEach(function(key) {
+      this.plists['delete'](key);
+    }.bind(this));
+  });
+
+  def("ern", function(varname) {
+    var varnamelist;
+    if (Type(varname) === 'list')
+      varnamelist = lexpr(varname);
+    else
+      varnamelist = [sexpr(varname)];
+
+    this.scopes.forEach(function(scope) {
+      varnamelist.forEach(function(name) {
+        name = sexpr(name);
+        scope['delete'](name);
       });
-    
-      def("erpls", function() {
-        this.plists.keys().filter(function(x) {
-          return !this.plists.get(x).buried;
-        }.bind(this)).forEach(function(key) {
-          this.plists['delete'](key);
-        }.bind(this));
-      });
-    
-      def("ern", function(varname) {
-        var varnamelist;
-        if (Type(varname) === 'list')
-          varnamelist = lexpr(varname);
-        else
-          varnamelist = [sexpr(varname)];
-    
-        this.scopes.forEach(function(scope) {
-          varnamelist.forEach(function(name) {
-            name = sexpr(name);
-            scope['delete'](name);
-          });
-        });
-      });
-    
-      def("erpl", function(plname) {
-        var plnamelist;
-        if (Type(plname) === 'list') {
-          plnamelist = lexpr(plname);
-        } else {
-          plnamelist = [sexpr(plname)];
-        }
-    
-        plnamelist.forEach(function(name) {
+    });
+  });
+
+  def("erpl", function(plname) {
+    var plnamelist;
+    if (Type(plname) === 'list') {
+      plnamelist = lexpr(plname);
+    } else {
+      plnamelist = [sexpr(plname)];
+    }
+
+    plnamelist.forEach(function(name) {
+      name = sexpr(name);
+      this.plists['delete'](name);
+    }.bind(this));
+  });
+
+  def("bury", function(list) {
+    list = lexpr(list);
+
+    if (list.length) {
+      var procs = lexpr(list.shift());
+      procs.forEach(function(name) {
+        name = sexpr(name);
+        if (this.routines.has(name))
+          this.routines.get(name).buried = true;
+      }.bind(this));
+    }
+
+    if (list.length) {
+      var vars = lexpr(list.shift());
+
+      this.scopes.forEach(function(scope) {
+        vars.forEach(function(name) {
           name = sexpr(name);
-          this.plists['delete'](name);
-        }.bind(this));
-      });
-    
-      def("bury", function(list) {
-        list = lexpr(list);
-
-        if (list.length) {
-          var procs = lexpr(list.shift());
-          procs.forEach(function(name) {
-            name = sexpr(name);
-            if (this.routines.has(name))
-              this.routines.get(name).buried = true;
-          }.bind(this));
-        }
-
-        if (list.length) {
-          var vars = lexpr(list.shift());
-
-          this.scopes.forEach(function(scope) {
-            vars.forEach(function(name) {
-              name = sexpr(name);
-              if (scope.has(name))
-                scope.get(name).buried = true;
-            });
-          });
-        }
-
-        if (list.length) {
-          var plists = lexpr(list.shift());
-          plists.forEach(function(name) {
-            name = sexpr(name);
-            if (this.plists.has(name))
-              this.plists.get(name).buried = true;
-          }.bind(this));
-        }
-      });
-    
-      def("buryall", function() {
-        this.routines.forEach(function(name, proc) {
-          proc.buried = true;
-        });
-    
-        this.scopes.forEach(function(scope) {
-          scope.forEach(function(name, entry) {
-            entry.buried = true;
-          });
-        });
-    
-        this.plists.forEach(function(name, entry) {
-          entry.buried = true;
+          if (scope.has(name))
+            scope.get(name).buried = true;
         });
       });
-    
-      def("buryname", function(varname) {
-        var bury = this.routines.get('bury');
-        var namelist = this.routines.get('namelist');
-        return bury.call(this, namelist.call(this, varname));
-      });
-    
-      def("unbury", function(list) {
-        list = lexpr(list);
+    }
 
-        if (list.length) {
-          var procs = lexpr(list.shift());
-          procs.forEach(function(name) {
-            name = sexpr(name);
-            if (this.routines.has(name))
-              this.routines.get(name).buried = false;
-          }.bind(this));
-        }
-        
+    if (list.length) {
+      var plists = lexpr(list.shift());
+      plists.forEach(function(name) {
+        name = sexpr(name);
+        if (this.plists.has(name))
+          this.plists.get(name).buried = true;
+      }.bind(this));
+    }
+  });
+
+  def("buryall", function() {
+    this.routines.forEach(function(name, proc) {
+      proc.buried = true;
+    });
+
+    this.scopes.forEach(function(scope) {
+      scope.forEach(function(name, entry) {
+        entry.buried = true;
+      });
+    });
+
+    this.plists.forEach(function(name, entry) {
+      entry.buried = true;
+    });
+  });
+
+  def("buryname", function(varname) {
+    var bury = this.routines.get('bury');
+    var namelist = this.routines.get('namelist');
+    return bury.call(this, namelist.call(this, varname));
+  });
+
+  def("unbury", function(list) {
+    list = lexpr(list);
+
+    if (list.length) {
+      var procs = lexpr(list.shift());
+      procs.forEach(function(name) {
+        name = sexpr(name);
+        if (this.routines.has(name))
+          this.routines.get(name).buried = false;
+      }.bind(this));
+    }
+
     if (list.length) {
       var vars = lexpr(list.shift());
 
@@ -2695,140 +2693,390 @@ function LogoInterpreter(turtle, stream, savehook)
         this.repcount = old_repcount;
       }.bind(this));
   });
-  
-    def(["repcount", "#"], function() {
-      return this.repcount;
-    });
-  
-    def("if", function(tf, statements) {
-      if (Type(tf) === 'list')
-        tf = evaluateExpression(reparse(tf));
-  
-      var statements2 = arguments[2];
-  
-      return Promise.resolve(tf)
-        .then(function(tf) {
-          tf = aexpr(tf);
-          statements = reparse(lexpr(statements));
-          if (!statements2) {
-            return tf ? this.execute(statements, {returnResult: true}) : undefined;
-          } else {
-            statements2 = reparse(lexpr(statements2));
-            return this.execute(tf ? statements : statements2, {returnResult: true});
-          }
-        }.bind(this));
-  
-    }, {maximum: 3});
-  
-    def("ifelse", function(tf, statements1, statements2) {
-      if (Type(tf) === 'list')
-        tf = evaluateExpression(reparse(tf));
-  
-      return Promise.resolve(tf)
-        .then(function(tf) {
-          tf = aexpr(tf);
-          statements1 = reparse(lexpr(statements1));
+
+  def(["repcount", "#"], function() {
+    return this.repcount;
+  });
+
+  def("if", function(tf, statements) {
+    if (Type(tf) === 'list')
+      tf = evaluateExpression(reparse(tf));
+
+    var statements2 = arguments[2];
+
+    return Promise.resolve(tf)
+      .then(function(tf) {
+        tf = aexpr(tf);
+        statements = reparse(lexpr(statements));
+        if (!statements2) {
+          return tf ? this.execute(statements, {returnResult: true}) : undefined;
+        } else {
           statements2 = reparse(lexpr(statements2));
-  
-          return this.execute(tf ? statements1 : statements2, {returnResult: true});
-        }.bind(this));
-    });
-  
-    def("test", function(tf) {
-      if (Type(tf) === 'list')
-        tf = evaluateExpression(reparse(tf));
-  
-      return Promise.resolve(tf)
-        .then(function(tf) {
-          tf = aexpr(tf);
+          return this.execute(tf ? statements : statements2, {returnResult: true});
+        }
+      }.bind(this));
 
-          this.scopes[this.scopes.length - 1]._test = tf;
-        }.bind(this));
-    });
-  
-    def(["iftrue", "ift"], function(statements) {
-      statements = reparse(lexpr(statements));
-      var tf = this.scopes[this.scopes.length - 1]._test;
-      if (tf === undefined)
-        throw err('{_PROC_}: Called without TEST', ERRORS.NO_TEST);
-      return tf ? this.execute(statements, {returnResult: true}) : undefined;
-    });
-  
-    def(["iffalse", "iff"], function(statements) {
-      statements = reparse(lexpr(statements));
-      var tf = this.scopes[this.scopes.length - 1]._test;
-      if (tf === undefined)
-        throw err('{_PROC_}: Called without TEST', ERRORS.NO_TEST);
-      return !tf ? this.execute(statements, {returnResult: true}) : undefined;
-    });
-  
-    def("stop", function() {
-      throw new Output();
-    });
-  
-    def(["output", "op"], function(atom) {
-      throw new Output(atom);
-    });
-  
+  }, {maximum: 3});
+
+  def("ifelse", function(tf, statements1, statements2) {
+    if (Type(tf) === 'list')
+      tf = evaluateExpression(reparse(tf));
+
+    return Promise.resolve(tf)
+      .then(function(tf) {
+        tf = aexpr(tf);
+        statements1 = reparse(lexpr(statements1));
+        statements2 = reparse(lexpr(statements2));
+
+        return this.execute(tf ? statements1 : statements2, {returnResult: true});
+      }.bind(this));
+  });
+
+  def("test", function(tf) {
+    if (Type(tf) === 'list')
+      tf = evaluateExpression(reparse(tf));
+
+    return Promise.resolve(tf)
+      .then(function(tf) {
+        tf = aexpr(tf);
+
+        this.scopes[this.scopes.length - 1]._test = tf;
+      }.bind(this));
+  });
+
+  def(["iftrue", "ift"], function(statements) {
+    statements = reparse(lexpr(statements));
+    var tf = this.scopes[this.scopes.length - 1]._test;
+    if (tf === undefined)
+      throw err('{_PROC_}: Called without TEST', ERRORS.NO_TEST);
+    return tf ? this.execute(statements, {returnResult: true}) : undefined;
+  });
+
+  def(["iffalse", "iff"], function(statements) {
+    statements = reparse(lexpr(statements));
+    var tf = this.scopes[this.scopes.length - 1]._test;
+    if (tf === undefined)
+      throw err('{_PROC_}: Called without TEST', ERRORS.NO_TEST);
+    return !tf ? this.execute(statements, {returnResult: true}) : undefined;
+  });
+
+  def("stop", function() {
+    throw new Output();
+  });
+
+  def(["output", "op"], function(atom) {
+    throw new Output(atom);
+  });
+
+  this.last_error = undefined;
+
+  def("catch", function(tag, instructionlist) {
+    tag = sexpr(tag).toUpperCase();
+    instructionlist = reparse(lexpr(instructionlist));
+    return this.execute(instructionlist, {returnResult: true})
+      .catch(function(error) {
+        if (!(error instanceof LogoError) || error.tag !== tag)
+          throw error;
+        this.last_error = error;
+        return error.value;
+      }.bind(this));
+  }, {maximum: 2});
+
+  def("throw", function(tag) {
+    tag = sexpr(tag).toUpperCase();
+    var value = arguments[1];
+    var error = new LogoError(tag, value);
+    error.code = (arguments.length > 1) ? ERRORS.USER_GENERATED : ERRORS.THROW_ERROR;
+    throw error;
+  }, {maximum: 2});
+
+  def("error", function() {
+    if (!this.last_error)
+      return [];
+
+    var list = [
+      this.last_error.code,
+      this.last_error.message,
+      this.last_error.proc,
+      this.last_error.line
+    ];
     this.last_error = undefined;
-  
-    def("catch", function(tag, instructionlist) {
-      tag = sexpr(tag).toUpperCase();
-      instructionlist = reparse(lexpr(instructionlist));
-      return this.execute(instructionlist, {returnResult: true})
-        .catch(function(error) {
-          if (!(error instanceof LogoError) || error.tag !== tag)
-            throw error;
-          this.last_error = error;
-          return error.value;
-        }.bind(this));
-    }, {maximum: 2});
-  
-    def("throw", function(tag) {
-      tag = sexpr(tag).toUpperCase();
-      var value = arguments[1];
-      var error = new LogoError(tag, value);
-      error.code = (arguments.length > 1) ? ERRORS.USER_GENERATED : ERRORS.THROW_ERROR;
-      throw error;
-    }, {maximum: 2});
-  
-    def("error", function() {
-      if (!this.last_error)
-        return [];
-  
-      var list = [
-        this.last_error.code,
-        this.last_error.message,
-        this.last_error.proc,
-        this.last_error.line
-      ];
-      this.last_error = undefined;
-      return list;
-    });
+    return list;
+  });
 
-    def("wait", function(time) {
-      return promiseYieldTime(Math.ceil(aexpr(time) / 60 * 1000));
+  def("wait", function(time) {
+    return promiseYieldTime(Math.ceil(aexpr(time) / 60 * 1000));
+  });
+
+  def("bye", function() {
+    throw new Bye;
+  });
+
+  def(".maybeoutput", function(value) {
+    throw new Output(value);
+  });
+
+  def("ignore", function(value) {
+  });
+
+  def("`", function(list) {
+    list = lexpr(list);
+    var out = [];
+    return promiseLoop(function(loop, resolve, reject) {
+      if (!list.length) {
+        resolve(out);
+        return;
+      }
+      var member = list.shift(), instructionlist;
+
+      if (member === ',' && list.length) {
+        member = list.shift();
+        if (Type(member) === 'word')
+          member = [member];
+        instructionlist = reparse(member);
+        this.execute(instructionlist, {returnResult: true})
+          .then(function(result) {
+            out.push(result);
+            loop();
+          }).catch(reject);
+      } else if (member === ',@' && list.length) {
+        member = list.shift();
+        if (Type(member) === 'word')
+          member = [member];
+        instructionlist = reparse(member);
+        this.execute(instructionlist, {returnResult: true})
+          .then(function(result) {
+            out = out.concat(result);
+          })
+          .then(loop, reject);
+      } else if (Type(member) === 'word' && /^",/.test(member)) {
+        instructionlist = reparse(member.substring(2));
+        this.execute(instructionlist, {returnResult: true})
+          .then(function(result) {
+            out.push('"' + (Type(result) === 'list' ? result[0] : result));
+          })
+          .then(loop, reject);
+      } else if (Type(member) === 'word' && /^:,/.test(member)) {
+        instructionlist = reparse(member.substring(2));
+        this.execute(instructionlist, {returnResult: true})
+          .then(function(result) {
+            out.push(':' + (Type(result) === 'list' ? result[0] : result));
+          })
+          .then(loop, reject);
+      } else {
+        out.push(member);
+        loop();
+      }
+    }.bind(this));
+  });
+
+  def("for", function(control, statements) {
+    control = reparse(lexpr(control));
+    statements = reparse(lexpr(statements));
+
+    function sign(x) { return x < 0 ? -1 : x > 0 ? 1 : 0; }
+
+    var varname = sexpr(control.shift());
+    var start, limit, step, current;
+
+    return Promise.resolve(evaluateExpression(control))
+      .then(function(r) {
+        current = start = aexpr(r);
+        return evaluateExpression(control);
+      })
+      .then(function(r) {
+        limit = aexpr(r);
+        return control.length ?
+          evaluateExpression(control) : (limit < start ? -1 : 1);
+      })
+      .then(function(r) {
+        step = aexpr(r);
+      })
+      .then(function() {
+        return promiseLoop(function(loop, resolve, reject) {
+          if (sign(current - limit) === sign(step)) {
+            resolve();
+            return;
+          }
+          setlocal(varname, current);
+          this.execute(statements)
+            .then(function() {
+              current += step;
+            })
+            .then(promiseYield)
+            .then(loop, reject);
+        }.bind(this));
+      }.bind(this));
+  });
+
+  def("dotimes", function(control, statements) {
+    control = reparse(lexpr(control));
+    statements = reparse(lexpr(statements));
+
+    var varname = sexpr(control.shift());
+    var times, current = 1;
+
+    return Promise.resolve(evaluateExpression(control))
+      .then(function(r) {
+        times = aexpr(r);
+      })
+      .then(function() {
+        return promiseLoop(function(loop, resolve, reject) {
+          if (current > times) {
+            resolve();
+            return;
+          }
+          setlocal(varname, current);
+          this.execute(statements)
+            .then(function() {
+              ++current;
+            })
+            .then(promiseYield)
+            .then(loop, reject);
+        }.bind(this));
+      }.bind(this));
+  });
+
+  function checkevalblock(block) {
+    block = block();
+    if (Type(block) === 'list') { return block; }
+    throw err("{_PROC_}: Expected block", ERRORS.BAD_INPUT);
+  }
+
+  def("do.while", function(block, tfexpression) {
+    block = reparse(lexpr(checkevalblock(block)));
+    return promiseLoop(function(loop, resolve, reject) {
+      this.execute(block)
+        .then(tfexpression)
+        .then(function(tf) {
+          if (Type(tf) === 'list')
+            tf = evaluateExpression(reparse(tf));
+          return tf;
+        })
+        .then(function(tf) {
+          if (!tf) {
+            resolve();
+            return;
+          }
+          promiseYield().then(loop);
+        }, reject);
+    }.bind(this));
+  }, {noeval: true});
+
+  def("while", function(tfexpression, block) {
+    block = reparse(lexpr(checkevalblock(block)));
+    return promiseLoop(function(loop, resolve, reject) {
+      Promise.resolve(tfexpression())
+        .then(function(tf) {
+          if (Type(tf) === 'list')
+            tf = evaluateExpression(reparse(tf));
+          return tf;
+        })
+        .then(function(tf) {
+          if (!tf) {
+            resolve();
+            return;
+          }
+          this.execute(block)
+            .then(promiseYield)
+            .then(loop, reject);
+        }.bind(this), reject);
+    }.bind(this));
+  }, {noeval: true});
+
+  def("do.until", function(block, tfexpression) {
+    block = reparse(lexpr(checkevalblock(block)));
+    return promiseLoop(function(loop, resolve, reject) {
+      this.execute(block)
+        .then(tfexpression)
+        .then(function(tf) {
+          if (Type(tf) === 'list')
+            tf = evaluateExpression(reparse(tf));
+          return tf;
+        })
+        .then(function(tf) {
+          if (tf) {
+            resolve();
+            return;
+          }
+          promiseYield().then(loop);
+        }, reject);
+    }.bind(this));
+  }, {noeval: true});
+
+  def("until", function(tfexpression, block) {
+    block = reparse(lexpr(checkevalblock(block)));
+    return promiseLoop(function(loop, resolve, reject) {
+      Promise.resolve(tfexpression())
+        .then(function(tf) {
+          if (Type(tf) === 'list')
+            tf = evaluateExpression(reparse(tf));
+          return tf;
+        })
+        .then(function(tf) {
+          if (tf) {
+            resolve();
+            return;
+          }
+          this.execute(block)
+            .then(promiseYield)
+            .then(loop, reject);
+        }.bind(this), reject);
+    }.bind(this));
+  }, {noeval: true});
+
+  def("case", function(value, clauses) {
+    clauses = lexpr(clauses);
+
+    for (var i = 0; i < clauses.length; ++i) {
+      var clause = lexpr(clauses[i]);
+      var first = clause.shift();
+      if (isKeyword(first, 'ELSE'))
+        return evaluateExpression(clause);
+      if (lexpr(first).some(function(x) { return equal(x, value); }))
+        return evaluateExpression(clause);
+    }
+    return undefined;
+  });
+
+  def("cond", function(clauses) {
+    clauses = lexpr(clauses);
+    return promiseLoop(function(loop, resolve, reject) {
+      if (!clauses.length) {
+        resolve();
+        return;
+      }
+      var clause = lexpr(clauses.shift());
+      var first = clause.shift();
+      if (isKeyword(first, 'ELSE')) {
+        resolve(evaluateExpression(clause));
+        return;
+      }
+      evaluateExpression(reparse(lexpr(first)))
+        .then(function(result) {
+          if (result) {
+            resolve(evaluateExpression(clause));
+            return;
+          }
+          loop();
+        }, reject);
     });
-  
-    def("bye", function() {
-      throw new Bye;
-    });
-  
-    def(".maybeoutput", function(value) {
-      throw new Output(value);
-    });
+  });
+
+  def("apply", function(procname, list) {
+    procname = sexpr(procname);
 
     var routine = this.routines.get(procname);
-if (!routine)
-  throw err("{_PROC_}: Don't know how to {name:U}", { name: procname }, ERRORS.BAD_PROC);
-if (routine.special || routine.noeval)
-  throw err("Can't apply {_PROC_} to special {name:U}", { name: procname }, ERRORS.BAD_INPUT);
+    if (!routine)
+      throw err("{_PROC_}: Don't know how to {name:U}", { name: procname }, ERRORS.BAD_PROC);
+    if (routine.special || routine.noeval)
+      throw err("Can't apply {_PROC_} to special {name:U}", { name: procname }, ERRORS.BAD_INPUT);
 
-return routine.apply(this, lexpr(list));
-});
+    return routine.apply(this, lexpr(list));
+  });
 
-def("invoke", function(procname, input1) {
-procname = sexpr(procname);
+  def("invoke", function(procname, input1) {
+    procname = sexpr(procname);
 
     var routine = this.routines.get(procname);
     if (!routine)
@@ -2861,6 +3109,7 @@ procname = sexpr(procname);
         .then(loop, reject);
     }.bind(this));
   });
+
 
   def("map", function(procname, list/*,  ... */) {
     procname = sexpr(procname);
@@ -2954,3 +3203,75 @@ procname = sexpr(procname);
       throw err("{_PROC_}: Don't know how to {name:U}", { name: procname }, ERRORS.BAD_PROC);
     if (procedure.special || procedure.noeval)
       throw err("Can't apply {_PROC_} to special {name:U}", { name: procname }, ERRORS.BAD_INPUT);
+
+    return promiseLoop(function(loop, resolve, reject) {
+      if (!list.length) {
+        resolve(value);
+        return;
+      }
+      Promise.resolve(procedure.call(this, value, list.shift()))
+        .then(function(result) { value = result; })
+        .then(loop, reject);
+    }.bind(this));
+  }, {maximum: 3});
+
+
+  def("crossmap", function(procname, list/*,  ... */) {
+    procname = sexpr(procname);
+
+    var routine = this.routines.get(procname);
+    if (!routine)
+      throw err("{_PROC_}: Don't know how to {name:U}", { name: procname }, ERRORS.BAD_PROC);
+    if (routine.special || routine.noeval)
+      throw err("Can't apply {_PROC_} to special {name:U}", { name: procname }, ERRORS.BAD_INPUT);
+
+    var lists = [].slice.call(arguments, 1).map(lexpr);
+    if (!lists.length)
+      throw err("{_PROC_}: Expected list", ERRORS.BAD_INPUT);
+
+    if (lists.length === 1)
+      lists = lists[0].map(lexpr);
+
+    var indexes = lists.map(function() { return 0; });
+    var done = false;
+
+    var mapped = [];
+    return promiseLoop(function(loop, resolve, reject) {
+      if (done) {
+        resolve(mapped);
+        return;
+      }
+
+      var args = indexes.map(function(v, i) { return lists[i][v]; });
+
+      var pos = indexes.length - 1;
+      ++indexes[pos];
+      while (indexes[pos] === lists[pos].length) {
+        if (pos === 0) {
+          done = true;
+          break;
+        }
+        indexes[pos] = 0;
+        pos--;
+        ++indexes[pos];
+      }
+
+      Promise.resolve(routine.apply(this, args))
+        .then(function(value) { mapped.push(value); })
+        .then(loop, reject);
+    }.bind(this));
+  }, {maximum: -1});
+
+  def(".promise", function(value) {
+    return Promise.resolve(value);
+  });
+  def(".verify_bound_ignore", function(value) {
+    if (this === undefined)
+      throw new Error("Internal error: Unbound procedure");
+  });
+  def(".verify_bound_identity", function(value) {
+    if (this === undefined)
+      throw new Error("Internal error: Unbound procedure");
+    return value;
+  });
+}
