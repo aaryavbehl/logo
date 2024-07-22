@@ -2944,3 +2944,126 @@ function LogoInterpreter(turtle, stream, savehook)
       if (Type(block) === 'list') { return block; }
       throw err("{_PROC_}: Expected block", ERRORS.BAD_INPUT);
     }
+
+    def("do.while", function(block, tfexpression) {
+      block = reparse(lexpr(checkevalblock(block)));
+      return promiseLoop(function(loop, resolve, reject) {
+        this.execute(block)
+          .then(tfexpression)
+          .then(function(tf) {
+            if (Type(tf) === 'list')
+              tf = evaluateExpression(reparse(tf));
+            return tf;
+          })
+          .then(function(tf) {
+            if (!tf) {
+              resolve();
+              return;
+            }
+            promiseYield().then(loop);
+          }, reject);
+      }.bind(this));
+    }, {noeval: true});
+    
+      def("while", function(tfexpression, block) {
+        block = reparse(lexpr(checkevalblock(block)));
+        return promiseLoop(function(loop, resolve, reject) {
+          Promise.resolve(tfexpression())
+            .then(function(tf) {
+              if (Type(tf) === 'list')
+                tf = evaluateExpression(reparse(tf));
+              return tf;
+            })
+            .then(function(tf) {
+              if (!tf) {
+                resolve();
+                return;
+              }
+              this.execute(block)
+                .then(promiseYield)
+                .then(loop, reject);
+            }.bind(this), reject);
+        }.bind(this));
+      }, {noeval: true});
+    
+      def("do.until", function(block, tfexpression) {
+        block = reparse(lexpr(checkevalblock(block)));
+        return promiseLoop(function(loop, resolve, reject) {
+          this.execute(block)
+            .then(tfexpression)
+            .then(function(tf) {
+              if (Type(tf) === 'list')
+                tf = evaluateExpression(reparse(tf));
+              return tf;
+            })
+            .then(function(tf) {
+              if (tf) {
+                resolve();
+                return;
+              }
+              promiseYield().then(loop);
+            }, reject);
+        }.bind(this));
+      }, {noeval: true});
+    
+      def("until", function(tfexpression, block) {
+        block = reparse(lexpr(checkevalblock(block)));
+        return promiseLoop(function(loop, resolve, reject) {
+          Promise.resolve(tfexpression())
+            .then(function(tf) {
+              if (Type(tf) === 'list')
+                tf = evaluateExpression(reparse(tf));
+              return tf;
+            })
+            .then(function(tf) {
+              if (tf) {
+                resolve();
+                return;
+              }
+              this.execute(block)
+                .then(promiseYield)
+                .then(loop, reject);
+            }.bind(this), reject);
+        }.bind(this));
+      }, {noeval: true});
+    
+      def("case", function(value, clauses) {
+        clauses = lexpr(clauses);
+    
+        for (var i = 0; i < clauses.length; ++i) {
+          var clause = lexpr(clauses[i]);
+          var first = clause.shift();
+          if (isKeyword(first, 'ELSE'))
+            return evaluateExpression(clause);
+          if (lexpr(first).some(function(x) { return equal(x, value); }))
+            return evaluateExpression(clause);
+        }
+        return undefined;
+      });
+    
+      def("cond", function(clauses) {
+        clauses = lexpr(clauses);
+        return promiseLoop(function(loop, resolve, reject) {
+          if (!clauses.length) {
+            resolve();
+            return;
+          }
+          var clause = lexpr(clauses.shift());
+          var first = clause.shift();
+          if (isKeyword(first, 'ELSE')) {
+            resolve(evaluateExpression(clause));
+            return;
+          }
+          evaluateExpression(reparse(lexpr(first)))
+            .then(function(result) {
+              if (result) {
+                resolve(evaluateExpression(clause));
+                return;
+              }
+              loop();
+            }, reject);
+        });
+      });
+    
+      def("apply", function(procname, list) {
+        procname = sexpr(procname);
