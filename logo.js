@@ -2817,3 +2817,130 @@ function LogoInterpreter(turtle, stream, savehook)
     def(".maybeoutput", function(value) {
       throw new Output(value);
     });
+
+    def("ignore", function(value) {
+    });
+  
+    def("`", function(list) {
+      list = lexpr(list);
+      var out = [];
+      return promiseLoop(function(loop, resolve, reject) {
+        if (!list.length) {
+          resolve(out);
+          return;
+        }
+        var member = list.shift(), instructionlist;
+
+        if (member === ',' && list.length) {
+          member = list.shift();
+          if (Type(member) === 'word')
+            member = [member];
+          instructionlist = reparse(member);
+          this.execute(instructionlist, {returnResult: true})
+            .then(function(result) {
+              out.push(result);
+              loop();
+            }).catch(reject);
+        } else if (member === ',@' && list.length) {
+          member = list.shift();
+          if (Type(member) === 'word')
+            member = [member];
+          instructionlist = reparse(member);
+          this.execute(instructionlist, {returnResult: true})
+            .then(function(result) {
+              out = out.concat(result);
+            })
+            .then(loop, reject);
+        } else if (Type(member) === 'word' && /^",/.test(member)) {
+          instructionlist = reparse(member.substring(2));
+          this.execute(instructionlist, {returnResult: true})
+            .then(function(result) {
+              out.push('"' + (Type(result) === 'list' ? result[0] : result));
+            })
+            .then(loop, reject);
+        } else if (Type(member) === 'word' && /^:,/.test(member)) {
+          instructionlist = reparse(member.substring(2));
+          this.execute(instructionlist, {returnResult: true})
+            .then(function(result) {
+              out.push(':' + (Type(result) === 'list' ? result[0] : result));
+            })
+            .then(loop, reject);
+        } else {
+          out.push(member);
+          loop();
+        }
+      }.bind(this));
+    });
+  
+    def("for", function(control, statements) {
+      control = reparse(lexpr(control));
+      statements = reparse(lexpr(statements));
+  
+      function sign(x) { return x < 0 ? -1 : x > 0 ? 1 : 0; }
+  
+      var varname = sexpr(control.shift());
+      var start, limit, step, current;
+  
+      return Promise.resolve(evaluateExpression(control))
+        .then(function(r) {
+          current = start = aexpr(r);
+          return evaluateExpression(control);
+        })
+        .then(function(r) {
+          limit = aexpr(r);
+          return control.length ?
+            evaluateExpression(control) : (limit < start ? -1 : 1);
+        })
+        .then(function(r) {
+          step = aexpr(r);
+        })
+        .then(function() {
+          return promiseLoop(function(loop, resolve, reject) {
+            if (sign(current - limit) === sign(step)) {
+              resolve();
+              return;
+            }
+            setlocal(varname, current);
+            this.execute(statements)
+              .then(function() {
+                current += step;
+              })
+              .then(promiseYield)
+              .then(loop, reject);
+          }.bind(this));
+        }.bind(this));
+    });
+  
+    def("dotimes", function(control, statements) {
+      control = reparse(lexpr(control));
+      statements = reparse(lexpr(statements));
+  
+      var varname = sexpr(control.shift());
+      var times, current = 1;
+  
+      return Promise.resolve(evaluateExpression(control))
+        .then(function(r) {
+          times = aexpr(r);
+        })
+        .then(function() {
+          return promiseLoop(function(loop, resolve, reject) {
+            if (current > times) {
+              resolve();
+              return;
+            }
+            setlocal(varname, current);
+            this.execute(statements)
+              .then(function() {
+                ++current;
+              })
+              .then(promiseYield)
+              .then(loop, reject);
+          }.bind(this));
+        }.bind(this));
+    });
+  
+    function checkevalblock(block) {
+      block = block();
+      if (Type(block) === 'list') { return block; }
+      throw err("{_PROC_}: Expected block", ERRORS.BAD_INPUT);
+    }
