@@ -2817,3 +2817,140 @@ function LogoInterpreter(turtle, stream, savehook)
     def(".maybeoutput", function(value) {
       throw new Output(value);
     });
+
+    var routine = this.routines.get(procname);
+if (!routine)
+  throw err("{_PROC_}: Don't know how to {name:U}", { name: procname }, ERRORS.BAD_PROC);
+if (routine.special || routine.noeval)
+  throw err("Can't apply {_PROC_} to special {name:U}", { name: procname }, ERRORS.BAD_INPUT);
+
+return routine.apply(this, lexpr(list));
+});
+
+def("invoke", function(procname, input1) {
+procname = sexpr(procname);
+
+    var routine = this.routines.get(procname);
+    if (!routine)
+      throw err("{_PROC_}: Don't know how to {name:U}", { name: procname }, ERRORS.BAD_PROC);
+    if (routine.special || routine.noeval)
+      throw err("Can't apply {_PROC_} to special {name:U}", { name: procname }, ERRORS.BAD_INPUT);
+
+    var args = [];
+    for (var i = 1; i < arguments.length; ++i)
+      args.push(arguments[i]);
+
+    return routine.apply(this, args);
+  }, {minimum: 1, maximum: -1});
+
+  def("foreach", function(list, procname) {
+    procname = sexpr(procname);
+
+    var routine = this.routines.get(procname);
+    if (!routine)
+      throw err("{_PROC_}: Don't know how to {name:U}", { name: procname }, ERRORS.BAD_PROC);
+    if (routine.special || routine.noeval)
+      throw err("Can't apply {_PROC_} to special {name:U}", { name: procname }, ERRORS.BAD_INPUT);
+    list = lexpr(list);
+    return promiseLoop(function(loop, resolve, reject) {
+      if (!list.length) {
+        resolve();
+        return;
+      }
+      Promise.resolve(routine.call(this, list.shift()))
+        .then(loop, reject);
+    }.bind(this));
+  });
+
+  def("map", function(procname, list/*,  ... */) {
+    procname = sexpr(procname);
+
+    var routine = this.routines.get(procname);
+    if (!routine)
+      throw err("{_PROC_}: Don't know how to {name:U}", { name: procname }, ERRORS.BAD_PROC);
+    if (routine.special || routine.noeval)
+      throw err("Can't apply {_PROC_} to special {name:U}", { name: procname }, ERRORS.BAD_INPUT);
+
+    var lists = [].slice.call(arguments, 1).map(lexpr);
+    if (!lists.length)
+      throw err("{_PROC_}: Expected list", ERRORS.BAD_INPUT);
+
+    var mapped = [];
+    return promiseLoop(function(loop, resolve, reject) {
+      if (!lists[0].length) {
+        resolve(mapped);
+        return;
+      }
+
+      var args = lists.map(function(l) {
+        if (!l.length)
+          throw err("{_PROC_}: Expected lists of equal length", ERRORS.BAD_INPUT);
+        return l.shift();
+      });
+
+      Promise.resolve(routine.apply(this, args))
+        .then(function(value) { mapped.push(value); })
+        .then(loop, reject);
+    }.bind(this));
+  }, {maximum: -1});
+
+  def("filter", function(procname, list) {
+    procname = sexpr(procname);
+
+    var routine = this.routines.get(procname);
+    if (!routine)
+      throw err("{_PROC_}: Don't know how to {name:U}", { name: procname }, ERRORS.BAD_PROC);
+    if (routine.special || routine.noeval)
+      throw err("Can't apply {_PROC_} to special {name:U}", { name: procname }, ERRORS.BAD_INPUT);
+
+    list = lexpr(list);
+    var filtered = [];
+    return promiseLoop(function(loop, resolve, reject) {
+      if (!list.length) {
+        resolve(filtered);
+        return;
+      }
+      var item = list.shift();
+      Promise.resolve(routine.call(this, item))
+        .then(function(value) { if (value) filtered.push(item); })
+        .then(loop, reject);
+    }.bind(this));
+  });
+
+  def("find", function(procname, list) {
+    procname = sexpr(procname);
+
+    var routine = this.routines.get(procname);
+    if (!routine)
+      throw err("{_PROC_}: Don't know how to {name:U}", { name: procname }, ERRORS.BAD_PROC);
+    if (routine.special || routine.noeval)
+      throw err("Can't apply {_PROC_} to special {name:U}", { name: procname }, ERRORS.BAD_INPUT);
+
+    list = lexpr(list);
+    return promiseLoop(function(loop, resolve, reject) {
+      if (!list.length) {
+        resolve([]);
+        return;
+      }
+      var item = list.shift();
+      Promise.resolve(routine.call(this, item))
+        .then(function(value) {
+          if (value) {
+            resolve(item);
+            return;
+          }
+          loop();
+      }, reject);
+    }.bind(this));
+  });
+
+  def("reduce", function(procname, list) {
+    procname = sexpr(procname);
+    list = lexpr(list);
+    var value = arguments[2] !== undefined ? arguments[2] : list.shift();
+
+    var procedure = this.routines.get(procname);
+    if (!procedure)
+      throw err("{_PROC_}: Don't know how to {name:U}", { name: procname }, ERRORS.BAD_PROC);
+    if (procedure.special || procedure.noeval)
+      throw err("Can't apply {_PROC_} to special {name:U}", { name: procname }, ERRORS.BAD_INPUT);
