@@ -39,7 +39,7 @@
       "Couldn't parse: '{string}'": "Не вдалося виконати синтаксичний аналіз: '{string}'",
       "Division by zero": "Ділення на ноль",
       "Don't know about variable {name:U}": "Невідома змінна {name:U}",
-      "Don't know how to {name:U}": "Не знаю, що таке {name:U}",
+      "Don't know how to do {name:U}": "Не знаю, що таке {name:U}",
       "Don't know what to do with {result}": "Не знаю, що робити з {result}",
       "Expected ')'": "Очікувалася ')'",
       "Expected ')', saw {word}": "Очікувалася ')', у {word}",

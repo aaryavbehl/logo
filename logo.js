@@ -819,7 +819,7 @@ function LogoInterpreter(turtle, stream, savehook)
                   { name: m[1], value: m[2] }, ERRORS.MISSING_SPACE);
       }
 
-      throw err("Don't know how to {name:U}", { name: name }, ERRORS.BAD_PROC);
+      throw err("Don't know how to do {name:U}", { name: name }, ERRORS.BAD_PROC);
     }
 
     if (procedure.special) {
@@ -1201,7 +1201,7 @@ function LogoInterpreter(turtle, stream, savehook)
     var name = sexpr(list);
     var proc = this.routines.get(name);
     if (!proc)
-      throw err("{_PROC_}: Don't know how to {name:U}", { name: name }, ERRORS.BAD_PROC);
+      throw err("{_PROC_}: Don't know how to do {name:U}", { name: name }, ERRORS.BAD_PROC);
     if (!proc.inputs) {
       throw err("{_PROC_}: Can't show definition of primitive {name:U}", { name: name },
                ERRORS.IS_PRIMITIVE);
@@ -2118,7 +2118,7 @@ function LogoInterpreter(turtle, stream, savehook)
   def("text", function(name) {
     var proc = this.routines.get(sexpr(name));
     if (!proc)
-      throw err("{_PROC_}: Don't know how to {name:U}", { name: name }, ERRORS.BAD_PROC);
+      throw err("{_PROC_}: Don't know how to do {name:U}", { name: name }, ERRORS.BAD_PROC);
     if (!proc.inputs) {
       throw err("{_PROC_}: Can't show definition of primitive {name:U}", { name: name },
                ERRORS.IS_PRIMITIVE);
@@ -2138,7 +2138,7 @@ function LogoInterpreter(turtle, stream, savehook)
     oldname = sexpr(oldname);
 
     if (!this.routines.has(oldname)) {
-      throw err("{_PROC_}: Don't know how to {name:U}", { name: oldname }, ERRORS.BAD_PROC);
+      throw err("{_PROC_}: Don't know how to do {name:U}", { name: oldname }, ERRORS.BAD_PROC);
     }
 
     if (this.routines.has(newname)) {
@@ -2369,7 +2369,7 @@ function LogoInterpreter(turtle, stream, savehook)
     name = sexpr(name);
     var proc = this.routines.get(name);
     if (!proc)
-      throw err("{_PROC_}: Don't know how to {name:U}", { name: name }, ERRORS.BAD_PROC);
+      throw err("{_PROC_}: Don't know how to do {name:U}", { name: name }, ERRORS.BAD_PROC);
     if (proc.special)
       return [-1, -1, -1];
 
@@ -3068,7 +3068,7 @@ function LogoInterpreter(turtle, stream, savehook)
 
     var routine = this.routines.get(procname);
     if (!routine)
-      throw err("{_PROC_}: Don't know how to {name:U}", { name: procname }, ERRORS.BAD_PROC);
+      throw err("{_PROC_}: Don't know how to do {name:U}", { name: procname }, ERRORS.BAD_PROC);
     if (routine.special || routine.noeval)
       throw err("Can't apply {_PROC_} to special {name:U}", { name: procname }, ERRORS.BAD_INPUT);
 
@@ -3080,7 +3080,7 @@ function LogoInterpreter(turtle, stream, savehook)
 
     var routine = this.routines.get(procname);
     if (!routine)
-      throw err("{_PROC_}: Don't know how to {name:U}", { name: procname }, ERRORS.BAD_PROC);
+      throw err("{_PROC_}: Don't know how to do {name:U}", { name: procname }, ERRORS.BAD_PROC);
     if (routine.special || routine.noeval)
       throw err("Can't apply {_PROC_} to special {name:U}", { name: procname }, ERRORS.BAD_INPUT);
 
@@ -3096,7 +3096,7 @@ function LogoInterpreter(turtle, stream, savehook)
 
     var routine = this.routines.get(procname);
     if (!routine)
-      throw err("{_PROC_}: Don't know how to {name:U}", { name: procname }, ERRORS.BAD_PROC);
+      throw err("{_PROC_}: Don't know how to do {name:U}", { name: procname }, ERRORS.BAD_PROC);
     if (routine.special || routine.noeval)
       throw err("Can't apply {_PROC_} to special {name:U}", { name: procname }, ERRORS.BAD_INPUT);
     list = lexpr(list);
@@ -3116,7 +3116,7 @@ function LogoInterpreter(turtle, stream, savehook)
 
     var routine = this.routines.get(procname);
     if (!routine)
-      throw err("{_PROC_}: Don't know how to {name:U}", { name: procname }, ERRORS.BAD_PROC);
+      throw err("{_PROC_}: Don't know how to do {name:U}", { name: procname }, ERRORS.BAD_PROC);
     if (routine.special || routine.noeval)
       throw err("Can't apply {_PROC_} to special {name:U}", { name: procname }, ERRORS.BAD_INPUT);
 
@@ -3148,7 +3148,7 @@ function LogoInterpreter(turtle, stream, savehook)
 
     var routine = this.routines.get(procname);
     if (!routine)
-      throw err("{_PROC_}: Don't know how to {name:U}", { name: procname }, ERRORS.BAD_PROC);
+      throw err("{_PROC_}: Don't know how to do {name:U}", { name: procname }, ERRORS.BAD_PROC);
     if (routine.special || routine.noeval)
       throw err("Can't apply {_PROC_} to special {name:U}", { name: procname }, ERRORS.BAD_INPUT);
 
@@ -3171,7 +3171,7 @@ function LogoInterpreter(turtle, stream, savehook)
 
     var routine = this.routines.get(procname);
     if (!routine)
-      throw err("{_PROC_}: Don't know how to {name:U}", { name: procname }, ERRORS.BAD_PROC);
+      throw err("{_PROC_}: Don't know how to do {name:U}", { name: procname }, ERRORS.BAD_PROC);
     if (routine.special || routine.noeval)
       throw err("Can't apply {_PROC_} to special {name:U}", { name: procname }, ERRORS.BAD_INPUT);
 
@@ -3200,7 +3200,7 @@ function LogoInterpreter(turtle, stream, savehook)
 
     var procedure = this.routines.get(procname);
     if (!procedure)
-      throw err("{_PROC_}: Don't know how to {name:U}", { name: procname }, ERRORS.BAD_PROC);
+      throw err("{_PROC_}: Don't know how to do {name:U}", { name: procname }, ERRORS.BAD_PROC);
     if (procedure.special || procedure.noeval)
       throw err("Can't apply {_PROC_} to special {name:U}", { name: procname }, ERRORS.BAD_INPUT);
 
@@ -3221,7 +3221,7 @@ function LogoInterpreter(turtle, stream, savehook)
 
     var routine = this.routines.get(procname);
     if (!routine)
-      throw err("{_PROC_}: Don't know how to {name:U}", { name: procname }, ERRORS.BAD_PROC);
+      throw err("{_PROC_}: Don't know how to do {name:U}", { name: procname }, ERRORS.BAD_PROC);
     if (routine.special || routine.noeval)
       throw err("Can't apply {_PROC_} to special {name:U}", { name: procname }, ERRORS.BAD_INPUT);
 

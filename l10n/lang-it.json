@@ -39,7 +39,7 @@
       "Couldn't parse: '{string}'": "Non capisco questa frase: '{string}'",
       "Division by zero": "Impossibile dividere per zero",
       "Don't know about variable {name:U}": "Non conosco la variabile {name:U}",
-      "Don't know how to {name:U}": "Non so come eseguire {name:U}",
+      "Don't know how to do {name:U}": "Non so come eseguire {name:U}",
       "Don't know what to do with {result}": "Non so cosa fare con {result}",
       "Expected ')'": "Mi aspetto la chiusura della parentesi ')'",
       "Expected ')', saw {word}": "E' prevista la ')', invece trovo {word}",

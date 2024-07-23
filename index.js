@@ -1,156 +1,156 @@
 if (!('console' in window)) {
-    window.console = { log: function(){}, error: function(){} };
-  }
-  
-  function $(s) { return document.querySelector(s); }
-  function $$(s) { return document.querySelectorAll(s); }
-  
-  function escapeHTML(s) {
-    return String(s).replace(/[&<>]/g, function(c) {
-      switch (c) {
-      case '&': return '&amp;';
-      case '<': return '&lt;';
-      case '>': return '&gt;';
-      default: return c;
-      }
-    });
-  }
-  
-  var logo, turtle;
+  window.console = { log: function(){}, error: function(){} };
+}
 
-  var examples = 'examples.txt';
-  
-  function hook(orig, func) {
-    return function() {
-      try {
-        func.apply(this, arguments);
-      } finally {
-        if (orig)
-          orig.apply(this, arguments);
-      }
-    };
-  }
-  
-  var savehook;
-  var historyhook;
-  var clearhistoryhook;
-  
-  function initStorage(loadhook) {
-    if (!window.indexedDB)
-      return;
-  
-    var req = indexedDB.open('logo', 3);
-    req.onblocked = function() {
-      Dialog.alert("Please close other Logo pages to allow database upgrade to proceed.");
-    };
-    req.onerror = function(e) {
-      console.error(e);
-    };
-    req.onupgradeneeded = function(e) {
-      var db = req.result;
-      if (e.oldVersion < 2) {
-        db.createObjectStore('procedures');
-      }
-      if (e.oldVersion < 3) {
-        db.createObjectStore('history', {autoIncrement: true});
-      }
-    };
-    req.onsuccess = function() {
-      var db = req.result;
-  
-      var tx = db.transaction('procedures');
-      tx.objectStore('procedures').openCursor().onsuccess = function(e) {
-        var cursor = e.target.result;
-        if (cursor) {
-          try {
-            loadhook(cursor.value);
-          } catch (ex) {
-            console.error("Error loading procedure: " + ex);
-          } finally {
-            cursor.continue();
-          }
-        }
-      };
-      tx = db.transaction('history');
-      tx.objectStore('history').openCursor().onsuccess = function(e) {
-        var cursor = e.target.result;
-        if (cursor) {
-          try {
-            historyhook(cursor.value);
-          } catch (ex) {
-            console.error("Error loading procedure: " + ex);
-          } finally {
-            cursor.continue();
-          }
-        }
-      };
-  
-      tx.oncomplete = function() {
-        savehook = hook(savehook, function(name, def) {
-          var tx = db.transaction('procedures', 'readwrite');
-          if (def)
-            tx.objectStore('procedures').put(def, name);
-          else
-            tx.objectStore('procedures')['delete'](name);
-        });
-  
-        historyhook = hook(historyhook, function(entry) {
-          var tx = db.transaction('history', 'readwrite');
-          tx.objectStore('history').put(entry);
-        });
-  
-        clearhistoryhook = hook(clearhistoryhook, function() {
-          var tx = db.transaction('history', 'readwrite');
-          tx.objectStore('history').clear();
-        });
-      };
-    };
-  }
+function $(s) { return document.querySelector(s); }
+function $$(s) { return document.querySelectorAll(s); }
 
-  var commandHistory = (function() {
-    var entries = [], pos = -1;
-  
-    clearhistoryhook = hook(clearhistoryhook, function() {
-      entries = [];
-      pos = -1;
-    });
-  
-    return {
-      push: function(entry) {
-        if (entries.length > 0 && entries[entries.length - 1] === entry) {
-          pos = -1;
-          return;
+function escapeHTML(s) {
+  return String(s).replace(/[&<>]/g, function(c) {
+    switch (c) {
+    case '&': return '&amp;';
+    case '<': return '&lt;';
+    case '>': return '&gt;';
+    default: return c;
+    }
+  });
+}
+
+var logo, turtle;
+
+var examples = 'examples.txt';
+
+function hook(orig, func) {
+  return function() {
+    try {
+      func.apply(this, arguments);
+    } finally {
+      if (orig)
+        orig.apply(this, arguments);
+    }
+  };
+}
+
+var savehook;
+var historyhook;
+var clearhistoryhook;
+
+function initStorage(loadhook) {
+  if (!window.indexedDB)
+    return;
+
+  var req = indexedDB.open('logo', 3);
+  req.onblocked = function() {
+    Dialog.alert("Please close other Logo pages to allow database upgrade to proceed.");
+  };
+  req.onerror = function(e) {
+    console.error(e);
+  };
+  req.onupgradeneeded = function(e) {
+    var db = req.result;
+    if (e.oldVersion < 2) {
+      db.createObjectStore('procedures');
+    }
+    if (e.oldVersion < 3) {
+      db.createObjectStore('history', {autoIncrement: true});
+    }
+  };
+  req.onsuccess = function() {
+    var db = req.result;
+
+    var tx = db.transaction('procedures');
+    tx.objectStore('procedures').openCursor().onsuccess = function(e) {
+      var cursor = e.target.result;
+      if (cursor) {
+        try {
+          loadhook(cursor.value);
+        } catch (ex) {
+          console.error("Error loading procedure: " + ex);
+        } finally {
+          cursor.continue();
         }
-        entries.push(entry);
+      }
+    };
+    tx = db.transaction('history');
+    tx.objectStore('history').openCursor().onsuccess = function(e) {
+      var cursor = e.target.result;
+      if (cursor) {
+        try {
+          historyhook(cursor.value);
+        } catch (ex) {
+          console.error("Error loading procedure: " + ex);
+        } finally {
+          cursor.continue();
+        }
+      }
+    };
+
+    tx.oncomplete = function() {
+      savehook = hook(savehook, function(name, def) {
+        var tx = db.transaction('procedures', 'readwrite');
+        if (def)
+          tx.objectStore('procedures').put(def, name);
+        else
+          tx.objectStore('procedures')['delete'](name);
+      });
+
+      historyhook = hook(historyhook, function(entry) {
+        var tx = db.transaction('history', 'readwrite');
+        tx.objectStore('history').put(entry);
+      });
+
+      clearhistoryhook = hook(clearhistoryhook, function() {
+        var tx = db.transaction('history', 'readwrite');
+        tx.objectStore('history').clear();
+      });
+    };
+  };
+}
+
+var commandHistory = (function() {
+  var entries = [], pos = -1;
+
+  clearhistoryhook = hook(clearhistoryhook, function() {
+    entries = [];
+    pos = -1;
+  });
+
+  return {
+    push: function(entry) {
+      if (entries.length > 0 && entries[entries.length - 1] === entry) {
         pos = -1;
-        if (historyhook) {
-          historyhook(entry);
-        }
-      },
-      next: function() {
-        if (entries.length === 0) {
-          return undefined;
-        }
-        if (pos === -1) {
-          pos = 0;
-        } else {
-          pos = (pos === entries.length - 1) ? 0 : pos + 1;
-        }
-        return entries[pos];
-      },
-      prev: function() {
-        if (entries.length === 0) {
-          return undefined;
-        }
-        if (pos === -1) {
-          pos = entries.length - 1;
-        } else {
-          pos = (pos === 0) ? entries.length - 1 : pos - 1;
-        }
-        return entries[pos];
+        return;
       }
-    };
-  }());
+      entries.push(entry);
+      pos = -1;
+      if (historyhook) {
+        historyhook(entry);
+      }
+    },
+    next: function() {
+      if (entries.length === 0) {
+        return undefined;
+      }
+      if (pos === -1) {
+        pos = 0;
+      } else {
+        pos = (pos === entries.length - 1) ? 0 : pos + 1;
+      }
+      return entries[pos];
+    },
+    prev: function() {
+      if (entries.length === 0) {
+        return undefined;
+      }
+      if (pos === -1) {
+        pos = entries.length - 1;
+      } else {
+        pos = (pos === 0) ? entries.length - 1 : pos - 1;
+      }
+      return entries[pos];
+    }
+  };
+}());
 
 var input = {};
 function initInput() {
@@ -279,139 +279,139 @@ function initInput() {
     });
 
     input.getValue = function() {
-        return (isMulti() ? cm2 : cm).getValue();
-      };
-      input.setValue = function(v) {
-        (isMulti() ? cm2 : cm).setValue(v);
-      };
-      input.setFocus = function() {
-        (isMulti() ? cm2 : cm).focus();
-      };
-      
-      } else {
-      
-      $('#logo-ta-single-line').addEventListener('keydown', function(e) {
-      
-       var elem = $('#logo-ta-single-line');
-      
-        var keyMap = {
-          'Enter': function(elem) {
-            run();
-          },
-          'ArrowUp': function(elem) {
-            var v = commandHistory.prev();
-            if (v !== undefined) {
-              elem.value = v;
-            }
-          },
-          'ArrowDown': function(elem) {
-            var v = commandHistory.next();
-            if (v !== undefined) {
-              elem.value = v;
-            }
+      return (isMulti() ? cm2 : cm).getValue();
+    };
+    input.setValue = function(v) {
+      (isMulti() ? cm2 : cm).setValue(v);
+    };
+    input.setFocus = function() {
+      (isMulti() ? cm2 : cm).focus();
+    };
+
+  } else {
+
+    $('#logo-ta-single-line').addEventListener('keydown', function(e) {
+
+     var elem = $('#logo-ta-single-line');
+
+      var keyMap = {
+        'Enter': function(elem) {
+          run();
+        },
+        'ArrowUp': function(elem) {
+          var v = commandHistory.prev();
+          if (v !== undefined) {
+            elem.value = v;
           }
-        };
-      
-        var keyName = keyNameForEvent(e);
-        if (keyName in keyMap && typeof keyMap[keyName] === 'function') {
-          keyMap[keyName](elem);
-          e.stopPropagation();
-          e.preventDefault();
+        },
+        'ArrowDown': function(elem) {
+          var v = commandHistory.next();
+          if (v !== undefined) {
+            elem.value = v;
+          }
         }
-      });
-      
-          input.getValue = function() {
-            return $(isMulti() ? '#logo-ta-multi-line' : '#logo-ta-single-line').value;
-          };
-          input.setValue = function(v) {
-            $(isMulti() ? '#logo-ta-multi-line' : '#logo-ta-single-line').value = v;
-          };
-          input.setFocus = function() {
-            $(isMulti() ? '#logo-ta-multi-line' : '#logo-ta-single-line').focus();
-          };
-        }
-      
-        input.setFocus();
-        $('#input').addEventListener('click', function() {
-          input.setFocus();
-        });
-      
-        $('#toggle').addEventListener('click', function() {
-          var v = input.getValue();
-          document.body.classList.toggle('single');
-          document.body.classList.toggle('multi');
-          if (!isMulti()) {
-            v = v.replace(/\n/g, '  ');
-          } else {
-            v = v.replace(/\s\s(\s*)/g, '\n$1');
-          }
-          input.setValue(v);
-          input.setFocus();
-        });
-      
-        $('#run').addEventListener('click', run);
-        $('#stop').addEventListener('click', stop);
-        $('#clear').addEventListener('click', clear);
-      
-        window.addEventListener('message', function(e) {
-          if ('example' in e.data) {
-            var text = e.data.example;
-            input.setSingle();
-            input.setValue(text);
-            input.setFocus();
-          }
-        });
+      };
+
+      var keyName = keyNameForEvent(e);
+      if (keyName in keyMap && typeof keyMap[keyName] === 'function') {
+        keyMap[keyName](elem);
+        e.stopPropagation();
+        e.preventDefault();
       }
-      
-      (function() {
-        window.addEventListener('resize', resize);
-        window.addEventListener('DOMContentLoaded', resize);
-        function resize() {
-          var box = $('#display-panel .inner'), rect = box.getBoundingClientRect(),
-              w = rect.width, h = rect.height;
-          $('#sandbox').width = w; $('#sandbox').height = h;
-          $('#turtle').width = w; $('#turtle').height = h;
-          $('#overlay').width = w; $('#overlay').height = h;
-      
-          if (logo && turtle) {
-            turtle.resize(w, h);
-            logo.run('cs');
-          }
-        }
-      }());
+    });
 
-      (function() {
-        var sidebars = Array.from($$('#sidebar .choice')).map(
-          function(elem) { return elem.id; });
-        sidebars.forEach(function(k) {
-          $('#sb-link-' + k).addEventListener('click', function() {
-            var cl = $('#sidebar').classList;
-            sidebars.forEach(function(sb) { cl.remove(sb); });
-            cl.add(k);
-          });
-        });
-      }());
+    input.getValue = function() {
+      return $(isMulti() ? '#logo-ta-multi-line' : '#logo-ta-single-line').value;
+    };
+    input.setValue = function(v) {
+      $(isMulti() ? '#logo-ta-multi-line' : '#logo-ta-single-line').value = v;
+    };
+    input.setFocus = function() {
+      $(isMulti() ? '#logo-ta-multi-line' : '#logo-ta-single-line').focus();
+    };
+  }
 
-      (function() {
-        savehook = hook(savehook, function(name, def) {
-          var parent = $('#library .snippets');
-          if (def)
-            insertSnippet(def, parent, name);
-          else
-            removeSnippet(parent, name);
-        });
-      
-        historyhook = hook(historyhook, function(entry) {
-          var parent = $('#history .snippets');
-          insertSnippet(entry, parent);
-        });
-      
-        clearhistoryhook = hook(clearhistoryhook, function() {
-          var parent = $('#history .snippets');
-          while (parent.firstChild)
-            parent.removeChild(parent.firstChild);
-        });
-      }());
+  input.setFocus();
+  $('#input').addEventListener('click', function() {
+    input.setFocus();
+  });
+
+  $('#toggle').addEventListener('click', function() {
+    var v = input.getValue();
+    document.body.classList.toggle('single');
+    document.body.classList.toggle('multi');
+    if (!isMulti()) {
+      v = v.replace(/\n/g, '  ');
+    } else {
+      v = v.replace(/\s\s(\s*)/g, '\n$1');
+    }
+    input.setValue(v);
+    input.setFocus();
+  });
+
+  $('#run').addEventListener('click', run);
+  $('#stop').addEventListener('click', stop);
+  $('#clear').addEventListener('click', clear);
+
+  window.addEventListener('message', function(e) {
+    if ('example' in e.data) {
+      var text = e.data.example;
+      input.setSingle();
+      input.setValue(text);
+      input.setFocus();
+    }
+  });
+}
+
+(function() {
+  window.addEventListener('resize', resize);
+  window.addEventListener('DOMContentLoaded', resize);
+  function resize() {
+    var box = $('#display-panel .inner'), rect = box.getBoundingClientRect(),
+        w = rect.width, h = rect.height;
+    $('#sandbox').width = w; $('#sandbox').height = h;
+    $('#turtle').width = w; $('#turtle').height = h;
+    $('#overlay').width = w; $('#overlay').height = h;
+
+    if (logo && turtle) {
+      turtle.resize(w, h);
+      logo.run('cs');
+    }
+  }
+}());
+
+(function() {
+  var sidebars = Array.from($$('#sidebar .choice')).map(
+    function(elem) { return elem.id; });
+  sidebars.forEach(function(k) {
+    $('#sb-link-' + k).addEventListener('click', function() {
+      var cl = $('#sidebar').classList;
+      sidebars.forEach(function(sb) { cl.remove(sb); });
+      cl.add(k);
+    });
+  });
+}());
+
+(function() {
+  savehook = hook(savehook, function(name, def) {
+    var parent = $('#library .snippets');
+    if (def)
+      insertSnippet(def, parent, name);
+    else
+      removeSnippet(parent, name);
+  });
+
+  historyhook = hook(historyhook, function(entry) {
+    var parent = $('#history .snippets');
+    insertSnippet(entry, parent);
+  });
+
+  clearhistoryhook = hook(clearhistoryhook, function() {
+    var parent = $('#history .snippets');
+    while (parent.firstChild)
+      parent.removeChild(parent.firstChild);
+  });
+}());
 
 var snippets = new Map();
 function insertSnippet(text, parent, key, options) {
@@ -477,7 +477,6 @@ window.addEventListener('DOMContentLoaded', function() {
       });
     }
   }());
-
 
   $('#overlay').style.fontSize = '13px';
   $('#overlay').style.fontFamily = 'monospace';
@@ -674,48 +673,48 @@ window.addEventListener('DOMContentLoaded', function() {
         document.body.lang = 'en';
       });
   }());
+
   fetch('l10n/languages.txt')
-.then(function(response) {
-  if (!response.ok) throw Error(response.statusText);
-  return response.text();
-})
-.then(function(text) {
-  var select = $('#select-lang');
-  text.split(/\r?\n/g).forEach(function(entry) {
-    var match = /^(\w+)\s+(.*)$/.exec(entry);
-    if (!match) return;
-    var opt = document.createElement('option');
-    opt.value = match[1];
-    opt.textContent = match[2];
-    select.appendChild(opt);
-  });
-  select.value = document.body.lang;
-  select.addEventListener('change', function() {
-    var url = String(document.location);
-    url = url.replace(/[?#].*/, '');
-    document.location = url + '?lang=' + select.value;
-  });
-});
-
-
-localizationComplete.then(initInput);
-
-localizationComplete.then(function() {
-fetch(examples)
-  .then(function(response) {
-    if (!response.ok) throw Error(response.statusText);
-    return response.text();
-  })
-  .then(function(text) {
-    var parent = $('#examples');
-    text.split(/\n\n/g).forEach(function(line) {
-      insertSnippet(line, parent, undefined, {
-        noScroll: true
+    .then(function(response) {
+      if (!response.ok) throw Error(response.statusText);
+      return response.text();
+    })
+    .then(function(text) {
+      var select = $('#select-lang');
+      text.split(/\r?\n/g).forEach(function(entry) {
+        var match = /^(\w+)\s+(.*)$/.exec(entry);
+        if (!match) return;
+        var opt = document.createElement('option');
+        opt.value = match[1];
+        opt.textContent = match[2];
+        select.appendChild(opt);
+      });
+      select.value = document.body.lang;
+      select.addEventListener('change', function() {
+        var url = String(document.location);
+        url = url.replace(/[?#].*/, '');
+        document.location = url + '?lang=' + select.value;
       });
     });
+
+  localizationComplete.then(initInput);
+
+  localizationComplete.then(function() {
+    fetch(examples)
+      .then(function(response) {
+        if (!response.ok) throw Error(response.statusText);
+        return response.text();
+      })
+      .then(function(text) {
+        var parent = $('#examples');
+        text.split(/\n\n/g).forEach(function(line) {
+          insertSnippet(line, parent, undefined, {
+            noScroll: true
+          });
+        });
+      });
   });
-});  
- 
+
   function demo(param) {
     param = String(param);
     if (param.length > 0) {

@@ -1397,7 +1397,7 @@ QUnit.test("Error Messages", function(t) {
   this.assert_error("1 + -", "Unexpected end of instructions");
   this.assert_error("( 1 + 2", "Expected ')'", 10);
   this.assert_error("( 1 + 2 3", "Expected ')', saw 3", 10);
-  this.assert_error("nosuchproc", "Don't know how to NOSUCHPROC", 24);
+  this.assert_error("nosuchproc", "Don't know how to do NOSUCHPROC", 24);
   this.assert_error("1 + \"1+2", "Expected number", 4);
   this.assert_error("1 + []", "Expected number", 4);
   this.assert_error("1 + ignore 1", "Expected number", 4);
@@ -1414,14 +1414,14 @@ QUnit.test("Error Messages", function(t) {
   this.assert_error("to fd :x bk :x end", "TO: Can't redefine primitive FD", 22);
   this.assert_error("define \"fd [[x] [bk :x]]", "DEFINE: Can't redefine primitive FD", 22);
   this.assert_error("define \"fd [[x]]", "DEFINE: Expected list of length 2", 4);
-  this.assert_error("def \"nosuchproc", "DEF: Don't know how to NOSUCHPROC", 24);
+  this.assert_error("def \"nosuchproc", "DEF: Don't know how to do NOSUCHPROC", 24);
   this.assert_error("def \"def", "DEF: Can't show definition of primitive DEF", 22);
-  this.assert_error("text \"nosuchproc", "TEXT: Don't know how to NOSUCHPROC", 24);
+  this.assert_error("text \"nosuchproc", "TEXT: Don't know how to do NOSUCHPROC", 24);
   this.assert_error("text \"text", "TEXT: Can't show definition of primitive TEXT", 22);
-  this.assert_error("text \"nosuchproc", "TEXT: Don't know how to NOSUCHPROC", 24);
+  this.assert_error("text \"nosuchproc", "TEXT: Don't know how to do NOSUCHPROC", 24);
   this.assert_error("text \"def", "TEXT: Can't show definition of primitive DEF", 22);
   this.assert_error("item 5 [ 1 2 ]", "ITEM: Index out of bounds", 4);
-  this.assert_error("copydef \"newname \"nosuchproc", "COPYDEF: Don't know how to NOSUCHPROC", 24);
+  this.assert_error("copydef \"newname \"nosuchproc", "COPYDEF: Don't know how to do NOSUCHPROC", 24);
   this.assert_error("to foo end  copydef \"to \"foo", "COPYDEF: Can't overwrite special TO", 4);
   this.assert_error("to foo end  copydef \"show \"foo", "COPYDEF: Can't overwrite primitives unless REDEFP is TRUE", 4);
   this.assert_error("erase [ [ TO ] [ ] ]", "Can't ERASE special TO", 4);
@@ -1430,25 +1430,25 @@ QUnit.test("Error Messages", function(t) {
   this.assert_error("while 1 2", "WHILE: Expected block", 4);
   this.assert_error("do.until 1 2", "DO.UNTIL: Expected block", 4);
   this.assert_error("until 1 2", "UNTIL: Expected block", 4);
-  this.assert_error("apply \"nosuch [ 1 2 ]", "APPLY: Don't know how to NOSUCH", 24);
+  this.assert_error("apply \"nosuch [ 1 2 ]", "APPLY: Don't know how to do NOSUCH", 24);
   this.assert_error("apply \"to [ 1 2 ]", "Can't apply APPLY to special TO", 4);
   this.assert_error("apply \"while [ 1 2 ]", "Can't apply APPLY to special WHILE", 4);
-  this.assert_error("foreach [ 1 2 ] \"nosuch", "FOREACH: Don't know how to NOSUCH", 24);
+  this.assert_error("foreach [ 1 2 ] \"nosuch", "FOREACH: Don't know how to do NOSUCH", 24);
   this.assert_error("foreach [ 1 2 ] \"to", "Can't apply FOREACH to special TO", 4);
   this.assert_error("foreach [ 1 2 ] \"while", "Can't apply FOREACH to special WHILE", 4);
-  this.assert_error("invoke \"nosuch [ 1 2 ]", "INVOKE: Don't know how to NOSUCH", 24);
+  this.assert_error("invoke \"nosuch [ 1 2 ]", "INVOKE: Don't know how to do NOSUCH", 24);
   this.assert_error("invoke \"to [ 1 2 ]", "Can't apply INVOKE to special TO", 4);
   this.assert_error("invoke \"while [ 1 2 ]", "Can't apply INVOKE to special WHILE", 4);
-  this.assert_error("map \"nosuch [ 1 2 ]", "MAP: Don't know how to NOSUCH", 24);
+  this.assert_error("map \"nosuch [ 1 2 ]", "MAP: Don't know how to do NOSUCH", 24);
   this.assert_error("map \"to [ 1 2 ]", "Can't apply MAP to special TO", 4);
   this.assert_error("map \"while [ 1 2 ]", "Can't apply MAP to special WHILE", 4);
-  this.assert_error("filter \"nosuch [ 1 2 ]", "FILTER: Don't know how to NOSUCH", 24);
+  this.assert_error("filter \"nosuch [ 1 2 ]", "FILTER: Don't know how to do NOSUCH", 24);
   this.assert_error("filter \"to [ 1 2 ]", "Can't apply FILTER to special TO", 4);
   this.assert_error("filter \"while [ 1 2 ]", "Can't apply FILTER to special WHILE", 4);
-  this.assert_error("find \"nosuch [ 1 2 ]", "FIND: Don't know how to NOSUCH", 24);
+  this.assert_error("find \"nosuch [ 1 2 ]", "FIND: Don't know how to do NOSUCH", 24);
   this.assert_error("find \"to [ 1 2 ]", "Can't apply FIND to special TO", 4);
   this.assert_error("find \"while [ 1 2 ]", "Can't apply FIND to special WHILE", 4);
-  this.assert_error("reduce \"nosuch [ 1 2 ]", "REDUCE: Don't know how to NOSUCH", 24);
+  this.assert_error("reduce \"nosuch [ 1 2 ]", "REDUCE: Don't know how to do NOSUCH", 24);
   this.assert_error("reduce \"to [ 1 2 ]", "Can't apply REDUCE to special TO", 4);
   this.assert_error("reduce \"while [ 1 2 ]", "Can't apply REDUCE to special WHILE", 4);
   this.assert_error("0", "Don't know what to do with 0", 9);
@@ -1515,8 +1515,8 @@ QUnit.test("Regression Tests", function(t) {
 
 QUnit.test("API Tests", function(t) {
 
-  this.assert_error('yup', "Don't know how to YUP");
-  this.assert_error('nope', "Don't know how to NOPE");
+  this.assert_error('yup', "Don't know how to do YUP");
+  this.assert_error('nope', "Don't know how to do NOPE");
   this.queue(function() {
     this.interpreter.copydef('yup', 'true');
     this.interpreter.copydef('nope', 'false');

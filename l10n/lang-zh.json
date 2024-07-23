@@ -39,7 +39,7 @@
       "Couldn't parse: '{string}'": "无法解析: '{string}'",
       "Division by zero": "除数为零",
       "Don't know about variable {name:U}": "未知变量 {name:U}",
-      "Don't know how to {name:U}": "不知道如何 {name:U}",
+      "Don't know how to do {name:U}": "不知道如何 {name:U}",
       "Don't know what to do with {result}": "不知道如何处理 {result}",
       "Expected ')'": "缺少 ')'",
       "Expected ')', saw {word}": "缺少 ')', 见 {word}",

@@ -39,7 +39,7 @@
       "Couldn't parse: '{string}'": "Impossible d'analyser: '{string}'",
       "Division by zero": "Division par zéro",
       "Don't know about variable {name:U}": "Je ne connais rien à propos de la variable {name:U}",
-      "Don't know how to {name:U}": "Je ne sais pas comment {name:U}",
+      "Don't know how to do {name:U}": "Je ne sais pas comment {name:U}",
       "Don't know what to do with {result}": "Je ne sais pas quoi faire avec {result}",
       "Expected ')'": "Attendu ')'",
       "Expected ')', saw {word}": "Attendu ')', vu {word}",

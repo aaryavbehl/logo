@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<title>Logo Language Guide</title>
+<title>Guide to Logo</title>
 <meta charset="utf-8">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
@@ -157,177 +157,177 @@ of comparison.</p>
   <dd class=example>show first "abc</dd>
   <dd class=example>show last [ 1 2 3 ]</dd>
   <dd class=example>show last "abc</dd>
-  
+
   <dt><code>firsts <var>listoflists</var></code>
-    <dd>Outputs a list of the first item (or character) of each sublist (or word)
-    <dd class=example>show firsts [ [1 2 3] [a b c] ]</dd>
-    <dd class=example>show firsts [ abc def ]</dd>
-  
-    <dt><code>butfirst <var>list</var></code>
-    <dt><code>bf <var>list</var></code>
-    <dt><code>butlast <var>list</var></code>
-    <dt><code>bl <var>list</var></code>
-    <dd>Outputs the list (or word), except for the first/last item (or character)
-    <dd class=example>show butfirst [ 1 2 3 ]</dd>
-    <dd class=example>show butfirst "abc</dd>
-    <dd class=example>show butlast [ 1 2 3 ]</dd>
-    <dd class=example>show butlast "abc</dd>
-  
-    <dt><code>butfirsts <var>listoflists</var></code>
-    <dt><code>bfs <var>listoflists</var></code>
-    <dd>Outputs a list of sublists (or words) without the first item (or characters)
-    <dd class=example>show butfirsts [ [ 1 2 3 ] [ a b c ] ]</dd>
-    <dd class=example>show butfirsts [ abc def ]</dd>
-  
-    <dt><code>item <var>index</var> <var>thing</var></code>
-    <dd>Outputs the indexth item of the list or array or word
-    <dd class=example>show item 2 [ 1 2 3 ]</dd>
-    <dd class=example>show item 2 "abc</dd>
-  
-    <dt><code>mditem [<var>index</var> ...] <var>thing</var></code>
-    <dd>Outputs an item from a multi-dimensional array
-    <dd class=example>show mditem [2 1] {{a b} {c d}}</dd>
-  
-    <dt><code>pick <var>list</var></code>
-    <dd>Outputs one item from a list (or word), at random
-    <dd class=example>show pick [ 1 2 3 ]</dd>
-    <dd class=example>show pick "abc</dd>
-  
-    <dt><code>remove <var>thing</var> <var>list</var></code>
-    <dd>Outputs the list (or word) with any occurences of thing removed
-    <dd class=example>show remove "b [ a b c ]</dd>
-    <dd class=example>show remove "a "banana</dd>
-  
-    <dt><code>remdup <var>list</var></code>
-    <dd>Outputs the list (or word) with duplicates removed
-    <dd class=example>show remdup [ 1 2 3 2 3 4 3 4 5 ]</dd>
-    <dd class=example>show remdup "banana</dd>
-  
-    <dt><code>quoted <var>thing</var></code>
-    <dd>Outputs thing with " prepended if a word, or just thing otherwise.
-    <dd class=example>show quoted "abc</dd>
-  
-    <dt><code>split <var>thing</var> <var>list</var></code>
-    <dd>Outputs the list split into a list of lists (or list of words) wherever thing appears.
-    <dd class=example>show split "a "banana</dd>
-    <dd class=example>show split 3 [1 2 3 4 1 2 3 4]</dd>
-  
-  </dl>
-  
-  <h4>2.3 Data Mutators</h4>
-  <dl>
-    <dt><code>setitem <var>index</var> <var>array</var> <var>value</var></code>
-    <dd>Sets the indexth item of the array to value (circular arrays prevented)
-    <dd class=example>make "a { 1 2 3 }  setitem 2 :a "x  show :a</dd>
-  
-    <dt><code>mdsetitem [<var>index</var>...] <var>array</var> <var>value</var></code>
-    <dd>Sets an item in a multi-dimensional array to value (circular arrays prevented)
-    <dd class=example>make "a {{1 2} {3 4}}  mdsetitem [2 1] :a "x  show :a</dd>
-  
-    <dt><code>.setfirst <var>list</var> <var>value</var></code>
-    <dd>Sets the first item of the list to value
-    <dd class=example>make "a [ 1 2 3 ]  .setfirst :a "7  show :a</dd>
-  
-    <dt><code>.setbf <var>list</var> <var>value</var></code>
-    <dd>Sets the 'butfirst' of the list to the items in value (a list)
-    <dd class=example>make "a [ 1 2 3 ]  .setbf :a [ 4 9 ]  show :a</dd>
-  
-    <dt><code>.setitem <var>index</var> <var>array</var> <var>value</var></code>
-    <dd>Sets the indexth item of the array to value (circular arrays allowed)
-    <dd class=example>make "a { 1 2 3 }  setitem 2 :a "x  show :a</dd>
-  
-    <dt><code>push <var>stackname</var> <var>thing</var></code>
-    <dt><code>pop <var>stackname</var></code>
-    <dd>Push to/pop from a stack i.e. list variable. Stacks grow from the front. Works on words.
-    <dd class=example>make "s [ 2 1 ]  push "s 3  show :s  show pop "s</dd>
-    <dd class=example>make "s "ba  push "s "c  show :s  show pop "s</dd>
-  
-    <dt><code>queue <var>stackname</var> <var>thing</var></code>
-    <dt><code>dequeue <var>stackname</var></code>
-    <dd>Add/remove from a queue i.e. list variable, Queues grow from the end. Works on words.
-    <dd class=example>make "q [ 1 2 ]  queue "q 3  show :q  show dequeue "q</dd>
-    <dd class=example>make "q "ab  queue "q "c  show :q  show dequeue "q</dd>
-  
-  </dl>
-  
-  <h4>2.4 Predicates</h4>
-  <p>Predicates return 1 (true) or 0 (false) </p>
-  <dl>
-    <dt><code>wordp <var>thing</var></code>
-    <dt><code>word? <var>thing</var></code>
-    <dt><code>listp <var>thing</var></code>
-    <dt><code>list? <var>thing</var></code>
-    <dt><code>arrayp <var>thing</var></code>
-    <dt><code>array? <var>thing</var></code>
-    <dt><code>numberp <var>thing</var></code>
-    <dt><code>number? <var>thing</var></code>
-    <dd>Test if thing is a word, list, array, or number respectively.
-  
-    <dt><code>emptyp <var>expr</var></code>
-    <dt><code>empty? <var>expr</var></code>
-    <dd>Test if thing is an empty list or empty string.
-  
-    <dt><code>equalp <var>expr</var> <var>expr</var></code>
-    <dt><code>equal? <var>expr</var> <var>expr</var></code>
-    <dt><code><var>expr</var> = <var>expr</var></code>
-    <dt><code>notequalp <var>expr</var> <var>expr</var></code>
-    <dt><code>notequal? <var>expr</var> <var>expr</var></code>
-    <dt><code><var>expr</var> &lt;&gt; <var>expr</var></code>
-    <dd>Equality/inequality tests. Compares strings, numbers, or lists (equal if length and all members are equal).
-  
-    <dt><code>beforep <var>thing1</var> <var>thing2</var></code>
-    <dt><code>before? <var>thing1</var> <var>thing2</var></code>
-    <dd>Test string collation order.
-  
-    <dt><code>.eq <var>thing1</var> <var>thing2</var></code>
-    <dd>Test if things have the same identity.
-  
-    <dt><code>memberp <var>thing</var> <var>list</var></code>
-    <dt><code>member? <var>thing</var> <var>list</var></code>
-    <dd>Test if thing is equal to any member of list.
-  
-    <dt><code>substringp <var>thing1</var> <var>thing2</var></code>
-    <dt><code>substring? <var>thing1</var> <var>thing2</var></code>
-    <dd>Test if thing1 is a substring of thing2.
-  </dl>
-  
-  <h4>2.5 Queries</h4>
-  <dl>
-    <dt><code>count <var>thing</var></code>
-    <dd>Outputs length of a list or number of characters in a string
-    <dd class=example>show count [ 1 2 3 ]</dd>
-    <dd class=example>show count "hello</dd>
-  
-    <dt><code>ascii <var>expr</var></code>
-    <dd>Outputs ASCII (actually, Unicode) code point for first character of string
-    <dd class=example>show ascii "abc</dd>
-  
-    <dt><code>char <var>expr</var></code>
-    <dd>Outputs Unicode character at specified code point
-    <dd class=example>show char 97</dd>
-  
-    <dt><code>member <var>thing</var> <var>list</var></code>
-    <dd>Outputs the list (or word) from the first occurence of thing to the end, or empty list (or word)
-    <dd class=example>show member "a "banana</dd>
-    <dd class=example>show member 2 [1 2 3 4]</dd>
-  
-    <dt><code>uppercase <var>expr</var></code>
-    <dt><code>lowercase <var>expr</var></code>
-    <dd>Outputs string converted to upper/lowercase
-    <dd class=example>show uppercase "abc</dd>
-    <dd class=example>show lowercase "ABC</dd>
-  
-<dt><code>standout <var>expr</var></code>
-<dd>Outputs string with alphanumeric characters in bold
-<dd class=example>show standout "ABCabc123</dd>
+  <dd>Outputs a list of the first item (or character) of each sublist (or word)
+  <dd class=example>show firsts [ [1 2 3] [a b c] ]</dd>
+  <dd class=example>show firsts [ abc def ]</dd>
 
-<dt><code>parse <var>word</var></code>
-<dd>Outputs word parsed as a list.
-<dd class=example>show parse "1+2</dd>
+  <dt><code>butfirst <var>list</var></code>
+  <dt><code>bf <var>list</var></code>
+  <dt><code>butlast <var>list</var></code>
+  <dt><code>bl <var>list</var></code>
+  <dd>Outputs the list (or word), except for the first/last item (or character)
+  <dd class=example>show butfirst [ 1 2 3 ]</dd>
+  <dd class=example>show butfirst "abc</dd>
+  <dd class=example>show butlast [ 1 2 3 ]</dd>
+  <dd class=example>show butlast "abc</dd>
 
-<dt><code>runparse <var>word</var></code>
-<dd>Outputs word parsed as instructions.
-<dd class=example>show runparse "1+2</dd>
+  <dt><code>butfirsts <var>listoflists</var></code>
+  <dt><code>bfs <var>listoflists</var></code>
+  <dd>Outputs a list of sublists (or words) without the first item (or characters)
+  <dd class=example>show butfirsts [ [ 1 2 3 ] [ a b c ] ]</dd>
+  <dd class=example>show butfirsts [ abc def ]</dd>
+
+  <dt><code>item <var>index</var> <var>thing</var></code>
+  <dd>Outputs the indexth item of the list or array or word
+  <dd class=example>show item 2 [ 1 2 3 ]</dd>
+  <dd class=example>show item 2 "abc</dd>
+
+  <dt><code>mditem [<var>index</var> ...] <var>thing</var></code>
+  <dd>Outputs an item from a multi-dimensional array
+  <dd class=example>show mditem [2 1] {{a b} {c d}}</dd>
+
+  <dt><code>pick <var>list</var></code>
+  <dd>Outputs one item from a list (or word), at random
+  <dd class=example>show pick [ 1 2 3 ]</dd>
+  <dd class=example>show pick "abc</dd>
+
+  <dt><code>remove <var>thing</var> <var>list</var></code>
+  <dd>Outputs the list (or word) with any occurences of thing removed
+  <dd class=example>show remove "b [ a b c ]</dd>
+  <dd class=example>show remove "a "banana</dd>
+
+  <dt><code>remdup <var>list</var></code>
+  <dd>Outputs the list (or word) with duplicates removed
+  <dd class=example>show remdup [ 1 2 3 2 3 4 3 4 5 ]</dd>
+  <dd class=example>show remdup "banana</dd>
+
+  <dt><code>quoted <var>thing</var></code>
+  <dd>Outputs thing with " prepended if a word, or just thing otherwise.
+  <dd class=example>show quoted "abc</dd>
+
+  <dt><code>split <var>thing</var> <var>list</var></code>
+  <dd>Outputs the list split into a list of lists (or list of words) wherever thing appears.
+  <dd class=example>show split "a "banana</dd>
+  <dd class=example>show split 3 [1 2 3 4 1 2 3 4]</dd>
+
+</dl>
+
+<h4>2.3 Data Mutators</h4>
+<dl>
+  <dt><code>setitem <var>index</var> <var>array</var> <var>value</var></code>
+  <dd>Sets the indexth item of the array to value (circular arrays prevented)
+  <dd class=example>make "a { 1 2 3 }  setitem 2 :a "x  show :a</dd>
+
+  <dt><code>mdsetitem [<var>index</var>...] <var>array</var> <var>value</var></code>
+  <dd>Sets an item in a multi-dimensional array to value (circular arrays prevented)
+  <dd class=example>make "a {{1 2} {3 4}}  mdsetitem [2 1] :a "x  show :a</dd>
+
+  <dt><code>.setfirst <var>list</var> <var>value</var></code>
+  <dd>Sets the first item of the list to value
+  <dd class=example>make "a [ 1 2 3 ]  .setfirst :a "7  show :a</dd>
+
+  <dt><code>.setbf <var>list</var> <var>value</var></code>
+  <dd>Sets the 'butfirst' of the list to the items in value (a list)
+  <dd class=example>make "a [ 1 2 3 ]  .setbf :a [ 4 9 ]  show :a</dd>
+
+  <dt><code>.setitem <var>index</var> <var>array</var> <var>value</var></code>
+  <dd>Sets the indexth item of the array to value (circular arrays allowed)
+  <dd class=example>make "a { 1 2 3 }  setitem 2 :a "x  show :a</dd>
+
+  <dt><code>push <var>stackname</var> <var>thing</var></code>
+  <dt><code>pop <var>stackname</var></code>
+  <dd>Push to/pop from a stack i.e. list variable. Stacks grow from the front. Works on words.
+  <dd class=example>make "s [ 2 1 ]  push "s 3  show :s  show pop "s</dd>
+  <dd class=example>make "s "ba  push "s "c  show :s  show pop "s</dd>
+
+  <dt><code>queue <var>stackname</var> <var>thing</var></code>
+  <dt><code>dequeue <var>stackname</var></code>
+  <dd>Add/remove from a queue i.e. list variable, Queues grow from the end. Works on words.
+  <dd class=example>make "q [ 1 2 ]  queue "q 3  show :q  show dequeue "q</dd>
+  <dd class=example>make "q "ab  queue "q "c  show :q  show dequeue "q</dd>
+
+</dl>
+
+<h4>2.4 Predicates</h4>
+<p>Predicates return 1 (true) or 0 (false) </p>
+<dl>
+  <dt><code>wordp <var>thing</var></code>
+  <dt><code>word? <var>thing</var></code>
+  <dt><code>listp <var>thing</var></code>
+  <dt><code>list? <var>thing</var></code>
+  <dt><code>arrayp <var>thing</var></code>
+  <dt><code>array? <var>thing</var></code>
+  <dt><code>numberp <var>thing</var></code>
+  <dt><code>number? <var>thing</var></code>
+  <dd>Test if thing is a word, list, array, or number respectively.
+
+  <dt><code>emptyp <var>expr</var></code>
+  <dt><code>empty? <var>expr</var></code>
+  <dd>Test if thing is an empty list or empty string.
+
+  <dt><code>equalp <var>expr</var> <var>expr</var></code>
+  <dt><code>equal? <var>expr</var> <var>expr</var></code>
+  <dt><code><var>expr</var> = <var>expr</var></code>
+  <dt><code>notequalp <var>expr</var> <var>expr</var></code>
+  <dt><code>notequal? <var>expr</var> <var>expr</var></code>
+  <dt><code><var>expr</var> &lt;&gt; <var>expr</var></code>
+  <dd>Equality/inequality tests. Compares strings, numbers, or lists (equal if length and all members are equal).
+
+  <dt><code>beforep <var>thing1</var> <var>thing2</var></code>
+  <dt><code>before? <var>thing1</var> <var>thing2</var></code>
+  <dd>Test string collation order.
+
+  <dt><code>.eq <var>thing1</var> <var>thing2</var></code>
+  <dd>Test if things have the same identity.
+
+  <dt><code>memberp <var>thing</var> <var>list</var></code>
+  <dt><code>member? <var>thing</var> <var>list</var></code>
+  <dd>Test if thing is equal to any member of list.
+
+  <dt><code>substringp <var>thing1</var> <var>thing2</var></code>
+  <dt><code>substring? <var>thing1</var> <var>thing2</var></code>
+  <dd>Test if thing1 is a substring of thing2.
+</dl>
+
+<h4>2.5 Queries</h4>
+<dl>
+  <dt><code>count <var>thing</var></code>
+  <dd>Outputs length of a list or number of characters in a string
+  <dd class=example>show count [ 1 2 3 ]</dd>
+  <dd class=example>show count "hello</dd>
+
+  <dt><code>ascii <var>expr</var></code>
+  <dd>Outputs ASCII (actually, Unicode) code point for first character of string
+  <dd class=example>show ascii "abc</dd>
+
+  <dt><code>char <var>expr</var></code>
+  <dd>Outputs Unicode character at specified code point
+  <dd class=example>show char 97</dd>
+
+  <dt><code>member <var>thing</var> <var>list</var></code>
+  <dd>Outputs the list (or word) from the first occurence of thing to the end, or empty list (or word)
+  <dd class=example>show member "a "banana</dd>
+  <dd class=example>show member 2 [1 2 3 4]</dd>
+
+  <dt><code>uppercase <var>expr</var></code>
+  <dt><code>lowercase <var>expr</var></code>
+  <dd>Outputs string converted to upper/lowercase
+  <dd class=example>show uppercase "abc</dd>
+  <dd class=example>show lowercase "ABC</dd>
+
+  <dt><code>standout <var>expr</var></code>
+  <dd>Outputs string with alphanumeric characters in bold
+  <dd class=example>show standout "ABCabc123</dd>
+
+  <dt><code>parse <var>word</var></code>
+  <dd>Outputs word parsed as a list.
+  <dd class=example>show parse "1+2</dd>
+
+  <dt><code>runparse <var>word</var></code>
+  <dd>Outputs word parsed as instructions.
+  <dd class=example>show runparse "1+2</dd>
 
 </dl>
 
@@ -452,150 +452,150 @@ of comparison.</p>
   <dt><code>cos <var>expr</var></code>
   <dt><code>tan <var>expr</var></code>
   <dd>The usual trig functions. Angles are in degrees.
-    
+
   <dt><code>radarctan <var>expr</var></code>
-    <dt><code>(radarctan <var>x</var> <var>y</var>)</code>
-    <dt><code>radsin <var>expr</var></code>
-    <dt><code>radcos <var>expr</var></code>
-    <dt><code>radtan <var>expr</var></code>
-    <dd>The usual trig functions. Angles are in radians.
-  
-    <dt><code>iseq <var>first</var> <var>last</var></code>
-    <dd>Outputs a list with integers from <var>first</var> to <var>last</var>, inclusive
-    <dd class=example>show iseq 1 10</dd>
-  
-    <dt><code>rseq <var>first</var> <var>last</var> <var>count</var></code>
-    <dd>Outputs a list of <var>count</var> numbers from <var>first</var> to <var>last</var>, inclusive
-    <dd class=example>show rseq 1 9 5</dd>
-  </dl>
-  
-  <h4>4.2 Numeric Predicates</h4>
-  <dl>
-    <dt><code>lessp <var>expr</var> <var>expr</var></code>
-    <dt><code>less? <var>expr</var> <var>expr</var></code>
-    <dt><code><var>expr</var> &lt; <var>expr</var></code>
-  
-    <dt><code>greaterp <var>expr</var> <var>expr</var></code>
-    <dt><code>greater? <var>expr</var> <var>expr</var></code>
-    <dt><code><var>expr</var> &gt; <var>expr</var></code>
-  
-    <dt><code>lessequalp <var>expr</var> <var>expr</var></code>
-    <dt><code>lessequal? <var>expr</var> <var>expr</var></code>
-    <dt><code><var>expr</var> &lt;= <var>expr</var></code>
-  
-    <dt><code>greaterequalp <var>expr</var> <var>expr</var></code>
-    <dt><code>greaterequal? <var>expr</var> <var>expr</var></code>
-    <dt><code><var>expr</var> &gt;= <var>expr</var></code>
-  
-    <dd>Less than, greater than, less than or equal to, greater than or equal to,
-    respectively. Inputs are numbers or numeric expressions, output is 1 (true) or 0 (false).
-  </dl>
-  
-  <h4>4.3 Random Numbers</h4>
-  <dl>
-    <dt><code>random <var>expr</var></code>
-    <dt><code>(random <var>start</var> <var>end</var>)</code>
-    <dd>Outputs a random number from 0 through one less than <var>expr</var>, or from start to end inclusive.
-    <dd class=example>show random 10</dd>
-    <dd class=example>show (random 1 6)</dd>
-  
-  
-    <dt><code>rerandom</code>
-    <dt>(<code>rerandom <var>expr</var>)</code>
-    <dd>Reseeds the random number generator, either to a fixed value or the specified seed.
-  </dl>
-  
-  <h4>4.4 Print Formatting</h4>
-  <dl>
-    <dt><code>form <var>expr</var> <var>width</var> <var>precision</var></code>
-    <dd>Outputs a formatted string with the result of a numeric expression with <var>precision</var> decimal places and
-    padded on the left with spaces (if necessary) to be at least <var>width</width> characters long.
-    <dd class=example>show form 1/3 10 3</dd>
-  </dl>
-  
-  <h4>4.5 Bitwise Operations</h4>
-  <dl>
-    <dt><code>bitand <var>expr</var> <var>expr</var></code>
-    <dt><code>(bitand <var>expr</var> ...)</code>
-    <dt><code>bitor <var>expr</var> <var>expr</var></code>
-    <dt><code>(bitor <var>expr</var> ...)</code>
-    <dt><code>bitxor <var>expr</var> <var>expr</var></code>
-    <dt><code>(bitxor <var>expr</var> ...)</code>
-    <dt><code>bitnot <var>expr</var></code>
-    <dd>Bitwise and, or, exclusive-or, and not, respectively.
-  
-    <dt><code>ashift <var>expr</var> <var>bitcount</var></code>
-    <dd>Arithmetic bit shift. If bitcount is negative, shifts to the right, preserving sign.
-  
-    <dt><code>lshift <var>expr</var> <var>bitcount</var></code>
-    <dd>Logical bit shift. If bitcount is negative, shifts to the right, zero-filling.
-  </dl>
-  
-  <h3 id="sec5">5. Logical Operations</h3>
-  <dl>
-    <dt><code>true</code>
-    <dd>Outputs 1
-    <dt><code>false</code>
-    <dd>Outputs 0
-  
-    <dt><code>and <var>expr</var> <var>expr</var></code>
-    <dt><code>(and <var>expr</var> <var>...</var>)</code>
-    <dt><code>or  <var>expr</var> <var>expr</var></code>
-    <dt><code>(or <var>expr</var> <var>...</var>)</code>
-    <dt><code>xor <var>expr</var> <var>expr</var></code>
-    <dt><code>(xor <var>expr</var> <var>...</var>)</code>
-    <dt><code>not <var>expr</var></code>
-    <dd>Logical "and", "or", "exclusive-or", and "not", respectively.
-    Inputs are numbers or numeric expressions, output is 1 (true) or 0 (false).
-  </dl>
-  
-  <h3 id="sec6">6. Graphics</h3>
-  
-  <p>An introduction to <a target="_blank" href="https://www.cs.berkeley.edu/~bh/v1ch10/turtle.html">Turtle Geometry</a>.</p>
-  
-  <h4>6.1 Turtle Motion</h4>
-  <dl>
-    <dt><code>forward <var>expr</var></code>
-    <dt><code>fd <var>expr</var></code>
-    <dd>Move turtle forward <var>expr</var> pixels
-    <dd class=example>fd 100</dd>
-  
-    <dt><code>back <var>expr</var></code>
-    <dt><code>bk <var>expr</var></code>
-    <dd>Move turtle backward <var>expr</var> pixels
-    <dd class=example>bk 100</dd>
-  
-    <dt><code>left <var>expr</var></code>
-    <dt><code>lt <var>expr</var></code>
-    <dd>Rotate <var>expr</var> degrees counterclockwise
-    <dd class=example>lt 90</dd>
-  
-    <dt><code>right <var>expr</var></code>
-    <dt><code>rt <var>expr</var></code>
-    <dd>Rotate <var>expr</var> degrees clockwise
-    <dd class=example>rt 90</dd>
-  
-    <dt><code>setpos [ <var>expr</var> <var>expr</var> ]</code>
-    <dt><code>setxy <var>expr</var> <var>expr</var></code>
-    <dt><code>setx <var>expr</var></code>
-    <dt><code>sety <var>expr</var></code>
-    <dd>Move turtle to the specified location
-    <dd class=example>setpos [ 100 -100 ]</dd>
-    <dd class=example>setxy -100 100</dd>
-  
-    <dt><code>setheading <var>expr</var></code>
-    <dt><code>seth <var>expr</var></code>
-    <dd>Rotate the turtle to the specified heading
-    <dd class=example>setheading 45</dd>
-  
-    <dt><code>home</code>
-    <dd>Moves the turtle to center, pointing upwards
-  
-    <dt><code>arc <var>angle</var> <var>radius</var></code>
-    <dd>Without moving the turtle, draws an arc centered on the turtle, starting at the turtle's heading.
-    <dd class=example>arc 180 100</dd>
-  </dl>
-  
+  <dt><code>(radarctan <var>x</var> <var>y</var>)</code>
+  <dt><code>radsin <var>expr</var></code>
+  <dt><code>radcos <var>expr</var></code>
+  <dt><code>radtan <var>expr</var></code>
+  <dd>The usual trig functions. Angles are in radians.
+
+  <dt><code>iseq <var>first</var> <var>last</var></code>
+  <dd>Outputs a list with integers from <var>first</var> to <var>last</var>, inclusive
+  <dd class=example>show iseq 1 10</dd>
+
+  <dt><code>rseq <var>first</var> <var>last</var> <var>count</var></code>
+  <dd>Outputs a list of <var>count</var> numbers from <var>first</var> to <var>last</var>, inclusive
+  <dd class=example>show rseq 1 9 5</dd>
+</dl>
+
+<h4>4.2 Numeric Predicates</h4>
+<dl>
+  <dt><code>lessp <var>expr</var> <var>expr</var></code>
+  <dt><code>less? <var>expr</var> <var>expr</var></code>
+  <dt><code><var>expr</var> &lt; <var>expr</var></code>
+
+  <dt><code>greaterp <var>expr</var> <var>expr</var></code>
+  <dt><code>greater? <var>expr</var> <var>expr</var></code>
+  <dt><code><var>expr</var> &gt; <var>expr</var></code>
+
+  <dt><code>lessequalp <var>expr</var> <var>expr</var></code>
+  <dt><code>lessequal? <var>expr</var> <var>expr</var></code>
+  <dt><code><var>expr</var> &lt;= <var>expr</var></code>
+
+  <dt><code>greaterequalp <var>expr</var> <var>expr</var></code>
+  <dt><code>greaterequal? <var>expr</var> <var>expr</var></code>
+  <dt><code><var>expr</var> &gt;= <var>expr</var></code>
+
+  <dd>Less than, greater than, less than or equal to, greater than or equal to,
+  respectively. Inputs are numbers or numeric expressions, output is 1 (true) or 0 (false).
+</dl>
+
+<h4>4.3 Random Numbers</h4>
+<dl>
+  <dt><code>random <var>expr</var></code>
+  <dt><code>(random <var>start</var> <var>end</var>)</code>
+  <dd>Outputs a random number from 0 through one less than <var>expr</var>, or from start to end inclusive.
+  <dd class=example>show random 10</dd>
+  <dd class=example>show (random 1 6)</dd>
+
+
+  <dt><code>rerandom</code>
+  <dt>(<code>rerandom <var>expr</var>)</code>
+  <dd>Reseeds the random number generator, either to a fixed value or the specified seed.
+</dl>
+
+<h4>4.4 Print Formatting</h4>
+<dl>
+  <dt><code>form <var>expr</var> <var>width</var> <var>precision</var></code>
+  <dd>Outputs a formatted string with the result of a numeric expression with <var>precision</var> decimal places and
+  padded on the left with spaces (if necessary) to be at least <var>width</width> characters long.
+  <dd class=example>show form 1/3 10 3</dd>
+</dl>
+
+<h4>4.5 Bitwise Operations</h4>
+<dl>
+  <dt><code>bitand <var>expr</var> <var>expr</var></code>
+  <dt><code>(bitand <var>expr</var> ...)</code>
+  <dt><code>bitor <var>expr</var> <var>expr</var></code>
+  <dt><code>(bitor <var>expr</var> ...)</code>
+  <dt><code>bitxor <var>expr</var> <var>expr</var></code>
+  <dt><code>(bitxor <var>expr</var> ...)</code>
+  <dt><code>bitnot <var>expr</var></code>
+  <dd>Bitwise and, or, exclusive-or, and not, respectively.
+
+  <dt><code>ashift <var>expr</var> <var>bitcount</var></code>
+  <dd>Arithmetic bit shift. If bitcount is negative, shifts to the right, preserving sign.
+
+  <dt><code>lshift <var>expr</var> <var>bitcount</var></code>
+  <dd>Logical bit shift. If bitcount is negative, shifts to the right, zero-filling.
+</dl>
+
+<h3 id="sec5">5. Logical Operations</h3>
+<dl>
+  <dt><code>true</code>
+  <dd>Outputs 1
+  <dt><code>false</code>
+  <dd>Outputs 0
+
+  <dt><code>and <var>expr</var> <var>expr</var></code>
+  <dt><code>(and <var>expr</var> <var>...</var>)</code>
+  <dt><code>or  <var>expr</var> <var>expr</var></code>
+  <dt><code>(or <var>expr</var> <var>...</var>)</code>
+  <dt><code>xor <var>expr</var> <var>expr</var></code>
+  <dt><code>(xor <var>expr</var> <var>...</var>)</code>
+  <dt><code>not <var>expr</var></code>
+  <dd>Logical "and", "or", "exclusive-or", and "not", respectively.
+  Inputs are numbers or numeric expressions, output is 1 (true) or 0 (false).
+</dl>
+
+<h3 id="sec6">6. Graphics</h3>
+
+<p>An introduction to <a target="_blank" href="https://www.cs.berkeley.edu/~bh/v1ch10/turtle.html">Turtle Geometry</a>.</p>
+
+<h4>6.1 Turtle Motion</h4>
+<dl>
+  <dt><code>forward <var>expr</var></code>
+  <dt><code>fd <var>expr</var></code>
+  <dd>Move turtle forward <var>expr</var> pixels
+  <dd class=example>fd 100</dd>
+
+  <dt><code>back <var>expr</var></code>
+  <dt><code>bk <var>expr</var></code>
+  <dd>Move turtle backward <var>expr</var> pixels
+  <dd class=example>bk 100</dd>
+
+  <dt><code>left <var>expr</var></code>
+  <dt><code>lt <var>expr</var></code>
+  <dd>Rotate <var>expr</var> degrees counterclockwise
+  <dd class=example>lt 90</dd>
+
+  <dt><code>right <var>expr</var></code>
+  <dt><code>rt <var>expr</var></code>
+  <dd>Rotate <var>expr</var> degrees clockwise
+  <dd class=example>rt 90</dd>
+
+  <dt><code>setpos [ <var>expr</var> <var>expr</var> ]</code>
+  <dt><code>setxy <var>expr</var> <var>expr</var></code>
+  <dt><code>setx <var>expr</var></code>
+  <dt><code>sety <var>expr</var></code>
+  <dd>Move turtle to the specified location
+  <dd class=example>setpos [ 100 -100 ]</dd>
+  <dd class=example>setxy -100 100</dd>
+
+  <dt><code>setheading <var>expr</var></code>
+  <dt><code>seth <var>expr</var></code>
+  <dd>Rotate the turtle to the specified heading
+  <dd class=example>setheading 45</dd>
+
+  <dt><code>home</code>
+  <dd>Moves the turtle to center, pointing upwards
+
+  <dt><code>arc <var>angle</var> <var>radius</var></code>
+  <dd>Without moving the turtle, draws an arc centered on the turtle, starting at the turtle's heading.
+  <dd class=example>arc 180 100</dd>
+</dl>
+
 <h4>6.2 Turtle Motion Queries</h4>
 <dl>
   <dt><code>pos</code>
@@ -740,7 +740,6 @@ of comparison.</p>
   <style>
     #colortable td { width: 25%; padding-left: 4px; padding-right: 4px; text-align: center; }
   </style>
-  
   <table id="colortable">
     <tr>
       <td style="background-color: black; color: white;">0<br>black
@@ -863,8 +862,8 @@ of comparison.</p>
       <li>Default number of inputs: <code>3</code>
     </ul>
   <dd class=example>to star :n  repeat 5 [ fd :n rt 144 ]  end</dd>
-  
-<dt><code>define <var>procname</var> [[<var>inputs</var> ...][<var>statements</var> ...]]</code>
+
+  <dt><code>define <var>procname</var> [[<var>inputs</var> ...][<var>statements</var> ...]]</code>
   <dd>Define a new named procedure with optional inputs
   <dd class=example>define "star [[n][repeat 5 [fd :n  rt 144]]]</dd>
 
@@ -950,7 +949,6 @@ of comparison.</p>
   <dd>Test if there is a property list with the given name.
 </dl>
 
-
 <h4>7.5 Workspace Queries</h4>
 <dl>
   <dt><code>contents</code>
@@ -1002,150 +1000,150 @@ of comparison.</p>
   <dd class=example>erase [ [myproc] [myvar] [] ]</dd>
 
   <dt><code>erall</code>
-    <dd>Erase all non-buried user-defined procedures, variables and property lists.
-  
-    <dt><code>erps</code>
-    <dd>Erase all non-buried user-defined procedures.
-  
-    <dt><code>erns</code>
-    <dd>Erase all non-buried variables.
-  
-    <dt><code>erpls</code>
-    <dd>Erase all non-buried property lists.
-  
-    <dt><code>ern <var>varname</var></code>
-    <dt><code>ern <var>varnamelist</var></code>
-    <dd>Erase the named variable(s).
-  
-    <dt><code>epl <var>plname</var></code>
-    <dt><code>epl <var>plnamelist</var></code>
-    <dd>Erase the named property list(s).
-  
-    <dt><code>bury <var>contentslist</var></code>
-    <dd>Takes a three member list, where the first is a list of user-defined procedure names to bury,
-    the second is a list of defined variables to bury, the third is a list of property lists to bury.
-  
-    <dt><code>buryall</code>
-    <dd>Bury all user-defined procedures, variables, and property lists.
-  
-    <dt><code>buryname <var>varname</var></code>
-    <dt><code>buryname <var>varnamelist</var></code>
-    <dd>Bury the given variable (or list of variables).
-  
-    <dt><code>unbury <var>contentslist</var></code>
-    <dd>Takes a three member list, where the first is a list of user-defined procedure names to unbury,
-    the second is a list of defined variables to unbury, the third is a list of property lists to unbury.
-  
-    <dt><code>unburyall</code>
-    <dd>Unbury all user-defined procedures, variables, and property lists.
-  
-    <dt><code>unburyname <var>varname</var></code>
-    <dt><code>unburyname <var>varnamelist</var></code>
-    <dd>Unbury the given variable (or list of variables).
-  
-    <dt><code>buriedp <var>contentslist</var></code>
-    <dt><code>buried? <var>contentslist</var></code>
-    <dd>Return 1 if the first named user-defined procedure, variable, or property list exists and
-      is buried, 0 otherwise.
-  
-  </dl>
-  
-  <h3 id="sec8">8. Control Structures</h3>
-  <h4>8.1 Control</h4>
-  <dl>
-    <dt><code>run [ <var>statements ...</var> ]</code>
-    <dd>Run the specified statements once
-    <dd class=example>run [ fd 100 rt 90 ]</dd>
-  
-    <dt><code>runresult [ <var>statements ...</var> ]</code>
-    <dd>Run the specified statements once. If the statements return a value, the result is a
-    list with the value as a single member. Otherwise, the result is an empty list.
-  
-    <dt><code>repeat <var>expr</var> [ <var>statements ...</var> ]</code>
-    <dd>Repeat statements <var>expr</var> times
-    <dd class=example>repeat 4 [ fd 100 rt 90 ]</dd>
-  
-    <dt><code>forever [ <var>statements ...</var> ]</code>
-    <dd>Repeat statements forever. Used inside a user-defined procedure
-    that terminates with <code>output</code>, <code>stop</code> or <code>bye</code>
-    <dd class=example>forever [ make "n random 100  show :n  if :n == 0 [ bye ] ]</dd>
-  
-    <dt><code>repcount</code>
-    <dt><code>#</code>
-    <dd>Outputs the current iteration number of the current <code>repeat</code> or <code>forever</code>
-    <dd class=example>repeat 10 [ show repcount ]</dd>
-    <dd class=example>repeat 10 [ show # ]</dd>
-  
-    <dt><code>if <var>expr</var> [ <var>statements ...</var> ]</code>
-    <dt><code>if [<var>expr</var>] [ <var>statements ...</var> ]</code>
-    <dd>Execute statements if the expression is non-zero
-    <dd class=example>if 2 > 1 [ show "yep ]</dd>
-  
-    <dt><code>ifelse <var>expr</var> [ <var>statements ...</var> ] [ <var>statements ...</var> ]</code>
-    <dt><code>ifelse [<var>expr</var>] [ <var>statements ...</var> ] [ <var>statements ...</var> ]</code>
-    <dd>Execute first set of statements if the expression is non-zero, otherwise execute the second set
-    <dd class=example>ifelse 1 > 2 [ show "yep ] [ show "nope ]</dd>
-  
-    <dt><code>test <var>expr</var></code>
-    <dt><code>test [<var>expr</var>]</code>
-    <dd>Test the specified expression, save the result in the local scope for subsequent use by <code>iftrue</code> or <code>iffalse</code>
-  
-    <dt><code>iftrue [ <var>statements ...</var>]</code>
-    <dt><code>ift [ <var>statements ...</var>]</code>
-    <dt><code>iffalse [ <var>statements ...</var>]</code>
-    <dt><code>iff [ <var>statements ...</var>]</code>
-    <dd>Run the statements if the result of the last local <code>test</code> was non-zero (true) or zero (false) respectively.
-    <dd class=example>test 1 > 2  iftrue [ show "yep ]  iffalse [ show "nope ]</dd>
-  
-    <dt><code>stop</code></dt>
-    <dd>End the running procedure with no output value.</dd>
-  
-    <dt><code>output <var>expr</var></code></dt>
-    <dt><code>op <var>expr</var></code></dt>
-    <dd>End the running procedure and output the specified value.</dd>
-  
-    <dt><code>catch tag instructionlist</code></dt>
-    <dd>Run instructions, but if an error with matching tag is thrown, return the thrown value (if any).
-      Use <code>"ERROR</code> to catch errors from regular procedures.
-    </dd>
-    <dd class=example>catch "t [ show "before throw "t show "after ]</dd>
-    <dd class=example>catch "error [ show 1 / 0 ] show error</dd>
-  
-    <dt><code>throw tag</code></dt>
-    <dt><code>(throw tag value)</code></dt>
-    <dd>Throw an error with the given tag which may be caught. An optional return value can be passed.</dd>
-    <dd class=example>show catch "t [ show "hello (throw "t "world) ]</dd>
-  
-    <dt><code>error</code></dt>
-    <dd>Outputs a list describing the last error caught:
-      an error number, an error message message, and the procedure name where the error occurred.
-    </dd>
-    <dd class=example>catch "error [ show 1 / 0 ] show error</dd>
-  
-    <dt><code>wait <var>time</var></code>
-    <dd>Pauses execution. <var>time</var> is in 60ths of a second.
-  
-    <dt><code>bye</code>
-    <dd>Terminate the program
-  
-    <dt><code>.maybeoutput <var>expr</var></code>
-    <dd>Like <code>output</code> if <var>expr</var> returns a value, like <code>stop</code> otherwise
-  
-    <dt><code>ignore <var>expr</var></code>
-    <dd>Evaluate and ignore results of the expression
-    <dd class=example>make "q [ 1 2 3 ]  ignore dequeue "q</dd>
-      
-    <dt><code>` <var>list</var></code></dt>
-    <dd>Outputs the list with substitutions:
-      <ul>
-        <li><code>, <var>instructionlist</var></code> replaced by output
-        <li><code>,@ <var>instructionlist</var></code> replaced by output list members
-        <li><code>",<var>instruction</var></code> replaced by output prefixed with "
-        <li><code>,@<var>instruction</var></code> replaced by output prefixed with :
-      </ul>
-    </dd>
-    <dd class=example>show `[a b ,[bf [c d e]] f ,@[bf [g h i]]]</dd>
-    <dd class=example>make "v "x  show `[",:v :,:v]</dd>
+  <dd>Erase all non-buried user-defined procedures, variables and property lists.
+
+  <dt><code>erps</code>
+  <dd>Erase all non-buried user-defined procedures.
+
+  <dt><code>erns</code>
+  <dd>Erase all non-buried variables.
+
+  <dt><code>erpls</code>
+  <dd>Erase all non-buried property lists.
+
+  <dt><code>ern <var>varname</var></code>
+  <dt><code>ern <var>varnamelist</var></code>
+  <dd>Erase the named variable(s).
+
+  <dt><code>epl <var>plname</var></code>
+  <dt><code>epl <var>plnamelist</var></code>
+  <dd>Erase the named property list(s).
+
+  <dt><code>bury <var>contentslist</var></code>
+  <dd>Takes a three member list, where the first is a list of user-defined procedure names to bury,
+  the second is a list of defined variables to bury, the third is a list of property lists to bury.
+
+  <dt><code>buryall</code>
+  <dd>Bury all user-defined procedures, variables, and property lists.
+
+  <dt><code>buryname <var>varname</var></code>
+  <dt><code>buryname <var>varnamelist</var></code>
+  <dd>Bury the given variable (or list of variables).
+
+  <dt><code>unbury <var>contentslist</var></code>
+  <dd>Takes a three member list, where the first is a list of user-defined procedure names to unbury,
+  the second is a list of defined variables to unbury, the third is a list of property lists to unbury.
+
+  <dt><code>unburyall</code>
+  <dd>Unbury all user-defined procedures, variables, and property lists.
+
+  <dt><code>unburyname <var>varname</var></code>
+  <dt><code>unburyname <var>varnamelist</var></code>
+  <dd>Unbury the given variable (or list of variables).
+
+  <dt><code>buriedp <var>contentslist</var></code>
+  <dt><code>buried? <var>contentslist</var></code>
+  <dd>Return 1 if the first named user-defined procedure, variable, or property list exists and
+    is buried, 0 otherwise.
+
+</dl>
+
+<h3 id="sec8">8. Control Structures</h3>
+<h4>8.1 Control</h4>
+<dl>
+  <dt><code>run [ <var>statements ...</var> ]</code>
+  <dd>Run the specified statements once
+  <dd class=example>run [ fd 100 rt 90 ]</dd>
+
+  <dt><code>runresult [ <var>statements ...</var> ]</code>
+  <dd>Run the specified statements once. If the statements return a value, the result is a
+  list with the value as a single member. Otherwise, the result is an empty list.
+
+  <dt><code>repeat <var>expr</var> [ <var>statements ...</var> ]</code>
+  <dd>Repeat statements <var>expr</var> times
+  <dd class=example>repeat 4 [ fd 100 rt 90 ]</dd>
+
+  <dt><code>forever [ <var>statements ...</var> ]</code>
+  <dd>Repeat statements forever. Used inside a user-defined procedure
+  that terminates with <code>output</code>, <code>stop</code> or <code>bye</code>
+  <dd class=example>forever [ make "n random 100  show :n  if :n == 0 [ bye ] ]</dd>
+
+  <dt><code>repcount</code>
+  <dt><code>#</code>
+  <dd>Outputs the current iteration number of the current <code>repeat</code> or <code>forever</code>
+  <dd class=example>repeat 10 [ show repcount ]</dd>
+  <dd class=example>repeat 10 [ show # ]</dd>
+
+  <dt><code>if <var>expr</var> [ <var>statements ...</var> ]</code>
+  <dt><code>if [<var>expr</var>] [ <var>statements ...</var> ]</code>
+  <dd>Execute statements if the expression is non-zero
+  <dd class=example>if 2 > 1 [ show "yep ]</dd>
+
+  <dt><code>ifelse <var>expr</var> [ <var>statements ...</var> ] [ <var>statements ...</var> ]</code>
+  <dt><code>ifelse [<var>expr</var>] [ <var>statements ...</var> ] [ <var>statements ...</var> ]</code>
+  <dd>Execute first set of statements if the expression is non-zero, otherwise execute the second set
+  <dd class=example>ifelse 1 > 2 [ show "yep ] [ show "nope ]</dd>
+
+  <dt><code>test <var>expr</var></code>
+  <dt><code>test [<var>expr</var>]</code>
+  <dd>Test the specified expression, save the result in the local scope for subsequent use by <code>iftrue</code> or <code>iffalse</code>
+
+  <dt><code>iftrue [ <var>statements ...</var>]</code>
+  <dt><code>ift [ <var>statements ...</var>]</code>
+  <dt><code>iffalse [ <var>statements ...</var>]</code>
+  <dt><code>iff [ <var>statements ...</var>]</code>
+  <dd>Run the statements if the result of the last local <code>test</code> was non-zero (true) or zero (false) respectively.
+  <dd class=example>test 1 > 2  iftrue [ show "yep ]  iffalse [ show "nope ]</dd>
+
+  <dt><code>stop</code></dt>
+  <dd>End the running procedure with no output value.</dd>
+
+  <dt><code>output <var>expr</var></code></dt>
+  <dt><code>op <var>expr</var></code></dt>
+  <dd>End the running procedure and output the specified value.</dd>
+
+  <dt><code>catch tag instructionlist</code></dt>
+  <dd>Run instructions, but if an error with matching tag is thrown, return the thrown value (if any).
+    Use <code>"ERROR</code> to catch errors from regular procedures.
+  </dd>
+  <dd class=example>catch "t [ show "before throw "t show "after ]</dd>
+  <dd class=example>catch "error [ show 1 / 0 ] show error</dd>
+
+  <dt><code>throw tag</code></dt>
+  <dt><code>(throw tag value)</code></dt>
+  <dd>Throw an error with the given tag which may be caught. An optional return value can be passed.</dd>
+  <dd class=example>show catch "t [ show "hello (throw "t "world) ]</dd>
+
+  <dt><code>error</code></dt>
+  <dd>Outputs a list describing the last error caught:
+    an error number, an error message message, and the procedure name where the error occurred.
+  </dd>
+  <dd class=example>catch "error [ show 1 / 0 ] show error</dd>
+
+  <dt><code>wait <var>time</var></code>
+  <dd>Pauses execution. <var>time</var> is in 60ths of a second.
+
+  <dt><code>bye</code>
+  <dd>Terminate the program
+
+  <dt><code>.maybeoutput <var>expr</var></code>
+  <dd>Like <code>output</code> if <var>expr</var> returns a value, like <code>stop</code> otherwise
+
+  <dt><code>ignore <var>expr</var></code>
+  <dd>Evaluate and ignore results of the expression
+  <dd class=example>make "q [ 1 2 3 ]  ignore dequeue "q</dd>
+
+  <dt><code>` <var>list</var></code></dt>
+  <dd>Outputs the list with substitutions:
+    <ul>
+      <li><code>, <var>instructionlist</var></code> replaced by output
+      <li><code>,@ <var>instructionlist</var></code> replaced by output list members
+      <li><code>",<var>instruction</var></code> replaced by output prefixed with "
+      <li><code>,@<var>instruction</var></code> replaced by output prefixed with :
+    </ul>
+  </dd>
+  <dd class=example>show `[a b ,[bf [c d e]] f ,@[bf [g h i]]]</dd>
+  <dd class=example>make "v "x  show `[",:v :,:v]</dd>
 
   <dt><code>for <var>controllist</var> [ <var>statements ...</var>]</code>
   <dd>Typical <code>for</code> loop. The <var>controllist</var> specifies three or four members:

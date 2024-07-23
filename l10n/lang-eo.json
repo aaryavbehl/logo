@@ -39,7 +39,7 @@
       "Couldn't parse: '{string}'": "Povis analizi '{string}'",
       "Division by zero": "Divido per nulo",
       "Don't know about variable {name:U}": "Ne estu variablo {name:U}",
-      "Don't know how to {name:U}": "Ne scipovas {name:U}",
+      "Don't know how to do {name:U}": "Ne scipovas {name:U}",
       "Don't know what to do with {result}": "Ne scias kion fari kun {result}",
       "Expected ')'": "Atendis ')'",
       "Expected ')', saw {word}": "Atendis ')', segilo {word}",
